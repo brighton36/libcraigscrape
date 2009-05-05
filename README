@@ -3,7 +3,7 @@
 An easy library to do the heavy lifting between you and Craigslist's posting database. Given a URL, libcraigscrape will
 follow links, scrape fields, and make ruby-sense out of the raw html from craigslist's servers.
 
-For more information, head to the {craiglist monitoring}[http://www.derosetechnologies.com/community/libcraigwatch] help section of our website.
+For more information, head to the {craiglist monitoring}[http://www.derosetechnologies.com/community/libcraigscrape] help section of our website.
 
 == craigwatch
 libcraigscrape was primarily developed to support the included craigwatch[link:files/bin/craigwatch.html] script. See the included craigwatch script for

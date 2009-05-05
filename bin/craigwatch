@@ -6,7 +6,7 @@
 # craiglist monitoring. craigwatch is designed to be run at periodic intervals (hourly/daily/etc) through crontab 
 # and report all new postings within a listing or search url, since its last run, by email.
 #
-# For more information, head to the {craiglist monitoring}[http://www.derosetechnologies.com/community/libcraigwatch] help section of our website.
+# For more information, head to the {craiglist monitoring}[http://www.derosetechnologies.com/community/libcraigscrape] help section of our website.
 #
 # == Features
 # In additon to its report tracking, craigwatch offers many post search and filtering options that offer much imrpoved
