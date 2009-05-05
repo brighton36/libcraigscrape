@@ -4,6 +4,8 @@ require 'rake/gempackagetask'
 require 'rake/rdoctask'
 require 'rake/testtask'
 require 'fileutils'
+require 'tempfile'
+
 include FileUtils
 
 RbConfig = Config unless defined? RbConfig
@@ -13,7 +15,8 @@ VERS = ENV['VERSION'] || "0.5"
 PKG = "#{NAME}-#{VERS}"
 
 RDOC_OPTS = ['--quiet', '--title', 'The libcraigscrape Reference', '--main', 'README', '--inline-source']
-PKG_FILES = %w(CHANGELOG COPYING COPYING.LESSER Rakefile) + Dir.glob("{bin,test,lib}/**/*")
+RDOC_FILES = ['README', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/craigwatch']
+PKG_FILES = (%w(Rakefile) + RDOC_FILES + Dir.glob("{bin,test,lib}/**/*")).uniq
 
 SPEC =
   Gem::Specification.new do |s|
@@ -24,7 +27,7 @@ SPEC =
     s.bindir = 'bin'
     s.executables = 'craigwatch'
     s.rdoc_options += RDOC_OPTS
-    s.extra_rdoc_files = ['README', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/craigwatch']
+    s.extra_rdoc_files = RDOC_FILES
     s.summary = "quick, easy, craigslist parsing library that takes the monotony out of working with craigslist posts and listings"
     s.description = s.summary
     s.author = "Chris DeRose, DeRose Technologies, Inc."
@@ -50,7 +53,7 @@ Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
     rdoc.options += RDOC_OPTS
     rdoc.main = "README"
-    rdoc.rdoc_files.add ['README', 'CHANGELOG', 'COPYING', 'COPYING.LESSER', 'bin/craigwatch','lib/**/*.rb']
+    rdoc.rdoc_files.add RDOC_FILES+['lib/**/*.rb']
 end
 
 Rake::GemPackageTask.new(SPEC) do |p|
@@ -69,4 +72,37 @@ end
 
 task :uninstall => [:clean] do
   sh %{sudo gem uninstall #{NAME}}
+end
+
+task :pkg_archives do
+  base_dir = File.dirname __FILE__
+  package_name = '%s-%s' % [NAME,VERS]
+  packages_base = "#{base_dir}/pkg"
+  packaging_dir = '%s/%s' % [ packages_base,package_name ] 
+  
+  begin
+    # First we create a proper package-X.X directory:
+    PKG_FILES.each do |p_f|
+      base_file = '%s/%s' % [base_dir, p_f]
+      packaged_file = '%s/%s' % [packaging_dir, p_f]
+      packaged_file_dirname = File.dirname packaged_file
+  
+      # We really don't care to do anything about these - we'll recreate it when/if its needed
+      next if File.directory? base_file
+  
+      FileUtils.mkdir_p packaged_file_dirname unless File.directory? packaged_file_dirname
+      
+      FileUtils.cp base_file, packaged_file unless File.exists? packaged_file
+    end
+    
+    # Remove any old archives we'd be replacing:
+    %w(zip tar.bz2).each{ |ext| FileUtils.rm "#{packaging_dir}.#{ext}" if File.exist? "#{packaging_dir}.#{ext}" }
+    
+    # Now let's create some archives:
+    sh %{cd #{packages_base} && tar -cjvf  #{package_name}.tar.bz2 #{package_name}}
+    sh %{cd #{packages_base} && zip -r #{package_name}.zip #{package_name}}
+  ensure
+    # Delete that temp directory we created at the start here
+    FileUtils.rmtree packaging_dir
+  end
 end
