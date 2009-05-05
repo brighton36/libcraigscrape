@@ -1,0 +1,57 @@
+type: map
+class: CraigReportDefinition
+mapping:
+   "debug_database":    { type: bool, required: no }
+   "debug_mailer":      { type: bool, required: no }
+   "debug_craigscrape": { type: bool, required: no }
+
+   "report_name":    { type: str, required: yes }
+   "email_to":       { type: str, required: yes }
+   "email_from":     { type: str, required: no }
+   "smtp_settings":
+      type: map
+      required: no
+      mapping:
+         "address":         { type: str, required: yes }
+         "port":            { type: int, required: no, default: 25 }
+         "user_name":       { type: str, required: no }
+         "domain":          { type: str, required: no }
+         "password":        { type: str, required: no }
+         "authentication":  { type: str, required: no }
+   "tracking_database":
+      type: map
+      mapping:
+         "adapter":  { type: str, required: yes }
+         "dbfile":   { type: str, required: no }
+         "host":  	{ type: str, required: no }
+         "username": { type: str, required: no }
+         "password": { type: str, required: no }
+         "socket":   { type: str, required: no }
+         "database": { type: str, required: no }
+   "searches":
+      type:  seq
+      sequence:
+         - type: map
+           class: CraigReportDefinition::SearchDefinition
+           mapping:
+              "name":                {type: str,  required: yes, unique: yes}
+              "has_image":           {type: bool, required: no}
+              "newest_first":        {type: bool, required: no, default: no}
+              "price_required":      {type: bool, required: no, default: no}
+              "price_greater_than":  {type: int, required: no}
+              "price_less_than":     {type: int, required: no}
+              "full_post_has":       {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
+              "full_post_has_no":    {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
+              "summary_post_has":    {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
+              "summary_post_has_no": {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
+              "listing":   
+                 type: seq
+                 required: yes
+                 sequence:
+                   - type: str
+                     pattern: /^http[s]?\:\/\//
+                     unique: yes
+              "starting":  
+                 type: str
+                 required: no
+                 pattern: /^[\d]{1,2}\/[\d]{1,2}\/(?:[\d]{2}|[\d]{4})$/

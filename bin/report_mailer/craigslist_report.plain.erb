@@ -1,0 +1,15 @@
+CRAIGSLIST REPORTER
+
+<%@summaries.each do |summary| -%>
+   <%=summary[:search].name %>
+   <% summary[:postings].collect do |post| -%>
+      <%='%s : %s %s %s %s' % [
+			post.date.strftime('%b %d'),
+			post.label,
+			(post.location) ? " (#{post.location})" : '',
+			(post.has_pic_or_img?) ? ' [img]': '',
+			post.full_url
+      ] -%>
+
+   <% end %>
+<% end -%>
