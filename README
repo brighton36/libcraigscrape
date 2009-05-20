@@ -21,6 +21,7 @@ Install via RubyGems:
 
 Using the search url http://miami.craigslist.org/search/sss?query=apple
 
+  require 'rubygems'
   require 'libcraigscrape'
   require 'date'
   require 'pp'
@@ -34,6 +35,7 @@ Using the search url http://miami.craigslist.org/search/sss?query=apple
 
 Under the category url http://miami.craigslist.org/apa/
 
+  require 'rubygems'
   require 'libcraigscrape'
   require 'pp'
   
@@ -46,6 +48,7 @@ Under the category url http://miami.craigslist.org/apa/
 
 This grabs the full details under the specific post http://miami.craigslist.org/mdc/sys/1140808860.html
 
+  require 'rubygems'
   require 'libcraigscrape'
   
   post = CraigScrape.scrape_full_post 'http://miami.craigslist.org/mdc/sys/1140808860.html'
@@ -55,6 +58,7 @@ This grabs the full details under the specific post http://miami.craigslist.org/
 
 This grabs the post summaries of the single listings at http://miami.craigslist.org/search/sss?query=laptop
 
+  require 'rubygems'
   require 'libcraigscrape'
   
   listing = CraigScrape.scrape_listing 'http://miami.craigslist.org/search/sss?query=laptop'
