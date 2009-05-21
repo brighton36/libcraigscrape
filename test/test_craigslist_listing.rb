@@ -139,6 +139,18 @@ EOD
     short_search = CraigScrape::Listings.new read_as_hpricot('listing_samples/short_search_output.html')
     assert_equal nil, short_search.next_page_href
     assert_equal 93, short_search.posts.length
+    
+    mia_fua_index8900_052109 = CraigScrape::Listings.new read_as_hpricot('listing_samples/mia_fua_index8900.5.21.09.html')
+    assert_equal 'index9000.html', mia_fua_index8900_052109.next_page_href
+    assert_equal 100, mia_fua_index8900_052109.posts.length
+    mia_fua_index8900_052109.posts[0..13].each do |l|
+      assert_equal 5, l.date.month
+      assert_equal 15, l.date.day
+    end
+    mia_fua_index8900_052109.posts[14..99].each do |l|
+      assert_equal 5, l.date.month
+      assert_equal 14, l.date.day
+    end
   end
   
   def test_posting_parse

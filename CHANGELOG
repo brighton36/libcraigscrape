@@ -12,6 +12,7 @@
 - Added a FetchError for http requests that don't return 200 or redirect...
 - Adjusted craigwatch to use scrape_until instead of scrape_since, this new approach cuts down on the url fetching by assuming that if we come across something we've already tracked, we dont need to keep going any further. NOTE: We still can't use a 'last_scraped_url' on the TrackedSearch model b/c sometimes posts get deleted.
 - We're tracking all date-relevant posts now in craigwatch, not just the ones that matched the first time aorund, this should significantly speed up our scrapes
+- Found an example of a screwy listing that was starting date h4's , but not actually listing the dates in them (see mia_fua_index8900.5.21.09.html test case). Added test case - handled appropriately. Seems like a bug in craigslist itself.
 
 === Release 0.5.0 (April 30, 2009)
 - First release. Not much to say - hopefully someone else finds this useful.
