@@ -5,14 +5,12 @@ require 'test/unit'
 
 class CraigslistListingTest < Test::Unit::TestCase
 
-  def test_no_puke
+  def test_pukes
     google = read_as_hpricot('google.html')
-    
-    assert_nothing_raised{ CraigScrape::PostSummary.new google}
-    
-    assert_nothing_raised{ CraigScrape::Listings.new google }
-    
-    assert_nothing_raised{ CraigScrape::PostFull.new google }
+
+    assert_raise(CraigScrape::ParseError){ CraigScrape::PostSummary.new google }    
+    assert_raise(CraigScrape::ParseError){ CraigScrape::Listings.new google }
+    assert_raise(CraigScrape::ParseError){ CraigScrape::PostFull.new google }
   end
 
   def test_listing_parse
@@ -211,6 +209,7 @@ EOD
     assert_equal 225000.0, posting4.price
     
     posting5 = CraigScrape::PostFull.new read_as_hpricot('post_samples/posting5.html')
+    assert_equal true, posting5.flagged_for_removal?
     assert_equal nil, posting5.contents
     assert_equal ["south florida craigslist", "palm beach co", "apts/housing for rent"], posting5.full_section
     assert_equal "This posting has been <a href=\"http://www.craigslist.org/about/help/flags_and_community_moderation\">flagged</a> for removal", posting5.header
@@ -221,7 +220,7 @@ EOD
     assert_equal nil, posting5.post_time
     assert_equal [],  posting5.images
     assert_equal nil, posting5.contents_as_plain
-    assert_equal nil, posting5.price    
+    assert_equal nil, posting5.price
   end
 
   private

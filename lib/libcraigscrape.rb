@@ -13,6 +13,12 @@ require 'activesupport'
 class CraigScrape
   cattr_accessor :logger
   cattr_accessor :time_now
+  cattr_accessor :retries_on_fetch_fail
+  cattr_accessor :sleep_between_fetch_retries
+
+  # Set some defaults:
+  self.retries_on_fetch_fail = 4
+  self.sleep_between_fetch_retries = 4
   
   def self.most_recently_expired_time(month, day)  #:nodoc:
     now = (time_now) ? time_now : Time.now
@@ -30,6 +36,9 @@ class CraigScrape
     end
   end
   
+  class ParseError < StandardError; end #:nodoc:
+  class FetchError < StandardError; end #:nodoc:
+
   # PostFull represents a fully downloaded, and parsed, Craigslist post.
   # This class is generally returned by the listing scrape methods, and 
   # contains the post summaries for a specific search url, or a general listing category 
@@ -68,14 +77,18 @@ class CraigScrape
     POSTING_ID = /PostingID\:[ ]+([\d]+)/
     REPLY_TO   = /(.+)/
     PRICE      = /\$([\d]+(?:\.[\d]{2})?)/
+    HTML_TAG   = /<\/?[^>]*>/
     
     def initialize(page) #:nodoc:
       # We proceed from easy to difficult:
       
       @images = []
       
-      @header = he_decode page.at('h2').inner_html if page.at('h2')
-      @title = he_decode page.at('title').inner_html if page.at('title')
+      h2 = page.at('h2')
+      @header = he_decode h2.inner_html if h2
+      
+      title = page.at('title')
+      @title = he_decode title.inner_html if title
       @title = nil if @title.length ==0
       
       @full_section = []
@@ -99,7 +112,7 @@ class CraigScrape
       @posting_id = $1.to_i if $1
       
       # OK - so the biggest problem parsing the contents of a craigslist post is that users post invalid html all over the place
-      # THis bad html trips up hpricot, and I've resoorted to splitting the page up using string parsing.
+      # This bad html trips up hpricot, and I've resorted to splitting the page up using string parsing like so:
       userbody_as_s,craigbody_as_s = $1, $2 if /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m.match page.to_s
 
       # Contents:
@@ -108,17 +121,23 @@ class CraigScrape
       # I made this a separate method since we're not actually parsing everything in here as-is.
       # This will make it easier for the next guy to work with if wants to parse out the information we're disgarding...
       parse_craig_body Hpricot.parse(craigbody_as_s) if craigbody_as_s
+      
+      # Validate that required fields are present:
+      raise ParseError, "Unable to parse PostFull: %s" % page.to_html if !flagged_for_removal? and [
+        @contents,@posting_id,@post_time,@header,@title,@full_section
+      ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
     end
     
+    # I left this here as a stub, since someone may want to parse more then what I'm currently scraping from this part of the page
     def parse_craig_body(craigbody_els)  #:nodoc:
       # Location (when explicitly defined):
-      cursor = craigbody_els.at('ul')
-      cursor = cursor.at('li') if cursor
-      @location = he_decode($1) if cursor and LOCATION.match(cursor.inner_html)
+      cursor = craigbody_els.at 'ul'
+      cursor = cursor.at 'li' if cursor
+      @location = he_decode $1 if cursor and LOCATION.match cursor.inner_html
 
       # Real estate listings can work a little different for location:
       unless @location
-        cursor = craigbody_els.at('small')
+        cursor = craigbody_els.at 'small'
         cursor = cursor.previous_node until cursor.nil? or cursor.text?
         
         @location = he_decode(cursor.to_s.strip) if cursor
@@ -130,6 +149,14 @@ class CraigScrape
       @images = (img_table / 'img').collect{|i| i[:src]} if img_table
     end
     
+    # Returns true if this Post was parsed, and merely a 'Flagged for Removal' page
+    def flagged_for_removal?
+      (
+        [@contents,@posting_id,@post_time,@title].all?{|f| f.nil?} and 
+        @header.gsub(HTML_TAG, "") == "This posting has been flagged for removal"
+      )
+    end
+    
     # Returns the price (as float) of the item, as best ascertained by the post header
     def price
       $1.to_f if @title and @header and PRICE.match(@header.gsub(/#{@title}/, ''))
@@ -137,7 +164,7 @@ class CraigScrape
     
     # Returns the post contents with all html tags removed
     def contents_as_plain
-      @contents.gsub(/<\/?[^>]*>/, "") if @contents
+      @contents.gsub HTML_TAG, "" if @contents
     end
   end
 
@@ -175,6 +202,9 @@ class CraigScrape
       
       # This will find the link on 'search listing' pages (if there is one):
       @next_page_href = next_link[:href] if next_link
+      
+      # Validate that required fields are present:
+      raise ParseError, "Unable to parse Listings: %s" % page.to_html unless @posts.length > 0
     end
     
   end
@@ -213,8 +243,8 @@ class CraigScrape
       location_tag = p_element.at 'font'
       has_pic_tag = p_element.at 'span'
       
-      @location = he_decode p_element.at('font').inner_html if location_tag
-      @location = $1 if LOCATION.match @location
+      location = he_decode p_element.at('font').inner_html if location_tag
+      @location = $1 if location and LOCATION.match location
   
       @img_types = []
       if has_pic_tag
@@ -231,11 +261,17 @@ class CraigScrape
         @date = CraigScrape.most_recently_expired_time $1, $2.to_i
       end
   
-      @label = he_decode title_anchor.inner_html
-      @label = $1 if LABEL.match @label
-  
-      @href = title_anchor[:href]
+      if title_anchor
+        label = he_decode title_anchor.inner_html
+        @label = $1 if LABEL.match label
+    
+        @href = title_anchor[:href]
+      end
+
       @base_url = base_url
+
+      # Validate that required fields are present:
+      raise ParseError, "Unable to parse PostSummary: %s" % p_element.to_html if [@label,@href].any?{|f| f.nil? or f.length == 0}
     end
     
     # Returns the full uri including host and scheme, not just the href
@@ -275,7 +311,13 @@ class CraigScrape
   def self.scrape_listing(listing_url)
     current_uri = ( listing_url.class == String ) ? URI.parse(listing_url) : listing_url 
     
-    CraigScrape::Listings.new Hpricot.parse(self.fetch_url(current_uri)), '%s://%s' % [current_uri.scheme, current_uri.host]
+    uri_contents = self.fetch_url(current_uri)
+    
+    CraigScrape::Listings.new Hpricot.parse(uri_contents), '%s://%s' % [current_uri.scheme, current_uri.host]
+    
+    rescue ParseError
+      puts "Encountered error here! : #{uri_contents.inspect}"
+      exit
   end
 
   # Continually scrapes listings, using the supplied url as a starting point, until the supplied block returns true or
@@ -323,17 +365,40 @@ class CraigScrape
   end
   
   def self.fetch_url(uri) #:nodoc:
-    # This handles the redirects for us
-    uri_dest = ( uri.class == String ) ? URI.parse(uri) : uri 
-
-    logger.info "Requesting: %s" % uri_dest.to_s unless logger.nil?
+    fetch_attempts = 0
     
-    resp, data = Net::HTTP.new( uri_dest.host, uri_dest.port).get uri_dest.request_uri, nil
+    begin
+      # This handles the redirects for us
+      uri_dest = ( uri.class == String ) ? URI.parse(uri) : uri 
+  
+      logger.info "Requesting: %s" % uri_dest.to_s if logger
+      
+      resp, data = Net::HTTP.new( uri_dest.host, uri_dest.port).get uri_dest.request_uri, nil
+  
+      if resp.response.code == "200"
+        data
+      elsif resp.response['Location']
+        redirect_to = resp.response['Location']
+        self.fetch_url(redirect_to)
+      else
+        # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
+        error_description = 'Unable to fetch "%s" (%s)' % [ uri_dest.to_s, resp.response.code ]
 
-    redirect_to = resp.response['Location'] if resp.response['Location']
-    redirect_to = $1 if /<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"0;[ ]*URL=(.*)\">/i.match data
+        logger.info error_description if logger
+        
+        raise FetchError, error_description
+      end
+    rescue FetchError => err
+      fetch_attempts += 1
+      
+      if retries_on_fetch_fail <= CraigScrape.retries_on_fetch_fail
+        sleep CraigScrape.sleep_between_fetch_retries if CraigScrape.sleep_between_fetch_retries
+        retry
+      else
+        raise err
+      end
+    end
 
-    (redirect_to) ? self.fetch_url(redirect_to) : data
   end
   
   def self.uri_from_href(base_uri, href) #:nodoc:

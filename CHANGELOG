@@ -1,4 +1,17 @@
 == Change Log
 
+=== Release 0.6.0 (May 21, 2009)
+- Added PostFull::flagged_for_removal?
+- Fixed a couple small parse bugs found in production
+- Added a ParseError object, which is raised on ... detected Parse errors. This raise will output the buggy parse, please send this over to me if you think CraigsScrape is actually wrong ..
+- Adjusted the examples in the readme, added a "require 'rubygems'" to the top of the listing so that they would actually work if you tried to run them verbatim (Thanks J T!)
+- Restructured some of the parsing to be less leinient when scraped values aren't matching their regexp's in the PostSummary
+- It seems like craigslist returns a 404 on pages that exist, for no good reason on occasion. Added a retry mechanism that wont take no for an answer, unless we get a defineable number of them in a row
+- Added CraigScrape cattr_accessors : retries_on_fetch_fail, sleep_between_fetch_retries . 
+- Adjusted craigwatch to not commit any database changes until the notification email goes out. This way if there's an error, the user wont miss any results on a re-run
+- Added a FetchError for http requests that don't return 200 or redirect...
+- Adjusted craigwatch to use scrape_until instead of scrape_since, this new approach cuts down on the url fetching by assuming that if we come across something we've already tracked, we dont need to keep going any further. NOTE: We still can't use a 'last_scraped_url' on the TrackedSearch model b/c sometimes posts get deleted.
+- We're tracking all date-relevant posts now in craigwatch, not just the ones that matched the first time aorund, this should significantly speed up our scrapes
+
 === Release 0.5.0 (April 30, 2009)
-* First release. Not much to say - hopefully someone else finds this useful.
+- First release. Not much to say - hopefully someone else finds this useful.

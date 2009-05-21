@@ -333,35 +333,43 @@ craig_report.each_search do |search|
 
   last_tracked_at = (search_track.last_tracked_at) ? search_track.last_tracked_at : search.starting_at
 
+  already_tracked_urls = search_track.tracked_posts.collect{|tp| tp.url}
+
   # Let's collect all the summaries that could apply:
   new_summaries = {}
   search.listing.each do |listing|
-    CraigScrape.scrape_posts_since(listing, last_tracked_at).each do |p_s|
-      new_summaries[p_s.full_url] = p_s unless new_summaries.has_key? p_s.full_url or search_track.already_tracked? p_s.full_url
+    CraigScrape.scrape_until(listing){|p| p.date <= last_tracked_at or already_tracked_urls.include? p.full_url }.each do |p_s|
+      new_summaries[p_s.full_url] = p_s unless new_summaries.has_key? p_s.full_url
     end
   end
-  
+
   # Let's flatten the unique'd hash into a more useable array:
   new_summaries = new_summaries.values.sort{|a,b| a.date <=> b.date} # oldest goes to bottom
   
-  # Reject anything which doesn't match the has/has_no :
+  # Let's tag all the newest tracked posts that should go into the database: 
+  # NOTE: Since all the dates are at_begining_of_day, we'll effectively have a chunk of dates tied for latest
+  new_summaries.reject{|p| p.date < new_summaries.last.date}.each do |p_s|
+    search_track.tracked_posts.create :url => p_s.full_url, :created_at => p_s.date
+  end
+  
+  # Reject anything from this report which doesn't match the has/has_no :
   new_summaries.reject!{|s| !search.passes_filter? s }
 
   # Now Let's manage the tracking database:
   if new_summaries.length > 0  
-    # Insert all the relevant, newest tracked posts: 
-    # NOTE: Since all the dates are at_begining_of_day, we'll effectively have a chunk of dates tied for latest
-    new_summaries.reject{|p| p.date < new_summaries.last.date}.each do |p_s|
-      search_track.tracked_posts.create! :url => p_s.full_url, :created_at => p_s.date
-    end
-  
-    # Remove all tracked posts older then we could need:
-    TrackedPost.delete_all ['tracked_search_id = ? AND created_at < ?', search_track.id, new_summaries.last.date ]
+
+    # We'll use this in the cleanup at the bottom:
+    latest_post_date = new_summaries.last.date
     
     new_summaries.reverse! if search.newest_first?
     
     # We'll want to email these...
-    report_summaries << { :postings => new_summaries, :search => search }
+    report_summaries << { 
+      :postings => new_summaries, 
+      :search => search, 
+      :search_track => search_track, 
+      :latest_post_date => latest_post_date
+    }
   end
 end
 
@@ -372,3 +380,12 @@ ReportMailer.deliver_report(
   craig_report.report_name, 
   {:summaries => report_summaries, :definition => craig_report}
 ) if report_summaries.length > 0
+
+# Now that we know the user has been informed, Let's commit all our database changes and end this scrape 'transaction':
+report_summaries.each do |s|
+  # Save the new posts:
+  s[:search_track].tracked_posts.each{|tp| tp.save!}
+  
+  # Let's do some light cleanup to keep the database size down, by removing all the old posts we're no longer tracking:
+  TrackedPost.delete_all [ 'tracked_search_id = ? AND created_at < ?', s[:search_track].id, s[:latest_post_date] ]
+end
