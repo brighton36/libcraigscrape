@@ -349,7 +349,7 @@ craig_report.each_search do |search|
   # Let's tag all the newest tracked posts that should go into the database: 
   # NOTE: Since all the dates are at_begining_of_day, we'll effectively have a chunk of dates tied for latest
   new_summaries.reject{|p| p.date < new_summaries.last.date}.each do |p_s|
-    search_track.tracked_posts.create :url => p_s.full_url, :created_at => p_s.date
+    search_track.tracked_posts.build :url => p_s.full_url, :created_at => p_s.date
   end
   
   # Reject anything from this report which doesn't match the has/has_no :
