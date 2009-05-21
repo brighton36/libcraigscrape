@@ -36,8 +36,11 @@ class CraigScrape
     end
   end
   
-  class ParseError < StandardError; end #:nodoc:
-  class FetchError < StandardError; end #:nodoc:
+  class ParseError < StandardError #:nodoc: 
+  end
+
+  class FetchError < StandardError #:nodoc:
+  end
 
   # PostFull represents a fully downloaded, and parsed, Craigslist post.
   # This class is generally returned by the listing scrape methods, and 
