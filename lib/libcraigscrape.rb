@@ -125,6 +125,20 @@ class CraigScrape
       # This will make it easier for the next guy to work with if wants to parse out the information we're disgarding...
       parse_craig_body Hpricot.parse(craigbody_as_s) if craigbody_as_s
       
+      # We'll first set these edge cases to false, unless the block below decides otherwise
+      @flagged_for_removal = false
+      @deleted_by_author = false
+      
+      # Time to check for errors and edge cases
+      if [@contents,@posting_id,@post_time,@title].all?{|f| f.nil?}
+        case @header.gsub(HTML_TAG, "")
+          when "This posting has been flagged for removal"
+            @flagged_for_removal = true
+          when "This posting has been deleted by its author."
+            @deleted_by_author = true
+        end
+      end
+      
       # Validate that required fields are present:
       raise ParseError, "Unable to parse PostFull: %s" % page.to_html if !flagged_for_removal? and !deleted_by_author? and [
         @contents,@posting_id,@post_time,@header,@title,@full_section
@@ -153,20 +167,10 @@ class CraigScrape
     end
     
     # Returns true if this Post was parsed, and merely a 'Flagged for Removal' page
-    def flagged_for_removal?
-      (
-        [@contents,@posting_id,@post_time,@title].all?{|f| f.nil?} and 
-        @header.gsub(HTML_TAG, "") == "This posting has been flagged for removal"
-      )
-    end
+    def flagged_for_removal?; @flagged_for_removal; end
 
     # Returns true if this Post was parsed, and represents a 'This posting has been deleted by its author.' notice
-    def deleted_by_author?
-      (
-        [@contents,@posting_id,@post_time,@title].all?{|f| f.nil?} and 
-        @header.gsub(HTML_TAG, "") == "This posting has been deleted by its author."
-      )
-    end
+    def deleted_by_author?; @deleted_by_author; end
     
     # Returns the price (as float) of the item, as best ascertained by the post header
     def price
