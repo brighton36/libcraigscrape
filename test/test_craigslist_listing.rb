@@ -233,6 +233,20 @@ EOD
     assert_equal [],  posting5.images
     assert_equal nil, posting5.contents_as_plain
     assert_equal nil, posting5.price
+    
+    posting_deleted = CraigScrape::PostFull.new read_as_hpricot('post_samples/this_post_has_been_deleted_by_its_author.html')
+    assert_equal true, posting_deleted.deleted_by_author?
+    assert_equal nil, posting_deleted.contents
+    assert_equal ["south florida craigslist", "broward county", "cars & trucks - by owner"], posting_deleted.full_section
+    assert_equal "This posting has been deleted by its author.", posting_deleted.header
+    assert_equal nil, posting_deleted.title
+    assert_equal nil, posting_deleted.location
+    assert_equal nil, posting_deleted.posting_id
+    assert_equal nil, posting_deleted.reply_to 
+    assert_equal nil, posting_deleted.post_time
+    assert_equal [],  posting_deleted.images
+    assert_equal nil, posting_deleted.contents_as_plain
+    assert_equal nil, posting_deleted.price
   end
 
   private
