@@ -320,9 +320,11 @@ ActiveRecord::Schema.define do
   end
 end
 
-# Now let's run a report:
+# We'll need these outside this next loop:
 report_summaries = []
+newly_tracked_posts = []
 
+# Now let's run a report:
 craig_report.each_search do |search|
 
   # Load our tracking info
@@ -349,7 +351,7 @@ craig_report.each_search do |search|
   # Let's tag all the newest tracked posts that should go into the database: 
   # NOTE: Since all the dates are at_begining_of_day, we'll effectively have a chunk of dates tied for latest
   new_summaries.reject{|p| p.date < new_summaries.last.date}.each do |p_s|
-    search_track.tracked_posts.build :url => p_s.full_url, :created_at => p_s.date
+    newly_tracked_posts << search_track.tracked_posts.build( :url => p_s.full_url, :created_at => p_s.date)
   end
   
   # Reject anything from this report which doesn't match the has/has_no :
@@ -381,11 +383,11 @@ ReportMailer.deliver_report(
   {:summaries => report_summaries, :definition => craig_report}
 ) if report_summaries.length > 0
 
+# Save the newly created posts:
+newly_tracked_posts.each{|tp| tp.save!}
+
 # Now that we know the user has been informed, Let's commit all our database changes and end this scrape 'transaction':
 report_summaries.each do |s|
-  # Save the new posts:
-  s[:search_track].tracked_posts.each{|tp| tp.save!}
-  
   # Let's do some light cleanup to keep the database size down, by removing all the old posts we're no longer tracking:
   TrackedPost.delete_all [ 'tracked_search_id = ? AND created_at < ?', s[:search_track].id, s[:latest_post_date] ]
 end

@@ -126,7 +126,7 @@ class CraigScrape
       parse_craig_body Hpricot.parse(craigbody_as_s) if craigbody_as_s
       
       # Validate that required fields are present:
-      raise ParseError, "Unable to parse PostFull: %s" % page.to_html if !flagged_for_removal? and [
+      raise ParseError, "Unable to parse PostFull: %s" % page.to_html if !flagged_for_removal? and !deleted_by_author? and [
         @contents,@posting_id,@post_time,@header,@title,@full_section
       ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
     end
@@ -157,6 +157,14 @@ class CraigScrape
       (
         [@contents,@posting_id,@post_time,@title].all?{|f| f.nil?} and 
         @header.gsub(HTML_TAG, "") == "This posting has been flagged for removal"
+      )
+    end
+
+    # Returns true if this Post was parsed, and represents a 'This posting has been deleted by its author.' notice
+    def deleted_by_author?
+      (
+        [@contents,@posting_id,@post_time,@title].all?{|f| f.nil?} and 
+        @header.gsub(HTML_TAG, "") == "This posting has been deleted by its author."
       )
     end
     

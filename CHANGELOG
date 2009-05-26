@@ -1,5 +1,8 @@
 == Change Log
 
+=== Release 0.6.1 (May 26, 2009)
+- Added PostFull::deleted_by_author? , added test case for said condition
+
 === Release 0.6.0 (May 21, 2009)
 - Added PostFull::flagged_for_removal?
 - Fixed a couple small parse bugs found in production
