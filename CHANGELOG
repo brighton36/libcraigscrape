@@ -1,6 +1,6 @@
 == Change Log
 
-=== Release 0.6.1 (May 26, 2009)
+=== Release 0.6.1 (Jun 6, 2009)
 - Added PostFull::deleted_by_author? , added test case for said condition
 - Fixed a bug that caused the library to die in weird ways if there wasn't a title tag on a parsed page
 - Apparently Craigslist starting gzip-encoding *some* listings. Added gzip decoding support

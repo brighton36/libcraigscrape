@@ -167,12 +167,14 @@ class CraigScrape
     # I left this here as a stub, since someone may want to parse more then what I'm currently scraping from this part of the page
     def parse_craig_body(craigbody_els)  #:nodoc:
       # Location (when explicitly defined):
-      craigbody_els.at('ul').children.each do |li|
+      cursor = craigbody_els.at 'ul' unless @location
+      
+      cursor.children.each do |li|
         if LOCATION.match li.inner_html
           @location = he_decode($1) and break
           break
         end
-      end
+      end if cursor
 
       # Real estate listings can work a little different for location:
       unless @location
@@ -386,43 +388,50 @@ class CraigScrape
   end
   
   def self.fetch_url(uri) #:nodoc:
-    fetch_attempts = 0
+    uri_dest = ( uri.class == String ) ? URI.parse(uri) : uri 
+
+    logger.info "Requesting: %s" % uri_dest.to_s if logger
+
+    case uri_dest.scheme
+      when 'file'
+        File.read uri_dest.path
+      when /^http[s]?/
+        fetch_attempts = 0
+        
+        begin
+          # This handles the redirects for us          
+          resp, data = Net::HTTP.new( uri_dest.host, uri_dest.port).get uri_dest.request_uri, nil
+      
+          if resp.response.code == "200"
+            # Check for gzip, and decode:
+            data = Zlib::GzipReader.new(StringIO.new(data)).read if resp.response.header['Content-Encoding'] == 'gzip'
+            
+            data
+          elsif resp.response['Location']
+            redirect_to = resp.response['Location']
+            self.fetch_url(redirect_to)
+          else
+            # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
+            error_description = 'Unable to fetch "%s" (%s)' % [ uri_dest.to_s, resp.response.code ]
     
-    begin
-      # This handles the redirects for us
-      uri_dest = ( uri.class == String ) ? URI.parse(uri) : uri 
-  
-      logger.info "Requesting: %s" % uri_dest.to_s if logger
-      
-      resp, data = Net::HTTP.new( uri_dest.host, uri_dest.port).get uri_dest.request_uri, nil
-  
-      if resp.response.code == "200"
-        # Check for gzip, and decode:
-        data = Zlib::GzipReader.new(StringIO.new(data)).read if resp.response.header['Content-Encoding'] == 'gzip'
-        
-        data
-      elsif resp.response['Location']
-        redirect_to = resp.response['Location']
-        self.fetch_url(redirect_to)
-      else
-        # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
-        error_description = 'Unable to fetch "%s" (%s)' % [ uri_dest.to_s, resp.response.code ]
-
-        logger.info error_description if logger
-        
-        raise FetchError, error_description
-      end
-    rescue FetchError => err
-      fetch_attempts += 1
-      
-      if retries_on_fetch_fail <= CraigScrape.retries_on_fetch_fail
-        sleep CraigScrape.sleep_between_fetch_retries if CraigScrape.sleep_between_fetch_retries
-        retry
-      else
-        raise err
-      end
+            logger.info error_description if logger
+            
+            raise FetchError, error_description
+          end
+        rescue FetchError => err
+          fetch_attempts += 1
+          
+          if retries_on_fetch_fail <= CraigScrape.retries_on_fetch_fail
+            sleep CraigScrape.sleep_between_fetch_retries if CraigScrape.sleep_between_fetch_retries
+            retry
+          else
+            raise err
+          end
+        end
+      else    
+        # TODO
+        raise StandardError, 'Unknown URI scheme for the uri TODO'
     end
-
   end
   
   def self.uri_from_href(base_uri, href) #:nodoc:
