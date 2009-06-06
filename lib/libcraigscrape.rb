@@ -2,10 +2,11 @@
 #
 # All of libcraigscrape's objects and methods are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
+require 'net/http'
+require 'zlib'
 
 require 'rubygems'
 require 'hpricot'
-require 'net/http'
 require 'htmlentities'
 require 'activesupport'
 
@@ -31,6 +32,7 @@ class CraigScrape
   end
   
   module ParseObjectHelper  #:nodoc:
+    private
     def he_decode(text)
       HTMLEntities.new.decode text
     end
@@ -92,7 +94,7 @@ class CraigScrape
       
       title = page.at('title')
       @title = he_decode title.inner_html if title
-      @title = nil if @title.length ==0
+      @title = nil if @title and @title.length ==0
       
       @full_section = []
       (page/"div[@class='bchead']//a").each do |a|
@@ -144,28 +146,7 @@ class CraigScrape
         @contents,@posting_id,@post_time,@header,@title,@full_section
       ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
     end
-    
-    # I left this here as a stub, since someone may want to parse more then what I'm currently scraping from this part of the page
-    def parse_craig_body(craigbody_els)  #:nodoc:
-      # Location (when explicitly defined):
-      cursor = craigbody_els.at 'ul'
-      cursor = cursor.at 'li' if cursor
-      @location = he_decode $1 if cursor and LOCATION.match cursor.inner_html
-
-      # Real estate listings can work a little different for location:
-      unless @location
-        cursor = craigbody_els.at 'small'
-        cursor = cursor.previous_node until cursor.nil? or cursor.text?
         
-        @location = he_decode(cursor.to_s.strip) if cursor
-      end
-
-      # Now let's find the craigslist hosted images:
-      img_table = (craigbody_els / 'table').find{|e| e.name == 'table' and e[:summary] == 'craigslist hosted images'}
-      
-      @images = (img_table / 'img').collect{|i| i[:src]} if img_table
-    end
-    
     # Returns true if this Post was parsed, and merely a 'Flagged for Removal' page
     def flagged_for_removal?; @flagged_for_removal; end
 
@@ -180,6 +161,31 @@ class CraigScrape
     # Returns the post contents with all html tags removed
     def contents_as_plain
       @contents.gsub HTML_TAG, "" if @contents
+    end
+    
+    private
+    # I left this here as a stub, since someone may want to parse more then what I'm currently scraping from this part of the page
+    def parse_craig_body(craigbody_els)  #:nodoc:
+      # Location (when explicitly defined):
+      craigbody_els.at('ul').children.each do |li|
+        if LOCATION.match li.inner_html
+          @location = he_decode($1) and break
+          break
+        end
+      end
+
+      # Real estate listings can work a little different for location:
+      unless @location
+        cursor = craigbody_els.at 'small'
+        cursor = cursor.previous_node until cursor.nil? or cursor.text?
+        
+        @location = he_decode(cursor.to_s.strip) if cursor
+      end
+
+      # Now let's find the craigslist hosted images:
+      img_table = (craigbody_els / 'table').find{|e| e.name == 'table' and e[:summary] == 'craigslist hosted images'}
+      
+      @images = (img_table / 'img').collect{|i| i[:src]} if img_table
     end
   end
 
@@ -316,7 +322,7 @@ class CraigScrape
     
     # Requests and returns the PostFull object that corresponds with this summary's full_url
     def full_post
-      @full_post = CraigScrape.scrape_full_post(full_url) if @full_post.nil? and full_url
+      @full_post ||= CraigScrape.scrape_full_post full_url if full_url
       
       @full_post
     end
@@ -391,6 +397,9 @@ class CraigScrape
       resp, data = Net::HTTP.new( uri_dest.host, uri_dest.port).get uri_dest.request_uri, nil
   
       if resp.response.code == "200"
+        # Check for gzip, and decode:
+        data = Zlib::GzipReader.new(StringIO.new(data)).read if resp.response.header['Content-Encoding'] == 'gzip'
+        
         data
       elsif resp.response['Location']
         redirect_to = resp.response['Location']

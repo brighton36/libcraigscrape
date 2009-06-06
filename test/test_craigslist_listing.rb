@@ -247,6 +247,21 @@ EOD
     assert_equal [],  posting_deleted.images
     assert_equal nil, posting_deleted.contents_as_plain
     assert_equal nil, posting_deleted.price
+
+    posting6 = CraigScrape::PostFull.new read_as_hpricot('post_samples/1207457727.html')
+    assert_equal "<p><br />Call!! asking for a new owner.<br />  no deposit required rent to own properties. <br /> <br /> Defaulting payment records are not a problem, <br /> we will help you protect the previous owners credit history! 202-567-6371  <br /><br /></p>",posting6.contents
+    assert_equal "Call!! asking for a new owner.  no deposit required rent to own properties.   Defaulting payment records are not a problem,  we will help you protect the previous owners credit history! 202-567-6371  ",posting6.contents_as_plain
+    assert_equal false,posting6.deleted_by_author?
+    assert_equal false,posting6.flagged_for_removal?
+    assert_equal ["south florida craigslist", "broward county", "apts/housing for rent"],posting6.full_section
+    assert_equal "$1350 / 3br - 2bth for no deposit req (Coral Springs)",posting6.header
+    assert_equal ["http://images.craigslist.org/3k43pe3o8ZZZZZZZZZ9655022102a3ea51624.jpg", "http://images.craigslist.org/3n13m53p6ZZZZZZZZZ96596515e51237a179c.jpg", "http://images.craigslist.org/3od3p33leZZZZZZZZZ9656d614da8e3a51dd9.jpg", "http://images.craigslist.org/3pb3oa3leZZZZZZZZZ965eb60e4d2344019fb.jpg"],posting6.images
+    assert_equal 'Coral Springs',posting6.location
+    assert_equal [0, 56, 18, 5, 6, 2009, 5, 156, true, "EDT"],posting6.post_time.to_a
+    assert_equal 1207457727,posting6.posting_id
+    assert_equal 1350.0,posting6.price
+    assert_equal "hous-ccpap-1207457727@craigslist.org",posting6.reply_to
+    assert_equal "2bth for no deposit req",posting6.title    
   end
 
   private
@@ -255,5 +270,23 @@ EOD
     Hpricot.parse(
       File.open('%s/%s' % [File.dirname(__FILE__), test_file]).read
     )
+  end
+  
+  def pp_assertions(obj, obj_name)
+    probable_accessors = (obj.methods-obj.class.superclass.methods)
+    
+    puts
+    probable_accessors.sort.each do |m|
+      val = obj.send(m.to_sym)
+      
+      # There's a good number of transformations worth doing here, I'll just start like this for now:
+      if val.kind_of? Time
+        # I've decided this is the the easiest way to understand and test a time
+        val = val.to_a
+        m = "#{m}.to_a"
+      end
+      
+      puts "assert_equal %s, %s.%s" % [val.inspect,obj_name,m]
+    end    
   end
 end
