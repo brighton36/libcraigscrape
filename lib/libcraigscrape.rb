@@ -37,6 +37,9 @@ class CraigScrape
       HTMLEntities.new.decode text
     end
   end
+
+  class BadUrlError < StandardError #:nodoc:
+  end
   
   class ParseError < StandardError #:nodoc: 
   end
@@ -164,11 +167,13 @@ class CraigScrape
     end
     
     private
+    
     # I left this here as a stub, since someone may want to parse more then what I'm currently scraping from this part of the page
     def parse_craig_body(craigbody_els)  #:nodoc:
       # Location (when explicitly defined):
       cursor = craigbody_els.at 'ul' unless @location
       
+      # Apa section includes other things in the li's (cats/dogs ok fields)
       cursor.children.each do |li|
         if LOCATION.match li.inner_html
           @location = he_decode($1) and break
@@ -428,9 +433,8 @@ class CraigScrape
             raise err
           end
         end
-      else    
-        # TODO
-        raise StandardError, 'Unknown URI scheme for the uri TODO'
+      else
+        raise BadUrlError, "Unknown URI scheme for the url: #{uri_dest.to_s}"
     end
   end
   

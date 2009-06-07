@@ -5,6 +5,7 @@
 - Fixed a bug that caused the library to die in weird ways if there wasn't a title tag on a parsed page
 - Apparently Craigslist starting gzip-encoding *some* listings. Added gzip decoding support
 - Found a bug when parsing the location field on some full_posts in the apa sections
+- Added support for file:// uri's int he scrape_* functions, and revised the tests to use these uri's
 
 === Release 0.6.0 (May 21, 2009)
 - Added PostFull::flagged_for_removal?
