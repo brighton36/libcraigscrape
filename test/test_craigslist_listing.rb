@@ -151,6 +151,10 @@ EOD
       assert_equal 5, l.date.month
       assert_equal 14, l.date.day
     end
+    
+    empty_listings = CraigScrape.scrape_listing relative_uri_for('listing_samples/empty_listings.html')
+    assert_equal nil, empty_listings.next_page_href
+    assert_equal [], empty_listings.posts
   end
   
   def test_posting_parse

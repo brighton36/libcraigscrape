@@ -232,7 +232,7 @@ class CraigScrape
       @next_page_href = next_link[:href] if next_link
       
       # Validate that required fields are present:
-      raise ParseError, "Unable to parse Listings: %s" % page.to_html unless @posts.length > 0
+      raise ParseError, "Unable to parse Listings: %s" % page.to_html if tags_worth_parsing.length > 0 and  @posts.length == 0
     end
     
   end
@@ -391,7 +391,7 @@ class CraigScrape
   def self.scrape_posts_since(listing_url, newer_then)
     self.scrape_until(listing_url) {|post| post.date <= newer_then}
   end
-  
+
   def self.fetch_url(uri) #:nodoc:
     uri_dest = ( uri.class == String ) ? URI.parse(uri) : uri 
 
