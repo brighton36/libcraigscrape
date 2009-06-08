@@ -11,7 +11,7 @@ include FileUtils
 RbConfig = Config unless defined? RbConfig
 
 NAME = "libcraigscrape"
-VERS = ENV['VERSION'] || "0.6.1"
+VERS = ENV['VERSION'] || "0.6.5"
 PKG = "#{NAME}-#{VERS}"
 
 RDOC_OPTS = ['--quiet', '--title', 'The libcraigscrape Reference', '--main', 'README', '--inline-source']
@@ -57,8 +57,11 @@ Rake::RDocTask.new do |rdoc|
 end
 
 Rake::GemPackageTask.new(SPEC) do |p|
-    p.need_tar = true
-    p.gem_spec = SPEC
+  p.need_tar = false
+  p.need_tar_gz = true
+  p.need_tar_bz2 = true
+  p.need_zip = true
+  p.gem_spec = SPEC
 end
 
 task "lib" do
@@ -74,35 +77,3 @@ task :uninstall => [:clean] do
   sh %{sudo gem uninstall #{NAME}}
 end
 
-task :pkg_archives do
-  base_dir = File.dirname __FILE__
-  package_name = '%s-%s' % [NAME,VERS]
-  packages_base = "#{base_dir}/pkg"
-  packaging_dir = '%s/%s' % [ packages_base,package_name ] 
-  
-  begin
-    # First we create a proper package-X.X directory:
-    PKG_FILES.each do |p_f|
-      base_file = '%s/%s' % [base_dir, p_f]
-      packaged_file = '%s/%s' % [packaging_dir, p_f]
-      packaged_file_dirname = File.dirname packaged_file
-  
-      # We really don't care to do anything about these - we'll recreate it when/if its needed
-      next if File.directory? base_file
-  
-      FileUtils.mkdir_p packaged_file_dirname unless File.directory? packaged_file_dirname
-      
-      FileUtils.cp base_file, packaged_file unless File.exists? packaged_file
-    end
-    
-    # Remove any old archives we'd be replacing:
-    %w(zip tar.bz2).each{ |ext| FileUtils.rm "#{packaging_dir}.#{ext}" if File.exist? "#{packaging_dir}.#{ext}" }
-    
-    # Now let's create some archives:
-    sh %{cd #{packages_base} && tar -cjvf  #{package_name}.tar.bz2 #{package_name}}
-    sh %{cd #{packages_base} && zip -r #{package_name}.zip #{package_name}}
-  ensure
-    # Delete that temp directory we created at the start here
-    FileUtils.rmtree packaging_dir
-  end
-end
