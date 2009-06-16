@@ -12,7 +12,8 @@ require 'activesupport'
 
 # A base class encapsulating the libcraigscrape objests, and providing some utility methods.
 class CraigScrape
-
+  cattr_accessor :time_now
+    
   class BadUrlError < StandardError #:nodoc:
   end
   
@@ -21,13 +22,24 @@ class CraigScrape
 
   class FetchError < StandardError #:nodoc:
   end
+    
+  # Returns the most recentlt expired  time for the provided month and day
+  def self.most_recently_expired_time(month, day)  #:nodoc:
+    now = (time_now) ? time_now : Time.now
+    
+    # This ensures we always generate a time in the past, by guessing the year and subtracting one if we guessed wrong
+    ret = Time.local now.year, month, day
+    ret = Time.local now.year-1, month, day if ret > now 
+    
+    ret
+  end
 
   class Scraper #:nodoc:
     cattr_accessor :logger
     cattr_accessor :sleep_between_fetch_retries
     cattr_accessor :retries_on_fetch_fail
-    cattr_accessor :time_now
 
+    # Returns the full url that corresponds to this resource
     attr_reader :url
 
     # Set some defaults:
@@ -54,19 +66,12 @@ class CraigScrape
     
     private
     
-    # Most 
-    def most_recently_expired_time(month, day)  #:nodoc:
-      now = (time_now) ? time_now : Time.now
-      
-      # This ensures we always generate a time in the past, by guessing the year and subtracting one if we guessed wrong
-      ret = Time.local now.year, month, day
-      ret = Time.local now.year-1, month, day if ret > now 
-      
-      ret
-    end
-    
     # Returns text with all html entities converted to respective ascii character.
     def he_decode(text)
+      self.class.he_decode text
+    end
+    
+    def self.he_decode(text)
       HTMLEntities.new.decode text
     end
     
@@ -140,7 +145,21 @@ class CraigScrape
     PRICE          = /\$([\d]+(?:\.[\d]{2})?)/
     HTML_TAG       = /<\/?[^>]*>/
     USERBODY_PARTS = /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m
-    
+
+
+    # Create a new Post via a url (String), or supplied parameters (Hash)
+    def initialize(*args)
+      super(*args)
+
+
+      # Validate that required fields are present:
+# TODO:
+#      raise ParseError, "Unable to parse PostFull: %s" % html.to_html if !flagged_for_removal? and !deleted_by_author? and [
+#        @contents,@posting_id,@post_time,@header,title,@full_section
+#      ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
+    end
+        
+
     # String, The contents of the item's html body heading
     def header
       unless @header
@@ -259,18 +278,6 @@ class CraigScrape
       @images
     end
 
-    
-    def initialize(*args) #:nodoc:
-      super(*args)
-
-
-      # Validate that required fields are present:
-# TODO:
-#      raise ParseError, "Unable to parse PostFull: %s" % html.to_html if !flagged_for_removal? and !deleted_by_author? and [
-#        @contents,@posting_id,@post_time,@header,title,@full_section
-#      ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
-    end
-        
     # Returns true if this Post was parsed, and merely a 'Flagged for Removal' page
     def flagged_for_removal?
       @flagged_for_removal = (
@@ -318,8 +325,9 @@ class CraigScrape
       $1 if USERBODY_PARTS.match html.to_s
     end
     
+    # Read the notes on user_body. However,  unlike the user_body, the craigslist portion of this div can be relied upon to be valid html. 
+    # So - we'll return it as an Hpricot object.
     def craigslist_body
-      # Unlike the user_body, the craigslist portion of this div can be relied upon to be valid html. So - we'll return it as an Hpricot object
       Hpricot.parse $2 if USERBODY_PARTS.match html.to_s
     end
 
@@ -327,16 +335,9 @@ class CraigScrape
 
   # Listings represents a parsed Craigslist listing page and is generally returned by CraigScrape.scrape_listing
   class Listings < Scraper
-    
-    # Array, PostSummary objects found in the listing
-    attr_reader :posts
-    
-    # String, URL Path of the next page link
-    attr_reader :next_page_href
-
-    LABEL    = /^(.+?)[ ]*\-$/
-    LOCATION = /^[ ]*\((.*?)\)$/
-    IMG_TYPE = /^[ ]*(.+)[ ]*$/
+    LABEL          = /^(.+?)[ ]*\-$/
+    LOCATION       = /^[ ]*\((.*?)\)$/
+    IMG_TYPE       = /^[ ]*(.+)[ ]*$/
     HEADER_DATE    = /^[ ]*[^ ]+[ ]+([^ ]+)[ ]+([^ ]+)[ ]*$/
     SUMMARY_DATE   = /^[ ]([^ ]+)[ ]+([^ ]+)[ ]*[\-][ ]*$/
     NEXT_PAGE_LINK = /^[ ]*next [\d]+ postings[ ]*$/
@@ -344,39 +345,66 @@ class CraigScrape
     def initialize(*args)  #:nodoc:
       super(*args)
       
-      if html # TODO: Get rid of this initializer entirely!
+      # Validate that required fields are present:
+# TODO:
+#      raise ParseError, "Unable to parse Listings: %s" % html.to_html if tags_worth_parsing.length > 0 and  @posts.length == 0
+    end
+
+    # Array, PostSummary objects found in the listing
+    def posts
+      unless @posts
         current_date = nil
         @posts = []
   
-        tags_worth_parsing = html.get_elements_by_tag_name('p','h4')
+        post_tags = html.get_elements_by_tag_name('p','h4')
         
-        # This will find the link on 'general listing' pages, if there is one:
-        last_twp_a = tags_worth_parsing.last.at('a') if  tags_worth_parsing.last
-        next_link = tags_worth_parsing.pop.at('a') if last_twp_a and NEXT_PAGE_LINK.match last_twp_a.inner_html    
+        # The last p in the list is sometimes a 'next XXX pages' link. We don't want to include this in our PostSummary output:
+        post_tags.pop if (
+          post_tags.length > 0 and 
+          post_tags.last.at('a') and 
+          NEXT_PAGE_LINK.match post_tags.last.at('a').inner_html
+        )
         
         # Now we iterate though the listings:
-        tags_worth_parsing.each do |el|
+        post_tags.each do |el|
           case el.name
             when 'p'
-             @posts << CraigScrape::PostSummary.new( parse_summary(el, current_date) )
-            when 'h4'            
-              current_date = most_recently_expired_time $1, $2 if HEADER_DATE.match he_decode(el.inner_html)
+             post_summary = self.class.parse_summary(el, current_date)
+             post_summary[:url] = '%s://%s%s' % [uri.scheme, uri.host, post_summary[:href]] if uri and post_summary[:href]
+             
+             @posts << CraigScrape::PostSummary.new(post_summary)
+            when 'h4'
+              current_date = CraigScrape.most_recently_expired_time $1, $2 if HEADER_DATE.match he_decode(el.inner_html)
           end        
-        end
-      
+        end        
+      end
+
+      @posts
+    end
+
+    # String, URL Path of the next page link
+    def next_page_href
+      unless @next_page_href
+        cursor = html.at 'p:last-of-type'
+        
+        cursor = cursor.at 'a' if cursor
+        
+        # Category Listings have their 'next 100 postings' link at the end of the doc in a p tag 
+        next_link = cursor if cursor and NEXT_PAGE_LINK.match cursor.inner_html
+
+        # Search listings put their next page in a link towards the top
         next_link = (html / 'a').find{ |a| he_decode(a.inner_html) == '<b>Next>></b>' } unless next_link
         
         # This will find the link on 'search listing' pages (if there is one):
         @next_page_href = next_link[:href] if next_link
-        
-        # Validate that required fields are present:
-        raise ParseError, "Unable to parse Listings: %s" % html.to_html if tags_worth_parsing.length > 0 and  @posts.length == 0
       end
+      
+      @next_page_href
     end
     
     # Takes a paragraph element and returns a mostly-parsed Posting
-    # TODO: Cut this down!
-    def parse_summary(p_element, date = nil)  #:nodoc:
+    # We separate this from the rest of the parsing both for readability and ease of testing
+    def self.parse_summary(p_element, date = nil)  #:nodoc:
       ret = {}
       
       title_anchor, section_anchor  = p_element.search 'a'
@@ -400,7 +428,7 @@ class CraigScrape
       
       ret[:date] = date
       if SUMMARY_DATE.match he_decode(p_element.children[0])
-        ret[:date] = most_recently_expired_time $1, $2.to_i
+        ret[:date] = CraigScrape.most_recently_expired_time $1, $2.to_i
       end
   
       if title_anchor
@@ -409,8 +437,6 @@ class CraigScrape
     
         ret[:href] = title_anchor[:href]
       end
-
-      ret[:url] = '%s://%s%s' % [uri.scheme, uri.host, ret[:href]] if uri and ret[:href]
 
       # Validate that required fields are present:
 # TODO: Move this somewhere

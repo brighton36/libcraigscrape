@@ -34,9 +34,7 @@ EOD
 <p><a href="/mdc/jwl/1128691192.html">925 Sterling Silver Dragonfly Charm Bracelet - $25 -</a> <span class="p"> img</span></p>
 EOD
 
-    empty_listing = CraigScrape::Listings.new # TODO: I think this isnt the way to go - we should make this a self.parse_summary kind of thing...
-
-    one = CraigScrape::PostSummary.new empty_listing.parse_summary(Hpricot.parse(search_html_one).at('p'))
+    one = CraigScrape::PostSummary.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_one).at('p'))
     assert_equal true, one.has_img?
     assert_equal false, one.has_pic?
     assert_equal true, one.has_pic_or_img?
@@ -48,7 +46,7 @@ EOD
     assert_equal 18, one.date.day
     assert_equal nil, one.price
 
-    two = CraigScrape::PostSummary.new empty_listing.parse_summary(Hpricot.parse(search_html_two).at('p'))
+    two = CraigScrape::PostSummary.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_two).at('p'))
     assert_equal true, two.has_img?
     assert_equal true, two.has_pic?
     assert_equal true, two.has_pic_or_img?
@@ -60,7 +58,7 @@ EOD
     assert_equal 4, two.date.day
     assert_equal 348000.0, two.price
 
-    three = CraigScrape::PostSummary.new empty_listing.parse_summary(Hpricot.parse(search_html_three).at('p'))
+    three = CraigScrape::PostSummary.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_three).at('p'))
     assert_equal false, three.has_img?
     assert_equal true, three.has_pic?
     assert_equal true, three.has_pic_or_img?
@@ -72,7 +70,7 @@ EOD
     assert_equal 31, three.date.day
     assert_equal 22.0, three.price
 
-    four = CraigScrape::PostSummary.new empty_listing.parse_summary(Hpricot.parse(search_html_four).at('p'))
+    four = CraigScrape::PostSummary.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_four).at('p'))
     assert_equal false, four.has_img?
     assert_equal false, four.has_pic?
     assert_equal false, four.has_pic_or_img?
@@ -84,7 +82,7 @@ EOD
     assert_equal 22, four.date.day
     assert_equal 325000.0, four.price
 
-    five = CraigScrape::PostSummary.new empty_listing.parse_summary(Hpricot.parse(search_html_five).at('p'))
+    five = CraigScrape::PostSummary.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_five).at('p'))
     assert_equal false, five.has_img?
     assert_equal true, five.has_pic?
     assert_equal true, five.has_pic_or_img?
@@ -96,7 +94,7 @@ EOD
     assert_equal 9, five.date.day
     assert_equal 105000.0, five.price
 
-    five = CraigScrape::PostSummary.new empty_listing.parse_summary(Hpricot.parse(category_listing_one).at('p'))
+    five = CraigScrape::PostSummary.new CraigScrape::Listings.parse_summary(Hpricot.parse(category_listing_one).at('p'))
     assert_equal false, five.has_img?
     assert_equal true,  five.has_pic?
     assert_equal true, five.has_pic_or_img?
@@ -107,7 +105,7 @@ EOD
     assert_equal nil, five.date
     assert_equal 2995000.0, five.price
 
-    six = CraigScrape::PostSummary.new empty_listing.parse_summary(Hpricot.parse(category_listing_two).at('p'))
+    six = CraigScrape::PostSummary.new CraigScrape::Listings.parse_summary(Hpricot.parse(category_listing_two).at('p'))
     assert_equal true, six.has_img?
     assert_equal false,  six.has_pic?
     assert_equal true, six.has_pic_or_img?
@@ -123,6 +121,7 @@ EOD
     category = CraigScrape::Listings.new relative_uri_for('listing_samples/category_output.html')
     assert_equal 'index100.html', category.next_page_href
     assert_equal 100, category.posts.length
+
     category.posts[0..80].each do |l|
       assert_equal 4, l.date.month
       assert_equal 18, l.date.day
