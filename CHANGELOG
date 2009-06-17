@@ -1,5 +1,16 @@
 == Change Log
 
+=== Release 0.7.0 (XXX XXX, 2009)
+- A good bit of refactoring
+- Post/Listing constructors now take either a Hash or a url (string) to use for its scrape. Regardless, either should always have a url object association now
+- Added a Base Scraper object. Maybe I'll make that its own gem...
+- Removed the PostSummary object, now we just have Posting/ Posts include all the functionality of both PostFull and PostSummary. Be careful with Posting if you're trying to minimize bandwidth. the rdoc labels which methods wont/will/might cause a page load.
+- Things should fail better (always outputting relevant html that was unable to be parsed)
+- Removed date in favor of post_date
+- full_post is no longer needed or available
+- PostSummary::href is no longer needed or available. Use uri.path instead
+- Posting.images renamed to Posting.pics, and a new method Posting.images better reflects the craigslist designations
+
 === Release 0.6.5 (Jun 8, 2009)
 - Added PostFull::deleted_by_author? , added test case for said condition
 - Fixed a bug that caused the library to die in weird ways if there wasn't a title tag on a parsed page

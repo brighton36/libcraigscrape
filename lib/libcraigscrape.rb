@@ -64,18 +64,27 @@ class CraigScrape
       end
     end
     
+    # Indicates whether the resource has yet been retrieved from its associated url
+    def downloaded?; !@html.nil?; end
+
+    # A URI object corresponding to this Scraped URL
+    def uri
+      @uri ||= URI.parse @url if @url
+      @uri
+    end
+
     private
     
+    # Easy way to fail noisily:
+    def parse_error!; raise ParseError, "Error while parsing %s:\n %s" % [self.class.to_s, html]; end
+    
     # Returns text with all html entities converted to respective ascii character.
-    def he_decode(text)
-      self.class.he_decode text
-    end
+    def he_decode(text); self.class.he_decode text; end
+
+    # Returns text with all html entities converted to respective ascii character.
+    def self.he_decode(text); HTMLEntities.new.decode text; end
     
-    def self.he_decode(text)
-      HTMLEntities.new.decode text
-    end
-    
-    def fetch_url(uri) #:nodoc:
+    def fetch_url(uri)
   
       logger.info "Requesting: %s" % @url if logger
   
@@ -121,28 +130,23 @@ class CraigScrape
       end
     end
     
-    def uri
-      @uri ||= URI.parse @url if @url
-      @uri
-    end
-    
     def html
       @html ||= Hpricot.parse fetch_url(uri) if uri
       @html
     end
   end
 
-
-  # PostFull represents a fully downloaded, and parsed, Craigslist post.
+  # Posting represents a fully downloaded, and parsed, Craigslist post.
   # This class is generally returned by the listing scrape methods, and 
   # contains the post summaries for a specific search url, or a general listing category 
-  class PostFull < Scraper
+  class Posting < Scraper
     
     POST_DATE      = /Date:[^\d]*((?:[\d]{2}|[\d]{4})\-[\d]{1,2}\-[\d]{1,2}[^\d]+[\d]{1,2}\:[\d]{1,2}[ ]*[AP]M[^a-z]+[a-z]+)/i
     LOCATION       = /Location\:[ ]+(.+)/
     POSTING_ID     = /PostingID\:[ ]+([\d]+)/
     REPLY_TO       = /(.+)/
-    PRICE          = /\$([\d]+(?:\.[\d]{2})?)/
+    PRICE          = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
+# TODO: Deprecated PRICE - is ok? : /\$([\d]+(?:\.[\d]{2})?)/
     HTML_TAG       = /<\/?[^>]*>/
     USERBODY_PARTS = /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m
 
@@ -151,19 +155,17 @@ class CraigScrape
     def initialize(*args)
       super(*args)
 
-
-      # Validate that required fields are present:
-# TODO:
-#      raise ParseError, "Unable to parse PostFull: %s" % html.to_html if !flagged_for_removal? and !deleted_by_author? and [
-#        @contents,@posting_id,@post_time,@header,title,@full_section
-#      ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
+      # Validate that required fields are present, at least - if we've downloaded it from a url
+      parse_error! if args.first.kind_of? String and !flagged_for_removal? and !deleted_by_author? and [
+        contents,posting_id,post_time,header,title,full_section
+      ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
     end
         
 
     # String, The contents of the item's html body heading
     def header
       unless @header
-        h2 = html.at('h2')
+        h2 = html.at 'h2' if html
         @header = he_decode h2.inner_html if h2
       end
       
@@ -173,7 +175,7 @@ class CraigScrape
     # String, the item's title
     def title
       unless @title
-        title_tag = html.at('title')
+        title_tag = html.at 'title' if html
         @title = he_decode title_tag.inner_html if title_tag
         @title = nil if @title and @title.length == 0
       end
@@ -185,9 +187,10 @@ class CraigScrape
     def full_section
       unless @full_section
         @full_section = []
+        
         (html/"div[@class='bchead']//a").each do |a|
           @full_section << he_decode(a.inner_html) unless a['id'] and a['id'] == 'ef'
-        end
+        end if html
       end
 
       @full_section
@@ -196,7 +199,7 @@ class CraigScrape
     # String, represents the post's reply-to address, if listed
     def reply_to
       unless @reply_to
-        cursor = html.at 'hr'    
+        cursor = html.at 'hr' if html
         cursor = cursor.next_sibling until cursor.nil? or cursor.name == 'a'
         @reply_to = $1 if cursor and REPLY_TO.match he_decode(cursor.inner_html)
       end
@@ -207,7 +210,7 @@ class CraigScrape
     # Time, reflects the full timestamp of the posting 
     def post_time
       unless @post_time
-        cursor = html.at 'hr'
+        cursor = html.at 'hr' if html
         cursor = cursor.next_node until cursor.nil? or POST_DATE.match cursor.to_s
         @post_time = Time.parse $1 if $1
       end
@@ -218,7 +221,7 @@ class CraigScrape
     # Integer, Craigslist's unique posting id
     def posting_id
       unless @posting_id
-        cursor = (html/"#userbody").first
+        cursor = (html/"#userbody").first if html
         cursor = cursor.next_node until cursor.nil? or POSTING_ID.match cursor.to_s
         @posting_id = $1.to_i if $1
       end
@@ -229,7 +232,7 @@ class CraigScrape
     # String, The full-html contents of the post
     def contents
       unless @contents
-        @contents = user_body
+        @contents = user_body if html
         @contents = he_decode @contents.strip if @contents
       end
       
@@ -238,7 +241,7 @@ class CraigScrape
     
     # String, the location of the item, as best could be parsed
     def location
-      if @location.nil? and craigslist_body
+      if @location.nil? and craigslist_body and html
         # Location (when explicitly defined):
         cursor = craigslist_body.at 'ul' unless @location
         
@@ -262,12 +265,17 @@ class CraigScrape
       @location
     end
 
-    # Array, urls of the post's craigslist-hosted images
+    # Array, urls of the post's images that are *not* hosted on craigslist
     def images
+      # TODO
+    end
+
+    # Array, urls of the post's craigslist-hosted images
+    def pics
       unless @images
         @images = []
         
-        if craigslist_body
+        if html and craigslist_body
           # Now let's find the craigslist hosted images:
           img_table = (craigslist_body / 'table').find{|e| e.name == 'table' and e[:summary] == 'craigslist hosted images'}
         
@@ -292,11 +300,76 @@ class CraigScrape
       @deleted_by_author = (
         system_post? and header_as_plain == "This posting has been deleted by its author."
       ) if @deleted_by_author.nil?
+      
+      @deleted_by_author
     end
-     
-    # Returns the price (as float) of the item, as best ascertained by the post header
+    
+    
+    # Reflects only the date portion of the posting. Does not include hours/minutes. This is useful when reflecting the listing scrapes, and can be safely
+    # used if you wish conserve bandwidth by not pulling an entire post from a listing scrape.
+    def post_date
+      @post_date = Time.local(*[0]*3+post_time.to_a[3...10]) unless @post_date or post_time.nil?
+      
+      @post_date
+    end
+    
+    # Returns The post label. The label would appear at first glance to be indentical to the header - but its not. 
+    # The label is cited on the listings pages, and generally includes everything in the header - with the exception of the location.
+    # Sometimes there's additional information ie. '(map)' on rea listings included in the header, that aren't to be listed in the label
+    # This is also used as a bandwidth shortcut for the craigwatch program, and is a guaranteed identifier for the post, that won't result
+    # in a full page load from the post's url.
+    def label
+      unless @label or system_post?
+        @label = header
+        
+        @label = $1 if location and /(.+?)[ ]*\(#{location}\).*?$/.match @label
+      end
+      
+      @label
+    end
+
+    # Array, which image types are listed for the post.
+    # This is always able to be pulled from the listing post-summary, and should never cause an additional page load
+    def img_types
+      unless @img_types
+        # TODO: We need to actually pull this. I say we create a pics array, much like the images array.
+      end
+      
+      @img_types
+    end
+    
+    # Retrieves the most-relevant craigslist 'section' of the post. This is *generally* the same as full_section.last. However, 
+    # this (sometimes/rarely) conserves bandwidth by pulling this field from the listing post-summary
+    def section
+      unless @section
+        @section = full_section.last if full_section  
+      end
+      
+      @section
+    end
+
+    # true if post summary has 'img(s)'. 'imgs' are different then pics, in that the resource is *not* hosted on craigslist's server. 
+    # This is always able to be pulled from the listing post-summary, and should never cause an additional page load
+    def has_img?
+      img_types.include? :img
+    end
+
+    # true if post summary has 'pic(s)'. 'pics' are different then imgs, in that craigslist is hosting the resource on craigslist's servers
+    # This is always able to be pulled from the listing post-summary, and should never cause an additional page load
+    def has_pic?
+      img_types.include? :pic
+    end
+
+    # true if post summary has either the img or pic label
+    # This is always able to be pulled from the listing post-summary, and should never cause an additional page load
+    def has_pic_or_img?
+      img_types.length > 0
+    end
+
+    # Returns the best-guess of a price, judging by the label's contents. Price is available when pulled from the listing summary
+    # and can be safely used if you wish conserve bandwidth by not pulling an entire post from a listing scrape.
     def price
-      $1.to_f if title and header and PRICE.match(header.gsub(/#{title}/, ''))
+      $1.tr('$','').to_f if label and PRICE.match label
     end
     
     # Returns the post contents with all html tags removed
@@ -342,14 +415,6 @@ class CraigScrape
     SUMMARY_DATE   = /^[ ]([^ ]+)[ ]+([^ ]+)[ ]*[\-][ ]*$/
     NEXT_PAGE_LINK = /^[ ]*next [\d]+ postings[ ]*$/
 
-    def initialize(*args)  #:nodoc:
-      super(*args)
-      
-      # Validate that required fields are present:
-# TODO:
-#      raise ParseError, "Unable to parse Listings: %s" % html.to_html if tags_worth_parsing.length > 0 and  @posts.length == 0
-    end
-
     # Array, PostSummary objects found in the listing
     def posts
       unless @posts
@@ -370,9 +435,9 @@ class CraigScrape
           case el.name
             when 'p'
              post_summary = self.class.parse_summary(el, current_date)
-             post_summary[:url] = '%s://%s%s' % [uri.scheme, uri.host, post_summary[:href]] if uri and post_summary[:href]
-             
-             @posts << CraigScrape::PostSummary.new(post_summary)
+             post_summary[:url] = '%s://%s%s' % [uri.scheme, uri.host, post_summary[:href]]
+
+             @posts << CraigScrape::Posting.new(post_summary)
             when 'h4'
               current_date = CraigScrape.most_recently_expired_time $1, $2 if HEADER_DATE.match he_decode(el.inner_html)
           end        
@@ -424,11 +489,11 @@ class CraigScrape
         ret[:img_types] = img_type.split(' ').collect{|t| t.to_sym}
       end
   
-      ret[:section] = he_decode section_anchor.inner_html if section_anchor
+      ret[:section] = he_decode(section_anchor.inner_html).split("\302\240").join(" ") if section_anchor
       
-      ret[:date] = date
+      ret[:post_date] = date
       if SUMMARY_DATE.match he_decode(p_element.children[0])
-        ret[:date] = CraigScrape.most_recently_expired_time $1, $2.to_i
+        ret[:post_date] = CraigScrape.most_recently_expired_time $1, $2.to_i
       end
   
       if title_anchor
@@ -439,63 +504,9 @@ class CraigScrape
       end
 
       # Validate that required fields are present:
-# TODO: Move this somewhere
-#      raise ParseError, "Unable to parse PostSummary: %s" % p_element.to_html if [@label,@href].any?{|f| f.nil? or f.length == 0}
+      parse_error! unless [ret[:label],ret[:href]].all?{|f| f and f.length > 0}
       
       ret
-    end
-    
-  end
-  
-  # PostSummary represents a parsed summary posting, typically found on a Listing page.
-  # This object is returned by the CraigScrape.scrape_listing methods
-  class PostSummary < Scraper
-   
-    # Time, date of post, as a Time object. Does not include hours/minutes
-    attr_reader :date
-    
-    # String, The label of the post
-    attr_reader :label
-    
-    # String, The path fragment of the post's URI
-    attr_reader :href
-    
-    # String, The location of the post
-    attr_reader :location
-    
-    # String, The abbreviated section of the post
-    attr_reader :section
-    
-    # Array, which image types are listed for the post
-    attr_reader :img_types
-    
-    PRICE    = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
-      
-    # true if post summary has the img label
-    def has_img?
-      img_types.include? :img
-    end
-
-    # true if post summary has the pic label
-    def has_pic?
-      img_types.include? :pic
-    end
-
-    # true if post summary has either the img or pic label
-    def has_pic_or_img?
-      img_types.length > 0
-    end
-    
-    # Returns the best-guess of a price, judging by the label's contents.
-    def price
-      $1.tr('$','').to_f if @label and PRICE.match(@label)
-    end
-    
-    # Requests and returns the PostFull object that corresponds with this summary's full_url
-    def full_post
-      @full_post ||= CraigScrape.scrape_full_post full_url if full_url
-      
-      @full_post
     end
   end
 
@@ -535,10 +546,10 @@ class CraigScrape
     ret
   end
 
-  # Scrapes a single Post Url, and returns a PostFull object representing its contents.
+  # Scrapes a single Post Url, and returns a Posting object representing its contents.
   def self.scrape_full_post(post_url)
     #TODO
-    CraigScrape::PostFull.new Hpricot.parse(self.fetch_url(post_url))
+    CraigScrape::Posting.new Hpricot.parse(self.fetch_url(post_url))
   end
 
   # Continually scrapes listings, using the supplied url as a starting point, until 'count' summaries have been retrieved
@@ -555,7 +566,7 @@ class CraigScrape
   #
   # <b>Note:<b> The results will not include post summaries having the newer_then date themselves.
   def self.scrape_posts_since(listing_url, newer_then)
-    self.scrape_until(listing_url) {|post| post.date <= newer_then}
+    self.scrape_until(listing_url) {|post| post.post_date <= newer_then}
   end
 
 end
