@@ -139,14 +139,19 @@ class CraigScrape
     
     # Derives a full url, using the current object's url and the provided href
     def url_from_href(href) #:nodoc:
-      scheme, server, path = $1, $2, $3 if URL_PARTS.match href
-      
+      scheme, host, path = $1, $2, $3 if URL_PARTS.match href
+
       scheme = uri.scheme if scheme.nil? or scheme.empty? and uri.respond_to? :scheme
-      server = uri.server if server.nil? or server.empty? and uri.respond_to? :server
 
-      path = '%s/%s' % [ File.dirname(uri.path), path ] unless /^\//.match path
+      host = uri.host if host.nil? or host.empty? and uri.respond_to? :host
 
-      '%s://%s%s' % [scheme, server, path]
+      path = (
+        (/\/$/.match(uri.path)) ?
+          '%s%s'  % [uri.path,path] :
+          '%s/%s' % [File.dirname(uri.path),path]
+      ) unless /^\//.match path
+
+      '%s://%s%s' % [scheme, host, path]
     end
     
     def fetch_url(uri)
@@ -171,7 +176,7 @@ class CraigScrape
             elsif resp.response['Location']
               redirect_to = resp.response['Location']
               
-              self.fetch_url url_from_href( redirect_to )
+              fetch_url url_from_href( redirect_to )
             else
               # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
               error_description = 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]

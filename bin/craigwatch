@@ -193,10 +193,10 @@ class CraigReportDefinition #:nodoc:
       
       if full_post_has or full_post_has_no
         # We're going to download the page, so let's make sure we didnt hit a "This posting has been flagged for removal"
-        return false if post.full_post.title.nil?
+        return false if post.system_post?
         
-        return false unless matches_all? full_post_has, post.full_post.contents_as_plain
-        return false unless doesnt_match_any? full_post_has_no, post.full_post.contents_as_plain
+        return false unless matches_all? full_post_has, post.contents_as_plain
+        return false unless doesnt_match_any? full_post_has_no, post.contents_as_plain
       end
 
       true
@@ -303,7 +303,7 @@ ActiveRecord::Base.logger = Logger.new STDERR if craig_report.debug_database?
 ActiveRecord::Base.establish_connection craig_report.tracking_database
 
 # Initialize CraigScrape (sorta)
-CraigScrape.logger = Logger.new STDERR if craig_report.debug_craigscrape?
+CraigScrape::Scraper.logger = Logger.new STDERR if craig_report.debug_craigscrape?
 
 # Perform migrations if needed?
 ActiveRecord::Schema.define do
@@ -340,18 +340,18 @@ craig_report.each_search do |search|
   # Let's collect all the summaries that could apply:
   new_summaries = {}
   search.listing.each do |listing|
-    CraigScrape.scrape_until(listing){|p| p.date <= last_tracked_at or already_tracked_urls.include? p.full_url }.each do |p_s|
-      new_summaries[p_s.full_url] = p_s unless new_summaries.has_key? p_s.full_url
+    CraigScrape.scrape_until(listing){|p| p.post_date <= last_tracked_at or already_tracked_urls.include? p.url }.each do |p_s|
+      new_summaries[p_s.url] = p_s unless new_summaries.has_key? p_s.url
     end
   end
 
   # Let's flatten the unique'd hash into a more useable array:
-  new_summaries = new_summaries.values.sort{|a,b| a.date <=> b.date} # oldest goes to bottom
+  new_summaries = new_summaries.values.sort{|a,b| a.post_date <=> b.post_date} # oldest goes to bottom
   
   # Let's tag all the newest tracked posts that should go into the database: 
   # NOTE: Since all the dates are at_begining_of_day, we'll effectively have a chunk of dates tied for latest
-  new_summaries.reject{|p| p.date < new_summaries.last.date}.each do |p_s|
-    newly_tracked_posts << search_track.tracked_posts.build( :url => p_s.full_url, :created_at => p_s.date)
+  new_summaries.reject{|p| p.post_date < new_summaries.last.post_date}.each do |p_s|
+    newly_tracked_posts << search_track.tracked_posts.build( :url => p_s.url, :created_at => p_s.post_date)
   end
   
   # Reject anything from this report which doesn't match the has/has_no :
@@ -361,7 +361,7 @@ craig_report.each_search do |search|
   if new_summaries.length > 0  
 
     # We'll use this in the cleanup at the bottom:
-    latest_post_date = new_summaries.last.date
+    latest_post_date = new_summaries.last.post_date
     
     new_summaries.reverse! if search.newest_first?
     
