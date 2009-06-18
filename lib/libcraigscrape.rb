@@ -13,14 +13,59 @@ require 'activesupport'
 # A base class encapsulating the libcraigscrape objests, and providing some utility methods.
 class CraigScrape
   cattr_accessor :time_now
-    
-  class BadUrlError < StandardError #:nodoc:
-  end
   
-  class ParseError < StandardError #:nodoc: 
+
+  # Scrapes a single listing url and returns a Listings object representing the contents. 
+  # Mostly here to preserve backwards-compatibility with the older api, CraigScrape::Listings.new "listing_url" does the same thing
+  # Consider this method 'marked for deprecation'
+  def self.scrape_listing(listing_url)    
+    CraigScrape::Listings.new listing_url
   end
 
-  class FetchError < StandardError #:nodoc:
+  # Continually scrapes listings, using the supplied url as a starting point, until the supplied block returns true or
+  # until there's no more 'next page' links available to click on
+  def self.scrape_until(listing_url, &post_condition)
+    ret = []
+    
+    current_url = listing_url
+    catch "ScrapeBreak" do
+      while current_url do 
+        listings = CraigScrape::Listings.new current_url
+        
+        listings.posts.each do |post|
+          throw "ScrapeBreak" if post_condition.call(post)
+          ret << post
+        end
+
+        current_url = listings.next_page_url
+      end
+    end
+
+    ret
+  end
+
+  # Scrapes a single Post Url, and returns a Posting object representing its contents.
+  # Mostly here to preserve backwards-compatibility with the older api, CraigScrape::Listings.new "listing_url" does the same thing
+  # Consider this method 'marked for deprecation'
+  def self.scrape_full_post(post_url)
+    CraigScrape::Posting.new post_url
+  end
+
+  # Continually scrapes listings, using the supplied url as a starting point, until 'count' summaries have been retrieved
+  # or no more 'next page' links are avialable to be clicked on. Returns an array of PostSummary objects.
+  def self.scrape_posts(listing_url, count)
+    count_so_far = 0
+    self.scrape_until(listing_url) {|post| count_so_far+=1; count < count_so_far }
+  end
+  
+  # Continually scrapes listings, until the date newer_then has been reached, or no more 'next page' links are avialable to be clicked on.
+  # Returns an array of PostSummary objects. Dates are based on the Month/Day 'datestamps' reported in the listing summaries. 
+  # As such, time-based cutoffs are not supported here. The scrape_until method, utilizing the SummaryPost.full_post method could achieve
+  # time-based cutoffs, at the expense of retrieving every post in full during enumerations.
+  #
+  # <b>Note:<b> The results will not include post summaries having the newer_then date themselves.
+  def self.scrape_posts_since(listing_url, newer_then)
+    self.scrape_until(listing_url) {|post| post.post_date <= newer_then}
   end
     
   # Returns the most recentlt expired  time for the provided month and day
@@ -39,6 +84,8 @@ class CraigScrape
     cattr_accessor :sleep_between_fetch_retries
     cattr_accessor :retries_on_fetch_fail
 
+    URL_PARTS = /^(?:([^\:]+)\:\/\/([^\/]*))?(.*)$/
+
     # Returns the full url that corresponds to this resource
     attr_reader :url
 
@@ -46,12 +93,18 @@ class CraigScrape
     self.retries_on_fetch_fail = 4
     self.sleep_between_fetch_retries = 4
   
-    class BadConstructionError < StandardError; end
-    class UnrecognizedPageError < StandardError; end
-    class ParseError < StandardError; end
+    class BadConstructionError < StandardError;#:nodoc:
+    end
   
-    HTML_TRIM = /(?:^(?:[\s]+|<br[\s]*[\/]?>)(.*)|(.*)(?:<br[\s]*[\/]?>|[\s]+)$)/mi
+    class ParseError < StandardError;#:nodoc:
+    end
   
+    class BadUrlError < StandardError #:nodoc:
+    end
+  
+    class FetchError < StandardError #:nodoc:
+    end
+    
     def initialize(init_via = nil)
       if init_via.nil?
         # Do nothing - possibly not a great idea, but we'll allow it
@@ -84,6 +137,18 @@ class CraigScrape
     # Returns text with all html entities converted to respective ascii character.
     def self.he_decode(text); HTMLEntities.new.decode text; end
     
+    # Derives a full url, using the current object's url and the provided href
+    def url_from_href(href) #:nodoc:
+      scheme, server, path = $1, $2, $3 if URL_PARTS.match href
+      
+      scheme = uri.scheme if scheme.nil? or scheme.empty? and uri.respond_to? :scheme
+      server = uri.server if server.nil? or server.empty? and uri.respond_to? :server
+
+      path = '%s/%s' % [ File.dirname(uri.path), path ] unless /^\//.match path
+
+      '%s://%s%s' % [scheme, server, path]
+    end
+    
     def fetch_url(uri)
   
       logger.info "Requesting: %s" % @url if logger
@@ -105,8 +170,8 @@ class CraigScrape
               data
             elsif resp.response['Location']
               redirect_to = resp.response['Location']
-              # TODO: Here's where we fix that / redirect bug
-              self.fetch_url(redirect_to)
+              
+              self.fetch_url url_from_href( redirect_to )
             else
               # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
               error_description = 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
@@ -141,15 +206,17 @@ class CraigScrape
   # contains the post summaries for a specific search url, or a general listing category 
   class Posting < Scraper
     
-    POST_DATE      = /Date:[^\d]*((?:[\d]{2}|[\d]{4})\-[\d]{1,2}\-[\d]{1,2}[^\d]+[\d]{1,2}\:[\d]{1,2}[ ]*[AP]M[^a-z]+[a-z]+)/i
-    LOCATION       = /Location\:[ ]+(.+)/
-    POSTING_ID     = /PostingID\:[ ]+([\d]+)/
-    REPLY_TO       = /(.+)/
-    PRICE          = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
-# TODO: Deprecated PRICE - is ok? : /\$([\d]+(?:\.[\d]{2})?)/
-    HTML_TAG       = /<\/?[^>]*>/
-    USERBODY_PARTS = /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m
+    POST_DATE       = /Date:[^\d]*((?:[\d]{2}|[\d]{4})\-[\d]{1,2}\-[\d]{1,2}[^\d]+[\d]{1,2}\:[\d]{1,2}[ ]*[AP]M[^a-z]+[a-z]+)/i
+    LOCATION        = /Location\:[ ]+(.+)/
+    HEADER_LOCATION = /^.+[ ]*\-[ ]*[\$]?[\d]+[ ]*\((.+)\)$/
+    POSTING_ID      = /PostingID\:[ ]+([\d]+)/
+    REPLY_TO        = /(.+)/
+    PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
+    HTML_TAG        = /<\/?[^>]*>/
+    USERBODY_PARTS  = /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m
 
+    # This is really just for testing, in production use, uri.path is a better solution
+    attr_reader :href #:nodoc:
 
     # Create a new Post via a url (String), or supplied parameters (Hash)
     def initialize(*args)
@@ -260,6 +327,9 @@ class CraigScrape
           
           @location = he_decode(cursor.to_s.strip) if cursor
         end
+        
+        # So, *sometimes* the location just ends up being in the header, I don't know why:
+        @location = $1 if @location.nil? and HEADER_LOCATION.match header
       end
       
       @location
@@ -434,12 +504,16 @@ class CraigScrape
         post_tags.each do |el|
           case el.name
             when 'p'
-             post_summary = self.class.parse_summary(el, current_date)
-             post_summary[:url] = '%s://%s%s' % [uri.scheme, uri.host, post_summary[:href]]
+             post_summary = self.class.parse_summary el, current_date
+             
+             # Validate that required fields are present:
+             parse_error! unless [post_summary[:label],post_summary[:href]].all?{|f| f and f.length > 0}
+      
+             post_summary[:url] = url_from_href post_summary[:href]
 
              @posts << CraigScrape::Posting.new(post_summary)
             when 'h4'
-              current_date = CraigScrape.most_recently_expired_time $1, $2 if HEADER_DATE.match he_decode(el.inner_html)
+              current_date = (HEADER_DATE.match he_decode(el.inner_html)) ? CraigScrape.most_recently_expired_time($1, $2) : nil
           end        
         end        
       end
@@ -447,7 +521,7 @@ class CraigScrape
       @posts
     end
 
-    # String, URL Path of the next page link
+    # String, URL Path href-fragment of the next page link
     def next_page_href
       unless @next_page_href
         cursor = html.at 'p:last-of-type'
@@ -465,6 +539,11 @@ class CraigScrape
       end
       
       @next_page_href
+    end
+    
+    # String, Full URL Path of the 'next page' link
+    def next_page_url
+      url_from_href next_page_href
     end
     
     # Takes a paragraph element and returns a mostly-parsed Posting
@@ -502,71 +581,9 @@ class CraigScrape
     
         ret[:href] = title_anchor[:href]
       end
-
-      # Validate that required fields are present:
-      parse_error! unless [ret[:label],ret[:href]].all?{|f| f and f.length > 0}
       
       ret
     end
-  end
-
-  # Scrapes a single listing url and returns a Listings object representing the contents
-  def self.scrape_listing(listing_url)
-    #TODO    
-    current_uri = ( listing_url.class == String ) ? URI.parse(listing_url) : listing_url 
-    
-    uri_contents = self.fetch_url(current_uri)
-    
-    CraigScrape::Listings.new Hpricot.parse(uri_contents), '%s://%s' % [current_uri.scheme, current_uri.host]
-    
-    rescue ParseError
-      puts "Encountered error here! : #{uri_contents.inspect}"
-      exit
-  end
-
-  # Continually scrapes listings, using the supplied url as a starting point, until the supplied block returns true or
-  # until there's no more 'next page' links available to click on
-  def self.scrape_until(listing_url, &post_condition)
-    ret = []
-    
-    current_uri = URI.parse listing_url
-    catch "ScrapeBreak" do
-      while current_uri do 
-        listings = scrape_listing current_uri
-        
-        listings.posts.each do |post|
-          throw "ScrapeBreak" if post_condition.call(post)
-          ret << post
-        end
-
-        current_uri = (listings.next_page_href) ? self.uri_from_href( current_uri, listings.next_page_href ) : nil
-      end
-    end
-
-    ret
-  end
-
-  # Scrapes a single Post Url, and returns a Posting object representing its contents.
-  def self.scrape_full_post(post_url)
-    #TODO
-    CraigScrape::Posting.new Hpricot.parse(self.fetch_url(post_url))
-  end
-
-  # Continually scrapes listings, using the supplied url as a starting point, until 'count' summaries have been retrieved
-  # or no more 'next page' links are avialable to be clicked on. Returns an array of PostSummary objects.
-  def self.scrape_posts(listing_url, count)
-    count_so_far = 0
-    self.scrape_until(listing_url) {|post| count_so_far+=1; count < count_so_far }
-  end
-  
-  # Continually scrapes listings, until the date newer_then has been reached, or no more 'next page' links are avialable to be clicked on.
-  # Returns an array of PostSummary objects. Dates are based on the Month/Day 'datestamps' reported in the listing summaries. 
-  # As such, time-based cutoffs are not supported here. The scrape_until method, utilizing the SummaryPost.full_post method could achieve
-  # time-based cutoffs, at the expense of retrieving every post in full during enumerations.
-  #
-  # <b>Note:<b> The results will not include post summaries having the newer_then date themselves.
-  def self.scrape_posts_since(listing_url, newer_then)
-    self.scrape_until(listing_url) {|post| post.post_date <= newer_then}
   end
 
 end

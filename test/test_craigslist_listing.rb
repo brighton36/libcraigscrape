@@ -6,9 +6,13 @@ require 'test/unit'
 class CraigslistListingTest < Test::Unit::TestCase
 
   def test_pukes
-    # TODO
-#    assert_raise(CraigScrape::ParseError){ CraigScrape::Posting.new relative_uri_for('google.html') }
-#    assert_raise(CraigScrape::ParseError){ CraigScrape::Listings.new relative_uri_for('google.html') }
+    assert_raise(CraigScrape::Scraper::ParseError) do
+      CraigScrape::Posting.new( relative_uri_for('google.html') ).contents
+    end
+    
+    assert_raise(CraigScrape::Scraper::ParseError) do
+      CraigScrape::Listings.new( relative_uri_for('google.html') ).posts
+    end
   end
 
   def test_listing_parse
@@ -38,7 +42,7 @@ EOD
     assert_equal true, one.has_img?
     assert_equal false, one.has_pic?
     assert_equal true, one.has_pic_or_img?
-#TODO   assert_equal '/brw/reb/1128608404.html', one.uri.path
+    assert_equal '/brw/reb/1128608404.html', one.href
     assert_equal "Losing your house?  You'll need this New Loan Mod Video", one.label
     assert_equal "real estate - by broker", one.section
     assert_equal "W. Woodland", one.location
@@ -50,7 +54,7 @@ EOD
     assert_equal true, two.has_img?
     assert_equal true, two.has_pic?
     assert_equal true, two.has_pic_or_img?
-#    assert_equal '/mdc/reb/1128609783.html', two.uri.path
+    assert_equal '/mdc/reb/1128609783.html', two.href
     assert_equal "$348000 / 1br - Large 1/1 plus office on 49th Floor. 5-Star NEW Condo. Great Views", two.label
     assert_equal "real estate - by broker", two.section
     assert_equal "Miami", two.location
@@ -62,7 +66,7 @@ EOD
     assert_equal false, three.has_img?
     assert_equal true, three.has_pic?
     assert_equal true, three.has_pic_or_img?
-#    assert_equal '/mdc/reb/1128520894.html', three.uri.path
+    assert_equal '/mdc/reb/1128520894.html', three.href
     assert_equal "$22,000 HOME -ADULT COMMUNITY BOYNTON BEACH", three.label
     assert_equal "real estate - by broker", three.section
     assert_equal nil, three.location
@@ -74,7 +78,7 @@ EOD
     assert_equal false, four.has_img?
     assert_equal false, four.has_pic?
     assert_equal false, four.has_pic_or_img?
-#    assert_equal '/mdc/reb/1128474725.html', four.uri.path
+    assert_equal '/mdc/reb/1128474725.html', four.href
     assert_equal "$325000 / 3br - GOOD DEAL GREAT HOUSE AND LOCATION", four.label
     assert_equal "real estate - by broker", four.section
     assert_equal "CORAL GABLES", four.location
@@ -86,7 +90,7 @@ EOD
     assert_equal false, five.has_img?
     assert_equal true, five.has_pic?
     assert_equal true, five.has_pic_or_img?
-#    assert_equal '/pbc/boa/1115308178.html', five.uri.path
+    assert_equal '/pbc/boa/1115308178.html', five.href
     assert_equal "40' SILVERTON CONVERTIBLE DIESEL  - $105000", five.label
     assert_equal nil, five.section
     assert_equal "HOBE SOUND", five.location
@@ -98,7 +102,7 @@ EOD
     assert_equal false, five.has_img?
     assert_equal true,  five.has_pic?
     assert_equal true, five.has_pic_or_img?
-#    assert_equal '/pbc/reb/1128661387.html', five.uri.path
+    assert_equal '/pbc/reb/1128661387.html', five.href
     assert_equal "$2995000 / 5br - Downtown Boca New Home To Be Built", five.label
     assert_equal "real estate - by broker", five.section
     assert_equal "Boca Raton", five.location
@@ -109,7 +113,7 @@ EOD
     assert_equal true, six.has_img?
     assert_equal false,  six.has_pic?
     assert_equal true, six.has_pic_or_img?
-#    assert_equal '/mdc/jwl/1128691192.html', six.uri.path
+    assert_equal '/mdc/jwl/1128691192.html', six.href
     assert_equal "925 Sterling Silver Dragonfly Charm Bracelet - $25", six.label
     assert_equal nil, six.section
     assert_equal nil, six.location
@@ -142,10 +146,7 @@ EOD
     mia_fua_index8900_052109 = CraigScrape::Listings.new relative_uri_for('listing_samples/mia_fua_index8900.5.21.09.html')
     assert_equal 'index9000.html', mia_fua_index8900_052109.next_page_href
     assert_equal 100, mia_fua_index8900_052109.posts.length
-    mia_fua_index8900_052109.posts[0..13].each do |l|
-      assert_equal 5, l.post_date.month
-      assert_equal 15, l.post_date.day
-    end
+    # NOTE: We ended up testing the case of mia_fua_index8900_052109.posts[0..13] in the eager loading below...
     mia_fua_index8900_052109.posts[14..99].each do |l|
       assert_equal 5, l.post_date.month
       assert_equal 14, l.post_date.day
@@ -154,7 +155,6 @@ EOD
     empty_listings = CraigScrape::Listings.new relative_uri_for('listing_samples/empty_listings.html')
     assert_equal nil, empty_listings.next_page_href
     assert_equal [], empty_listings.posts
-    
   end
   
   def test_posting_parse
@@ -303,7 +303,7 @@ EOD
     assert_equal "Bombay Company Art Painting - $650 (saratoga)", sfbay_art_1223614914.header
     assert_equal "Bombay Company Art Painting - $650 (saratoga)", sfbay_art_1223614914.header_as_plain
     assert_equal ["http://images.craigslist.org/3kf3o93laZZZZZZZZZ96fbc594a6ceb1f1025.jpg"], sfbay_art_1223614914.pics
-    assert_equal "Bombay Company Art Painting - $650 (saratoga)", sfbay_art_1223614914.label
+    assert_equal "Bombay Company Art Painting - $650", sfbay_art_1223614914.label
     assert_equal 'saratoga', sfbay_art_1223614914.location
     assert_equal [0, 0, 0, 15, 6, 2009, 1, 166, true, "EDT"], sfbay_art_1223614914.post_date.to_a
     assert_equal [0, 38, 22, 15, 6, 2009, 1, 166, true, "EDT"], sfbay_art_1223614914.post_time.to_a
@@ -313,7 +313,160 @@ EOD
     assert_equal false, sfbay_art_1223614914.system_post?
     assert_equal "Bombay Company Art Painting", sfbay_art_1223614914.title
     assert_equal "file:///mnt/raid1_2x160G/home/cderose/workspace/libcraigscrape/trunk/test/post_samples/sfbay_art_1223614914.html", sfbay_art_1223614914.url
+  end
+  
+  def test_eager_post_loading
+    # libcraigscrape is supposed to 'smart' when downloading postings that don't make 'sense' solely by looking at the listings.
+    # I'm only seen this on occasion, but its annoying and craigslist seems to use a lot of approximations sometimes
+    # The test page supplied is slightly adjusted to compensate for the lack of a web server when readng pages form the filesystem.
+    
+    fortmyers_art_index500_060909 = CraigScrape::Listings.new relative_uri_for('listing_samples/fortmyers_art_index.060909/fortmyers_art_index500.060909.html')
+    fortmyers_art_index500_060909.posts[0..12].each do |l|
+      assert_equal 5, l.post_date.month
+      assert_equal 16, l.post_date.day
+    end    
+    fortmyers_art_index500_060909.posts[13..36].each do |l|
+      assert_equal 5, l.post_date.month
+      assert_equal 15, l.post_date.day
+    end
+    fortmyers_art_index500_060909.posts[37..41].each do |l|
+      assert_equal 5, l.post_date.month
+      assert_equal 14, l.post_date.day
+    end    
+    fortmyers_art_index500_060909.posts[42..55].each do |l|
+      assert_equal 5, l.post_date.month
+      assert_equal 13, l.post_date.day
+    end
+    fortmyers_art_index500_060909.posts[56..65].each do |l|
+      assert_equal 5, l.post_date.month
+      assert_equal 12, l.post_date.day
+    end    
+    fortmyers_art_index500_060909.posts[66..87].each do |l|
+      assert_equal 5, l.post_date.month
+      assert_equal 11, l.post_date.day
+    end    
+    fortmyers_art_index500_060909.posts[88..94].each do |l|
+      assert_equal 5, l.post_date.month
+      assert_equal 10, l.post_date.day
+    end    
+    assert_equal 4,  fortmyers_art_index500_060909.posts[95].post_date.month
+    assert_equal 8,  fortmyers_art_index500_060909.posts[95].post_date.day
+    assert_equal 2,  fortmyers_art_index500_060909.posts[96].post_date.month
+    assert_equal 27, fortmyers_art_index500_060909.posts[96].post_date.day   
+    assert_equal 2,  fortmyers_art_index500_060909.posts[97].post_date.month
+    assert_equal 23, fortmyers_art_index500_060909.posts[97].post_date.day
+    assert_equal 1,  fortmyers_art_index500_060909.posts[98].post_date.month
+    assert_equal 14, fortmyers_art_index500_060909.posts[98].post_date.day
+    assert_equal 12, fortmyers_art_index500_060909.posts[99].post_date.month
+    assert_equal 16, fortmyers_art_index500_060909.posts[99].post_date.day
 
+    # Now we'll do one of these elusive 'trailer' pages which don't seem to really make much sense. 
+    # Best I can tell, it only comes after a page like the one tested just above
+    fortmyers_art_index600_060909 = CraigScrape::Listings.new relative_uri_for('listing_samples/fortmyers_art_index.060909/fortmyers_art_index600.060909.html')   
+
+    assert_equal "Husqvarna Viking Rose: Used Embroidery/Sewing Machine.  Instruction book, Video, Embroidery Unit, 4\" 4\" hoop, designs, tool box with accessories including 8 feet (A, B, C, D, E, J, P, U and zipper foot). $400.00 Firm. (941) 347-8014 or (352)638-4707.", fortmyers_art_index600_060909.posts[0].contents
+    assert_equal "Husqvarna Viking Rose: Used Embroidery/Sewing Machine.  Instruction book, Video, Embroidery Unit, 4\" 4\" hoop, designs, tool box with accessories including 8 feet (A, B, C, D, E, J, P, U and zipper foot). $400.00 Firm. (941) 347-8014 or (352)638-4707.", fortmyers_art_index600_060909.posts[0].contents_as_plain
+    assert_equal false, fortmyers_art_index600_060909.posts[0].deleted_by_author?
+    assert_equal true, fortmyers_art_index600_060909.posts[0].downloaded?
+    assert_equal false, fortmyers_art_index600_060909.posts[0].flagged_for_removal?
+    assert_equal ["fort myers craigslist", "art & crafts"], fortmyers_art_index600_060909.posts[0].full_section
+    assert_equal false, fortmyers_art_index600_060909.posts[0].has_img?
+    assert_equal true, fortmyers_art_index600_060909.posts[0].has_pic?
+    assert_equal true, fortmyers_art_index600_060909.posts[0].has_pic_or_img?
+    assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine - $400 (Punta Gorda, Charlotte County)", fortmyers_art_index600_060909.posts[0].header
+    assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine - $400 (Punta Gorda, Charlotte County)", fortmyers_art_index600_060909.posts[0].header_as_plain
+    assert_equal "897549505.html", fortmyers_art_index600_060909.posts[0].href
+    assert_equal nil, fortmyers_art_index600_060909.posts[0].images
+    assert_equal [:pic], fortmyers_art_index600_060909.posts[0].img_types
+    assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine - $400", fortmyers_art_index600_060909.posts[0].label
+    assert_equal "Punta Gorda, Charlotte County", fortmyers_art_index600_060909.posts[0].location
+    assert_equal [], fortmyers_art_index600_060909.posts[0].pics
+    assert_equal [0, 0, 0, 28, 10, 2008, 2, 302, true, "EDT"], fortmyers_art_index600_060909.posts[0].post_date.to_a
+    assert_equal [0, 51, 21, 28, 10, 2008, 2, 302, true, "EDT"], fortmyers_art_index600_060909.posts[0].post_time.to_a
+    assert_equal 897549505, fortmyers_art_index600_060909.posts[0].posting_id
+    assert_equal 400.0, fortmyers_art_index600_060909.posts[0].price
+    assert_equal nil, fortmyers_art_index600_060909.posts[0].reply_to
+    assert_equal "art & crafts", fortmyers_art_index600_060909.posts[0].section
+    assert_equal false, fortmyers_art_index600_060909.posts[0].system_post?
+    assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine", fortmyers_art_index600_060909.posts[0].title
+    
+    assert_equal "Multiple artists' moving sale. Lots of unusual items including art, art supplies, ceramics and ceramic glazes, furniture, clothes, books, electronics, cd's and much more. Also for sale is alot of restaurant equpment.\r<br />\n\r<br />\nSale to be held at 3570 Bayshore Dr. next to Bayshore Coffee Co.\r<br />\n\r<br />\nSaturday 8:00 a.m. until 2:00 Rain or shine.\r<br />", fortmyers_art_index600_060909.posts[1].contents
+    assert_equal "Multiple artists' moving sale. Lots of unusual items including art, art supplies, ceramics and ceramic glazes, furniture, clothes, books, electronics, cd's and much more. Also for sale is alot of restaurant equpment.\r\n\r\nSale to be held at 3570 Bayshore Dr. next to Bayshore Coffee Co.\r\n\r\nSaturday 8:00 a.m. until 2:00 Rain or shine.\r", fortmyers_art_index600_060909.posts[1].contents_as_plain
+    assert_equal false, fortmyers_art_index600_060909.posts[1].deleted_by_author?
+    assert_equal true, fortmyers_art_index600_060909.posts[1].downloaded?
+    assert_equal false, fortmyers_art_index600_060909.posts[1].flagged_for_removal?
+    assert_equal ["fort myers craigslist", "art & crafts"], fortmyers_art_index600_060909.posts[1].full_section
+    assert_equal false, fortmyers_art_index600_060909.posts[1].has_img?
+    assert_equal false, fortmyers_art_index600_060909.posts[1].has_pic?
+    assert_equal false, fortmyers_art_index600_060909.posts[1].has_pic_or_img?
+    assert_equal "ARTISTS' MOVING SALE-BAYSHORE (Naples)", fortmyers_art_index600_060909.posts[1].header
+    assert_equal "ARTISTS' MOVING SALE-BAYSHORE (Naples)", fortmyers_art_index600_060909.posts[1].header_as_plain
+    assert_equal "891513957.html", fortmyers_art_index600_060909.posts[1].href
+    assert_equal nil, fortmyers_art_index600_060909.posts[1].images
+    assert_equal [], fortmyers_art_index600_060909.posts[1].img_types
+    assert_equal "ARTISTS' MOVING SALE-BAYSHORE", fortmyers_art_index600_060909.posts[1].label
+    assert_equal "Naples", fortmyers_art_index600_060909.posts[1].location
+    assert_equal [], fortmyers_art_index600_060909.posts[1].pics
+    assert_equal [0, 0, 0, 24, 10, 2008, 5, 298, true, "EDT"], fortmyers_art_index600_060909.posts[1].post_date.to_a
+    assert_equal [0, 31, 9, 24, 10, 2008, 5, 298, true, "EDT"], fortmyers_art_index600_060909.posts[1].post_time.to_a
+    assert_equal 891513957, fortmyers_art_index600_060909.posts[1].posting_id
+    assert_equal nil, fortmyers_art_index600_060909.posts[1].price
+    assert_equal "sale-891513957@craigslist.org", fortmyers_art_index600_060909.posts[1].reply_to
+    assert_equal "art & crafts", fortmyers_art_index600_060909.posts[1].section
+    assert_equal false, fortmyers_art_index600_060909.posts[1].system_post?
+    assert_equal "ARTISTS' MOVING SALE-BAYSHORE", fortmyers_art_index600_060909.posts[1].title
+    
+    assert_equal "Tapestry sewing machine and embroidery arm luggage for Viking designer sewing machine.  Two years old in excellent condition.", fortmyers_art_index600_060909.posts[2].contents
+    assert_equal "Tapestry sewing machine and embroidery arm luggage for Viking designer sewing machine.  Two years old in excellent condition.", fortmyers_art_index600_060909.posts[2].contents_as_plain
+    assert_equal false, fortmyers_art_index600_060909.posts[2].deleted_by_author?
+    assert_equal true, fortmyers_art_index600_060909.posts[2].downloaded?
+    assert_equal false, fortmyers_art_index600_060909.posts[2].flagged_for_removal?
+    assert_equal ["fort myers craigslist", "art & crafts"], fortmyers_art_index600_060909.posts[2].full_section
+    assert_equal false, fortmyers_art_index600_060909.posts[2].has_img?
+    assert_equal false, fortmyers_art_index600_060909.posts[2].has_pic?
+    assert_equal false, fortmyers_art_index600_060909.posts[2].has_pic_or_img?
+    assert_equal "tapestry sewing machine and embroidery arm luggage - $250 (Punta Gorda)", fortmyers_art_index600_060909.posts[2].header
+    assert_equal "tapestry sewing machine and embroidery arm luggage - $250 (Punta Gorda)", fortmyers_art_index600_060909.posts[2].header_as_plain
+    assert_equal "825684735.html", fortmyers_art_index600_060909.posts[2].href
+    assert_equal nil, fortmyers_art_index600_060909.posts[2].images
+    assert_equal [], fortmyers_art_index600_060909.posts[2].img_types
+    assert_equal "tapestry sewing machine and embroidery arm luggage - $250", fortmyers_art_index600_060909.posts[2].label
+    assert_equal "Punta Gorda", fortmyers_art_index600_060909.posts[2].location
+    assert_equal [], fortmyers_art_index600_060909.posts[2].pics
+    assert_equal [0, 0, 0, 3, 9, 2008, 3, 247, true, "EDT"], fortmyers_art_index600_060909.posts[2].post_date.to_a
+    assert_equal [0, 31, 15, 3, 9, 2008, 3, 247, true, "EDT"], fortmyers_art_index600_060909.posts[2].post_time.to_a
+    assert_equal 825684735, fortmyers_art_index600_060909.posts[2].posting_id
+    assert_equal 250.0, fortmyers_art_index600_060909.posts[2].price
+    assert_equal "sale-825684735@craigslist.org", fortmyers_art_index600_060909.posts[2].reply_to
+    assert_equal "art & crafts", fortmyers_art_index600_060909.posts[2].section
+    assert_equal false, fortmyers_art_index600_060909.posts[2].system_post?
+    assert_equal "tapestry sewing machine and embroidery arm luggage", fortmyers_art_index600_060909.posts[2].title
+    
+    assert_equal "Gorgeous and one of a kind!   Museum-collected artist Jay von Koffler's Aurora Series - cast glass nude sculpture - Aurora.  Mounted on marble and enhanced with bronze beak.   \r<br />\n\r<br />\nDimensions:  30x16x6\r<br />\nCall for appointment for studio viewing - 239.595.1793", fortmyers_art_index600_060909.posts[3].contents
+    assert_equal "Gorgeous and one of a kind!   Museum-collected artist Jay von Koffler's Aurora Series - cast glass nude sculpture - Aurora.  Mounted on marble and enhanced with bronze beak.   \r\n\r\nDimensions:  30x16x6\r\nCall for appointment for studio viewing - 239.595.1793", fortmyers_art_index600_060909.posts[3].contents_as_plain
+    assert_equal false, fortmyers_art_index600_060909.posts[3].deleted_by_author?
+    assert_equal true, fortmyers_art_index600_060909.posts[3].downloaded?
+    assert_equal false, fortmyers_art_index600_060909.posts[3].flagged_for_removal?
+    assert_equal ["fort myers craigslist", "art & crafts"], fortmyers_art_index600_060909.posts[3].full_section
+    assert_equal false, fortmyers_art_index600_060909.posts[3].has_img?
+    assert_equal true, fortmyers_art_index600_060909.posts[3].has_pic?
+    assert_equal true, fortmyers_art_index600_060909.posts[3].has_pic_or_img?
+    assert_equal "Cast Glass Sculpture - Aurora - $2400 (Naples)", fortmyers_art_index600_060909.posts[3].header
+    assert_equal "Cast Glass Sculpture - Aurora - $2400 (Naples)", fortmyers_art_index600_060909.posts[3].header_as_plain
+    assert_equal "823516079.html", fortmyers_art_index600_060909.posts[3].href
+    assert_equal nil, fortmyers_art_index600_060909.posts[3].images
+    assert_equal [:pic], fortmyers_art_index600_060909.posts[3].img_types
+    assert_equal "Cast Glass Sculpture - Aurora - $2400", fortmyers_art_index600_060909.posts[3].label
+    assert_equal "Naples", fortmyers_art_index600_060909.posts[3].location
+    assert_equal [], fortmyers_art_index600_060909.posts[3].pics
+    assert_equal [0, 0, 0, 2, 9, 2008, 2, 246, true, "EDT"], fortmyers_art_index600_060909.posts[3].post_date.to_a
+    assert_equal [0, 35, 10, 2, 9, 2008, 2, 246, true, "EDT"], fortmyers_art_index600_060909.posts[3].post_time.to_a
+    assert_equal 823516079, fortmyers_art_index600_060909.posts[3].posting_id
+    assert_equal 2400.0, fortmyers_art_index600_060909.posts[3].price
+    assert_equal "sale-823516079@craigslist.org", fortmyers_art_index600_060909.posts[3].reply_to
+    assert_equal "art & crafts", fortmyers_art_index600_060909.posts[3].section
+    assert_equal false, fortmyers_art_index600_060909.posts[3].system_post?
+    assert_equal "Cast Glass Sculpture - Aurora", fortmyers_art_index600_060909.posts[3].title
   end
 
   private

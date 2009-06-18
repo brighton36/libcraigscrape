@@ -7,8 +7,9 @@
 - Removed the PostSummary object, now we just have Posting/ Posts include all the functionality of both PostFull and PostSummary. Be careful with Posting if you're trying to minimize bandwidth. the rdoc labels which methods wont/will/might cause a page load.
 - Things should fail better (always outputting relevant html that was unable to be parsed)
 - Removed date in favor of post_date
+- Eager-loading in the Post object without the need of the full_post method
 - full_post is no longer needed or available
-- PostSummary::href is no longer needed or available. Use uri.path instead
+- PostSummary::href is no longer needed. Use uri.path instead
 - Posting.images renamed to Posting.pics, and a new method Posting.images better reflects the craigslist designations
 
 === Release 0.6.5 (Jun 8, 2009)
