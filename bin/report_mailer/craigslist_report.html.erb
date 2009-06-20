@@ -4,8 +4,8 @@
    <h3><%=h summary[:search].name%></h3>
       <%summary[:postings].each do |post|%>
          <%='<p>%s <a href="%s">%s -</a>%s%s</p>' % [
-			h(post.date.strftime('%b %d')),
-			post.full_url,
+			h(post.post_date.strftime('%b %d')),
+			post.url,
 			h(post.label),
 			(post.location) ? '<font size="-1"> (%s)</font>' % h(post.location) : '',
 			(post.has_pic_or_img?) ? ' <span style="color: orange"> img</span>': ''

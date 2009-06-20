@@ -1,6 +1,6 @@
 == Change Log
 
-=== Release 0.7.0 (XXX XXX, 2009)
+=== Release 0.7.0 (Jun 17, 2009)
 - A good bit of refactoring
 - Post/Listing constructors now take either a Hash or a url (string) to use for its scrape. Regardless, either should always have a url object association now
 - Added a Base Scraper object. Maybe I'll make that its own gem...
@@ -9,6 +9,7 @@
 - Removed date in favor of post_date
 - Eager-loading in the Post object without the need of the full_post method
 - full_post is no longer needed or available
+- Posting::full_url is now url
 - PostSummary::href is no longer needed. Use uri.path instead
 - Posting.images renamed to Posting.pics, and a new method Posting.images better reflects the craigslist designations
 

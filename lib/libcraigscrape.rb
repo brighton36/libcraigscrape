@@ -10,7 +10,7 @@ require 'hpricot'
 require 'htmlentities'
 require 'activesupport'
 
-# A base class encapsulating the libcraigscrape objests, and providing some utility methods.
+# A base class encapsulating the libcraigscrape objects, and providing some utility methods.
 class CraigScrape
   cattr_accessor :time_now
   
@@ -79,7 +79,8 @@ class CraigScrape
     ret
   end
 
-  class Scraper #:nodoc:
+  # TODO: Rdoc!
+  class Scraper
     cattr_accessor :logger
     cattr_accessor :sleep_between_fetch_retries
     cattr_accessor :retries_on_fetch_fail
@@ -93,10 +94,10 @@ class CraigScrape
     self.retries_on_fetch_fail = 4
     self.sleep_between_fetch_retries = 4
   
-    class BadConstructionError < StandardError;#:nodoc:
+    class BadConstructionError < StandardError #:nodoc:
     end
   
-    class ParseError < StandardError;#:nodoc:
+    class ParseError < StandardError #:nodoc:
     end
   
     class BadUrlError < StandardError #:nodoc:
@@ -154,7 +155,7 @@ class CraigScrape
       '%s://%s%s' % [scheme, host, path]
     end
     
-    def fetch_url(uri)
+    def fetch_uri(uri)
   
       logger.info "Requesting: %s" % @url if logger
   
@@ -176,7 +177,7 @@ class CraigScrape
             elsif resp.response['Location']
               redirect_to = resp.response['Location']
               
-              fetch_url url_from_href( redirect_to )
+              fetch_uri URI.parse(url_from_href(redirect_to))
             else
               # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
               error_description = 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
@@ -185,11 +186,15 @@ class CraigScrape
               
               raise FetchError, error_description
             end
-          rescue FetchError => err
-            fetch_attempts += 1
+          rescue FetchError,Timeout::Error,Errno::ECONNRESET => err
+            logger.info 'Timeout error while requesting "%s"' % @url if logger and err.class == Timeout::Error
+            logger.info 'Connection reset while requesting "%s"' % @url if logger and err.class == Errno::ECONNRESET
             
-            if retries_on_fetch_fail <= self.retries_on_fetch_fail
+            fetch_attempts += 1
+
+            if fetch_attempts <= self.retries_on_fetch_fail
               sleep self.sleep_between_fetch_retries if self.sleep_between_fetch_retries
+              logger.info 'Retrying fetch ....' if logger
               retry
             else
               raise err
@@ -201,7 +206,7 @@ class CraigScrape
     end
     
     def html
-      @html ||= Hpricot.parse fetch_url(uri) if uri
+      @html ||= Hpricot.parse fetch_uri(uri) if uri
       @html
     end
   end
@@ -548,7 +553,7 @@ class CraigScrape
     
     # String, Full URL Path of the 'next page' link
     def next_page_url
-      url_from_href next_page_href
+      (next_page_href) ? url_from_href(next_page_href) : nil
     end
     
     # Takes a paragraph element and returns a mostly-parsed Posting
