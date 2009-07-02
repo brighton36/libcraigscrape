@@ -522,8 +522,18 @@ class CraigScrape
              post_summary[:url] = url_from_href post_summary[:href]
 
              @posts << CraigScrape::Posting.new(post_summary)
-            when 'h4'
-              current_date = (HEADER_DATE.match he_decode(el.inner_html)) ? CraigScrape.most_recently_expired_time($1, $2) : nil
+           when 'h4'
+            # Let's make sense of the h4 tag, and then read all the p tags below it
+            if HEADER_DATE.match he_decode(el.inner_html)
+              # Generally, the H4 tags contain valid dates. When they do - this is easy:
+              current_date = CraigScrape.most_recently_expired_time $1, $2
+            elsif html.at('h4:last-of-type') == el
+              # There's a specific bug, where these nonsense h4's just appear without anything relevant inside them.
+              # They're safe to ignore if they're not the last h4 on the page. I fthey're the last h4 on the page, 
+              # we need to pull up the full post in order to accurate tell the date.
+              # Setting this to nil will achieve the eager-load.
+              current_date = nil
+            end
           end        
         end        
       end
@@ -543,8 +553,19 @@ class CraigScrape
 
         # Search listings put their next page in a link towards the top
         next_link = (html / 'a').find{ |a| he_decode(a.inner_html) == '<b>Next>></b>' } unless next_link
+                
+        # Some search pages have a bug, whereby a 'next page' link isn't displayed,
+        # even though we can see that theres another page listed in the page-number links block at the top
+        # and bottom of the listing page
+        unless next_link
+          cursor = html % 'div.sh:first-of-type > b:last-of-type'
+
+          # If there's no 'a' in the next sibling, we'll have just performed a nil assignment, otherwise
+          # We're looking good.
+          next_link = cursor.next_sibling if cursor and /^[\d]+$/.match cursor.inner_html
+        end
         
-        # This will find the link on 'search listing' pages (if there is one):
+        # We have an anchor tag - so - let's assign the href:
         @next_page_href = next_link[:href] if next_link
       end
       

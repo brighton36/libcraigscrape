@@ -102,7 +102,6 @@ class CraigslistListingTest < Test::Unit::TestCase
     # Now we'll do one of these elusive 'trailer' pages which don't seem to really make much sense. 
     # Best I can tell, it only comes after a page like the one tested just above
     fortmyers_art_index600_060909 = CraigScrape::Listings.new relative_uri_for('listing_samples/fortmyers_art_index.060909/fortmyers_art_index600.060909.html')   
-
     assert_equal "Husqvarna Viking Rose: Used Embroidery/Sewing Machine.  Instruction book, Video, Embroidery Unit, 4\" 4\" hoop, designs, tool box with accessories including 8 feet (A, B, C, D, E, J, P, U and zipper foot). $400.00 Firm. (941) 347-8014 or (352)638-4707.", fortmyers_art_index600_060909.posts[0].contents
     assert_equal "Husqvarna Viking Rose: Used Embroidery/Sewing Machine.  Instruction book, Video, Embroidery Unit, 4\" 4\" hoop, designs, tool box with accessories including 8 feet (A, B, C, D, E, J, P, U and zipper foot). $400.00 Firm. (941) 347-8014 or (352)638-4707.", fortmyers_art_index600_060909.posts[0].contents_as_plain
     assert_equal false, fortmyers_art_index600_060909.posts[0].deleted_by_author?
@@ -210,7 +209,7 @@ class CraigslistListingTest < Test::Unit::TestCase
   
   def test_nasty_search_listings
      miami_search_sss_rack900_061809 = CraigScrape::Listings.new relative_uri_for('listing_samples/miami_search_sss_rack.6.18.09/miami_search_sss_rack900.6.18.09.html')
-     assert_equal '/search/sss?query=rack&amp;s=1000', miami_search_sss_rack900_061809.next_page_href
+     assert_equal '/search/sss?query=rack&s=1000', miami_search_sss_rack900_061809.next_page_href
      
      miami_search_sss_rack1000_061809 = CraigScrape::Listings.new relative_uri_for('listing_samples/miami_search_sss_rack.6.18.09/miami_search_sss_rack1000.6.18.09.html')
      assert_equal nil, miami_search_sss_rack1000_061809.next_page_href
