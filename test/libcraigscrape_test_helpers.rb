@@ -16,8 +16,16 @@ module LibcraigscrapeTestHelpers
         val = val.to_a
         m = "#{m}.to_a"
       end
-      
-      puts "assert_equal %s, %s.%s" % [val.inspect,obj_name,m]
+
+      if val.kind_of? Hash and val.length > 5       
+        puts "assert_equal %s, %s.%s.length" % [val.length.inspect,obj_name,m]
+        
+        val.keys.sort{|a,b| a <=> b }.each do |k| 
+          puts "assert_equal %s, %s.%s[%s]" % [val[k].inspect,obj_name,m,k.inspect]
+        end
+      else
+        puts "assert_equal %s, %s.%s" % [val.inspect,obj_name,m]
+      end
     end    
   end
 end
