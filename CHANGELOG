@@ -1,6 +1,6 @@
 == Change Log
 
-=== Release 0.7.0 (Jul 2, 2009)
+=== Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring
 - Eager-loading in the Post object without the need of the full_post method
 - full_post is no longer needed or available

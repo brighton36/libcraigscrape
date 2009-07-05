@@ -13,7 +13,6 @@ require 'activesupport'
 # A base class encapsulating the libcraigscrape objects, and providing some utility methods.
 class CraigScrape
   cattr_accessor :time_now
-  
 
   # Scrapes a single listing url and returns a Listings object representing the contents. 
   # Mostly here to preserve backwards-compatibility with the older api, CraigScrape::Listings.new "listing_url" does the same thing
@@ -79,7 +78,15 @@ class CraigScrape
     ret
   end
 
-  # TODO: Rdoc!
+  # Scraper is a general-pupose base class for all libcraigscrape Objects. Scraper facilitates all http-related 
+  # functionality, and adds some useful helpers for dealing with eager-loading of http-objects and general html
+  # methods. It also contains the http-related cattr_accessors:
+  # 
+  # *logger* - a Logger object to debug http notices too. Defaults to nil
+  #
+  # *retries_on_fetch_fail* - The number of times to retry a failed uri download. Defaults to 4
+  #
+  # *sleep_between_fetch_retries* - The amount of seconds to sleep, between successive attempts in the case of a failed download. Defaults to 15.
   class Scraper
     cattr_accessor :logger
     cattr_accessor :sleep_between_fetch_retries
@@ -107,6 +114,17 @@ class CraigScrape
     class FetchError < StandardError #:nodoc:
     end
     
+    # Scraper Objects can be created from either a full URL (string), or a Hash.
+    # Currently, this initializer isn't intended to be called from libcraigslist API users, though
+    # if you know what you're doing - feel free to try this out.
+    #
+    # A (string) url can be passed in a 'http://' scheme or a 'file://' scheme.
+    #
+    # When constructing from a hash, the keys in the hash will be used to set the object's corresponding values.
+    # This is useful to create an object without actually making an html request, this is used to set-up an
+    # object before it eager-loads any values not already passed in by the constructor hash. Though optional, if
+    # you're going to be setting this object up for eager-loadnig, be sure to pass in a :url key in your hash,
+    # Otherwise this will fail to eager load.
     def initialize(init_via = nil)
       if init_via.nil?
         # Do nothing - possibly not a great idea, but we'll allow it
@@ -119,7 +137,9 @@ class CraigScrape
       end
     end
     
-    # Indicates whether the resource has yet been retrieved from its associated url
+    # Indicates whether the resource has yet been retrieved from its associated url.
+    # This is useful to distinguish whether the instance was instantiated for the purpose of an eager-load,
+    # but hasn't yet been fetched.
     def downloaded?; !@html.nil?; end
 
     # A URI object corresponding to this Scraped URL
@@ -633,11 +653,15 @@ class CraigScrape
     end
   end
   
-  # GeoListings represents a parsed Craigslist geo lisitng page. These list all the craigslist sites in a given region
+  # GeoListings represents a parsed Craigslist geo lisiting page. (i.e. {'http://geo.craigslist.org/iso/us'}[http://geo.craigslist.org/iso/us]) 
+  # These list all the craigslist sites in a given region.
   class GeoListings < Scraper
     LOCATION_NAME = /[ ]*\>[ ](.+)[ ]*/
     GEOLISTING_BASE_URL = %{http://geo.craigslist.org/iso/}
 
+    # The geolisting constructor works like all other Scraper objects, in that it accepts a string 'url'. 
+    # In addition though, here we'll accept an array like %w(us fl) which gets converted to
+    # {'http://geo.craigslist.org/iso/us/fl'}[http://geo.craigslist.org/iso/us/fl]
     def initialize(init_via = nil)
       super init_via.kind_of?(Array) ? "#{GEOLISTING_BASE_URL}#{init_via.join '/'}" : init_via
       
@@ -656,7 +680,7 @@ class CraigScrape
       @name
     end
 
-    # Returns a hash of sites names and urls
+    # Returns a hash of site name to urls in the current listing
     def sites
       unless @sites
         @sites = {}
