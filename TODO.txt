@@ -1,0 +1,54 @@
+0.8.0 TODO: 
+ * It'd be nice to let the yaml's not need a full path to the .db, just use dir(__FILE__) as cwd for that
+ * We should hve a listings.next_page which returns the next page - that would clean up our while loop a bit
+ * Change craigwatch's default non-regex search to be case insensitive
+ * Reduce memory consumption in craigwatch.
+ * I think we need to update the package to include the enw rake tasks for flogging
+ * Add some rdoc text to the top of all the new lib files...
+   
+Post-0.7:
+ * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)
+ * Some pages are legitimate 404's and we just can't parse them no matter how hard we try - what to do about this?
+ * Break the scraper objects into separate files...
+ * Maybe we should make an instance out of CraigScrape.new('us/fl/south florida') kind of thing..
+ * Finsih testing out that geo location todo list
+ 	* Test out that array-paramter to the GeoListings constructor, make sure it actually works
+	* integrate it better nito craigscrape
+	* It'd be nice to tell craigscrape 'us/ca' or 'us/ca/losangeles' as the scrape location
+	* and maybe have 'search text" and "search section" type stuff where everything ends up scraping from there..
+	* We should really cache pages if we're going to do this - and I'd say to cache the geolisting pages first...
+ * Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
+ 
+ * It'd also be nice to run an erb over the yaml file? No, we should take some steps to DRY out the code though. 
+	* Particularly with respect to the searches which the same regex for multiple searches.
+	* and particularly with those searches which are usingt he same listings urls to search for different things (IE 'cta' searches)
+
+Recheks in a week (5.11.09 was last tried)
+
+	* This thread:
+	http://sfbay.craigslist.org/forums/?ID=29345737
+	Title: craigwatch does this - if you're a little handy 
+	Message: 
+		craigwatch and libcraigscrape are a tightly-coupled, ruby solution for (largely) unix-based systems. 
+		<br>
+		<br>
+		Check it out here: 
+		<br>
+		<a target="_top" href="http://www.derosetechnologies.com/community/libcraigscrape">http://www.derosetechnologies.com/community/libcraigscrape</a>
+	* http://www.craigslistwatch.com/
+	* Did this actuallyt post?: http://digg.com/tech_news/Stop_wasting_money_use_Craigslist_Watch
+
+email: 
+
+	http://www.dostuffright.com/Craigwatch
+	http://wareseeker.com/Network-Internet/Craigslist-All-City-Search-Tool-1.2.zip/8036652
+	http://www.killerstartups.com/Search/craigslittlebuddy-com-multiple-city-craigslist-search
+	
+Scripts aggregators:
+	  bigwebmaster.com 
+	http://www.scripts.com/
+	http://www.scriptarchive.com/
+	http://www.needscripts.com/
+	http://www.scriptsearch.com/
+	http://www.sitescripts.com/PHP/
+	http://www.scriptsbank.com/

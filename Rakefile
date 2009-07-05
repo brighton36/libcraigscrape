@@ -11,7 +11,7 @@ include FileUtils
 RbConfig = Config unless defined? RbConfig
 
 NAME = "libcraigscrape"
-VERS = ENV['VERSION'] || "0.7.0"
+VERS = ENV['VERSION'] || "0.8.0"
 PKG = "#{NAME}-#{VERS}"
 
 RDOC_OPTS = ['--quiet', '--title', 'The libcraigscrape Reference', '--main', 'README', '--inline-source']
@@ -76,4 +76,45 @@ end
 task :uninstall => [:clean] do
   sh %{sudo gem uninstall #{NAME}}
 end
+
+require 'roodi'
+require 'roodi_task'
+
+namespace :code_tests do
+  desc "Analyze for code complexity"
+  task :flog do
+    require 'flog'
+
+    flog = Flog.new
+    flog.flog_files ['lib']
+    threshold = 105
+  
+    bad_methods = flog.totals.select do |name, score|
+       score > threshold
+    end
+  
+    bad_methods.sort { |a,b| a[1] <=> b[1] }.each do |name, score|
+      puts "%8.1f: %s" % [score, name]
+    end
+  
+    puts "WARNING : #{bad_methods.size} methods have a flog complexity > #{threshold}" unless bad_methods.empty?
+  end
+  
+  desc "Analyze for code duplication"
+    require 'flay'
+    task :flay do
+    threshold = 25
+    flay = Flay.new({:fuzzy => false, :verbose => false, :mass => threshold})
+    flay.process(*Flay.expand_dirs_to_files(['lib']))
+  
+    flay.report
+  
+    raise "#{flay.masses.size} chunks of code have a duplicate mass > #{threshold}" unless flay.masses.empty?
+  end
+  
+  RoodiTask.new 'roodi', ['lib/*.rb'], 'roodi.yml'
+end
+
+desc "Run all code tests"
+task :code_tests => %w(code_tests:flog code_tests:flay code_tests:roodi)
 
