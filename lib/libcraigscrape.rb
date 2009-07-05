@@ -86,13 +86,14 @@ class CraigScrape
     cattr_accessor :retries_on_fetch_fail
 
     URL_PARTS = /^(?:([^\:]+)\:\/\/([^\/]*))?(.*)$/
-
+    HTML_TAG  = /<\/?[^>]*>/
+    
     # Returns the full url that corresponds to this resource
     attr_reader :url
 
     # Set some defaults:
     self.retries_on_fetch_fail = 4
-    self.sleep_between_fetch_retries = 4
+    self.sleep_between_fetch_retries = 15
   
     class BadConstructionError < StandardError #:nodoc:
     end
@@ -128,6 +129,11 @@ class CraigScrape
     end
 
     private
+    
+    # Returns text with all html tags removed.
+    def strip_html(str)
+      str.gsub HTML_TAG, "" if str
+    end
     
     # Easy way to fail noisily:
     def parse_error!; raise ParseError, "Error while parsing %s:\n %s" % [self.class.to_s, html]; end
@@ -222,8 +228,8 @@ class CraigScrape
     POSTING_ID      = /PostingID\:[ ]+([\d]+)/
     REPLY_TO        = /(.+)/
     PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
-    HTML_TAG        = /<\/?[^>]*>/
     USERBODY_PARTS  = /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m
+    IMAGE_SRC       = /\<im[a]?g[e]?[^\>]*src=(?:\'([^\']+)\'|\"([^\"]+)\"|([^ ]+))[^\>]*\>/
 
     # This is really just for testing, in production use, uri.path is a better solution
     attr_reader :href #:nodoc:
@@ -347,23 +353,30 @@ class CraigScrape
 
     # Array, urls of the post's images that are *not* hosted on craigslist
     def images
-      # TODO
+      # Keep in mind that when users post html to craigslist, they're often not posting wonderful html...
+      @images = ( 
+        contents ? 
+          contents.scan(IMAGE_SRC).collect{ |a| a.find{|b| !b.nil? } } :
+          [] 
+      ) unless @images
+      
+      @images
     end
 
     # Array, urls of the post's craigslist-hosted images
     def pics
-      unless @images
-        @images = []
+      unless @pics
+        @pics = []
         
         if html and craigslist_body
           # Now let's find the craigslist hosted images:
           img_table = (craigslist_body / 'table').find{|e| e.name == 'table' and e[:summary] == 'craigslist hosted images'}
         
-          @images = (img_table / 'img').collect{|i| i[:src]} if img_table
+          @pics = (img_table / 'img').collect{|i| i[:src]} if img_table
         end
       end
       
-      @images
+      @pics
     end
 
     # Returns true if this Post was parsed, and merely a 'Flagged for Removal' page
@@ -412,7 +425,10 @@ class CraigScrape
     # This is always able to be pulled from the listing post-summary, and should never cause an additional page load
     def img_types
       unless @img_types
-        # TODO: We need to actually pull this. I say we create a pics array, much like the images array.
+        @img_types = []
+        
+        @img_types << :img if images.length > 0
+        @img_types << :pic if pics.length > 0
       end
       
       @img_types
@@ -454,13 +470,13 @@ class CraigScrape
     
     # Returns the post contents with all html tags removed
     def contents_as_plain
-      contents.gsub HTML_TAG, "" if contents
+      strip_html contents
     end
 
     # Returns the header with all html tags removed. Granted, the header should usually be plain, but in the case of a 
     # 'system_post' we may get tags in here
     def header_as_plain
-      header.gsub HTML_TAG, "" if header
+      strip_html header
     end
 
     # Some posts (deleted_by_author, flagged_for_removal) are common template posts that craigslist puts up in lieu of an original 
@@ -614,6 +630,43 @@ class CraigScrape
       end
       
       ret
+    end
+  end
+  
+  # GeoListings represents a parsed Craigslist geo lisitng page. These list all the craigslist sites in a given region
+  class GeoListings < Scraper
+    LOCATION_NAME = /[ ]*\>[ ](.+)[ ]*/
+    GEOLISTING_BASE_URL = %{http://geo.craigslist.org/iso/}
+
+    def initialize(init_via = nil)
+      super init_via.kind_of?(Array) ? "#{GEOLISTING_BASE_URL}#{init_via.join '/'}" : init_via
+      
+      # Validate that required fields are present, at least - if we've downloaded it from a url
+      parse_error! unless location
+    end
+
+    # Returns the GeoLocation's full name
+    def location
+      unless @name
+        cursor = html % 'h3 > b > a:first-of-type'
+        cursor = cursor.next_node if cursor       
+        @name = $1 if cursor and LOCATION_NAME.match he_decode(cursor.to_s)
+      end
+      
+      @name
+    end
+
+    # Returns a hash of sites names and urls
+    def sites
+      unless @sites
+        @sites = {}
+        (html / 'div#list > a').each do |el_a|
+          site_name = he_decode strip_html(el_a.inner_html)
+          @sites[site_name] = el_a[:href]
+        end
+      end
+      
+      @sites
     end
   end
 

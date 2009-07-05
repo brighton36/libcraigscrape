@@ -1,17 +1,21 @@
 == Change Log
 
-=== Release 0.7.0 (Jun 17, 2009)
+=== Release 0.7.0 (Jul 2, 2009)
 - A good bit of refactoring
-- Post/Listing constructors now take either a Hash or a url (string) to use for its scrape. Regardless, either should always have a url object association now
-- Added a Base Scraper object. Maybe I'll make that its own gem...
-- Removed the PostSummary object, now we just have Posting/ Posts include all the functionality of both PostFull and PostSummary. Be careful with Posting if you're trying to minimize bandwidth. the rdoc labels which methods wont/will/might cause a page load.
-- Things should fail better (always outputting relevant html that was unable to be parsed)
-- Removed date in favor of post_date
 - Eager-loading in the Post object without the need of the full_post method
 - full_post is no longer needed or available
+- Added a Base Scraper object. Maybe I'll make that its own gem...
+- Post/Listing constructors now take either a Hash or a url (string) to use for its scrape. Regardless, either should always have a url object association now
+- Removed the PostSummary object, now we just have Posting/ Posts include all the functionality of both PostFull and PostSummary. Be careful with Posting if you're trying to minimize bandwidth. the rdoc labels which methods wont/will/might cause a page load.
+- Things should fail better (always outputting relevant html that was unable to be parsed)
+- Removed Posting::date in favor of Posting::post_date
 - Posting::full_url is now url
-- PostSummary::href is no longer needed. Use uri.path instead
+- Post::href is no longer needed. Use Post::uri.path instead
 - Posting.images renamed to Posting.pics, and a new method Posting.images better reflects the craigslist designations
+- Fixed a bug with some search listings, where the last page might not get scrapped b/c craigslist doesn't correctly include the next page link. see 'test_nasty_search_listings' for an example
+- On some listings (with the empty h4 tags) we were eager-loading when we could have made some safe assumptions instead. Fixed.
+- Preliminary support for GeoListing scrapes.. (Not exactly sure where this will go - but I have ideas..)
+- Adjusted Posting::images and Posting::pics to better match the craigslist media-dicotomy notation.
 
 === Release 0.6.5 (Jun 8, 2009)
 - Added PostFull::deleted_by_author? , added test case for said condition

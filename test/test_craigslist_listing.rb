@@ -114,7 +114,7 @@ class CraigslistListingTest < Test::Unit::TestCase
     assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine - $400 (Punta Gorda, Charlotte County)", fortmyers_art_index600_060909.posts[0].header
     assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine - $400 (Punta Gorda, Charlotte County)", fortmyers_art_index600_060909.posts[0].header_as_plain
     assert_equal "897549505.html", fortmyers_art_index600_060909.posts[0].href
-    assert_equal nil, fortmyers_art_index600_060909.posts[0].images
+    assert_equal [], fortmyers_art_index600_060909.posts[0].images
     assert_equal [:pic], fortmyers_art_index600_060909.posts[0].img_types
     assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine - $400", fortmyers_art_index600_060909.posts[0].label
     assert_equal "Punta Gorda, Charlotte County", fortmyers_art_index600_060909.posts[0].location
@@ -140,7 +140,7 @@ class CraigslistListingTest < Test::Unit::TestCase
     assert_equal "ARTISTS' MOVING SALE-BAYSHORE (Naples)", fortmyers_art_index600_060909.posts[1].header
     assert_equal "ARTISTS' MOVING SALE-BAYSHORE (Naples)", fortmyers_art_index600_060909.posts[1].header_as_plain
     assert_equal "891513957.html", fortmyers_art_index600_060909.posts[1].href
-    assert_equal nil, fortmyers_art_index600_060909.posts[1].images
+    assert_equal [], fortmyers_art_index600_060909.posts[1].images
     assert_equal [], fortmyers_art_index600_060909.posts[1].img_types
     assert_equal "ARTISTS' MOVING SALE-BAYSHORE", fortmyers_art_index600_060909.posts[1].label
     assert_equal "Naples", fortmyers_art_index600_060909.posts[1].location
@@ -166,7 +166,7 @@ class CraigslistListingTest < Test::Unit::TestCase
     assert_equal "tapestry sewing machine and embroidery arm luggage - $250 (Punta Gorda)", fortmyers_art_index600_060909.posts[2].header
     assert_equal "tapestry sewing machine and embroidery arm luggage - $250 (Punta Gorda)", fortmyers_art_index600_060909.posts[2].header_as_plain
     assert_equal "825684735.html", fortmyers_art_index600_060909.posts[2].href
-    assert_equal nil, fortmyers_art_index600_060909.posts[2].images
+    assert_equal [], fortmyers_art_index600_060909.posts[2].images
     assert_equal [], fortmyers_art_index600_060909.posts[2].img_types
     assert_equal "tapestry sewing machine and embroidery arm luggage - $250", fortmyers_art_index600_060909.posts[2].label
     assert_equal "Punta Gorda", fortmyers_art_index600_060909.posts[2].location
@@ -192,7 +192,7 @@ class CraigslistListingTest < Test::Unit::TestCase
     assert_equal "Cast Glass Sculpture - Aurora - $2400 (Naples)", fortmyers_art_index600_060909.posts[3].header
     assert_equal "Cast Glass Sculpture - Aurora - $2400 (Naples)", fortmyers_art_index600_060909.posts[3].header_as_plain
     assert_equal "823516079.html", fortmyers_art_index600_060909.posts[3].href
-    assert_equal nil, fortmyers_art_index600_060909.posts[3].images
+    assert_equal [], fortmyers_art_index600_060909.posts[3].images
     assert_equal [:pic], fortmyers_art_index600_060909.posts[3].img_types
     assert_equal "Cast Glass Sculpture - Aurora - $2400", fortmyers_art_index600_060909.posts[3].label
     assert_equal "Naples", fortmyers_art_index600_060909.posts[3].location
