@@ -23,23 +23,21 @@ class CraigScrape
   def self.scrape_until(listing_url, &post_condition)
     ret = []
     
-    current_url = listing_url
+    listings = CraigScrape::Listings.new listing_url
     catch "ScrapeBreak" do
-      while current_url do 
-        listings = CraigScrape::Listings.new current_url
-        
+      while listings do 
         listings.posts.each do |post|
           throw "ScrapeBreak" if post_condition.call(post)
           ret << post
         end
 
-        current_url = listings.next_page_url
+        listings = listings.next_page
       end
     end
 
     ret
   end
-
+  
   # Scrapes a single Post Url, and returns a Posting object representing its contents.
   # Mostly here to preserve backwards-compatibility with the older api, CraigScrape::Listings.new "listing_url" does the same thing
   # Consider this method 'marked for deprecation'

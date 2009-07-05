@@ -95,6 +95,11 @@ class CraigScrape
       (next_page_href) ? url_from_href(next_page_href) : nil
     end
     
+    # Returns a Listings object of the next_page_url on the current listings object
+    def next_page
+      CraigScrape::Listings.new next_page_url if next_page_url
+    end
+    
     # Takes a paragraph element and returns a mostly-parsed Posting
     # We separate this from the rest of the parsing both for readability and ease of testing
     def self.parse_summary(p_element, date = nil)  #:nodoc:

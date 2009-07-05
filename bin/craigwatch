@@ -154,11 +154,23 @@ class CraigReportDefinition #:nodoc:
   def debug_database?;    @debug_database; end
   def debug_mailer?;      @debug_mailer; end
   def debug_craigscrape?; @debug_craigscrape; end
-    
+
   def each_search(&block); searches.each &block; end
 
   def email_from
     (@email_from) ? @email_from : ('%s@%s' % [ENV['USER'], Socket.gethostname])
+  end
+
+  # We allow people rewrite relative (sqlite) dbfiles by taking the use_cwd as a paramter
+  def tracking_database(use_cwd = nil)
+    # This is a little hack to make sqlite definitions a little more portable, by allowing them 
+    # to be specify dbfile's relative to the yml's directory:
+    ret = @tracking_database
+    ret['dbfile'] = '%s/%s' % [use_cwd, $1] if (
+      use_cwd and ret.has_key? 'dbfile' and /^([^\/].*)$/.match ret['dbfile']
+    )
+    
+    ret
   end
 
   class SearchDefinition #:nodoc:
@@ -300,7 +312,7 @@ ReportMailer.template_root = File.dirname __FILE__
 
 # Initialize the database:
 ActiveRecord::Base.logger = Logger.new STDERR if craig_report.debug_database?
-ActiveRecord::Base.establish_connection craig_report.tracking_database
+ActiveRecord::Base.establish_connection craig_report.tracking_database(File.dirname(report_definition_file))
 
 # Initialize CraigScrape (sorta)
 CraigScrape::Scraper.logger = Logger.new STDERR if craig_report.debug_craigscrape?

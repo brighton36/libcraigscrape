@@ -1,15 +1,16 @@
 0.8.0 TODO: 
- * It'd be nice to let the yaml's not need a full path to the .db, just use dir(__FILE__) as cwd for that
+ * Reduce memory consumption in craigwatch.
+ 	* i think, rather then have scrape_until we need a collect_scrape_until. 
+ 	* But that would require both a a collect? and a stop? type return
+ 	* Maybe we should just implement this in the craigwatch and not the full api ...
  * We should hve a listings.next_page which returns the next page - that would clean up our while loop a bit
  * Change craigwatch's default non-regex search to be case insensitive
- * Reduce memory consumption in craigwatch.
  * I think we need to update the package to include the enw rake tasks for flogging
- * Add some rdoc text to the top of all the new lib files...
+ * Go through the rdoc todos
    
 Post-0.7:
  * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)
  * Some pages are legitimate 404's and we just can't parse them no matter how hard we try - what to do about this?
- * Break the scraper objects into separate files...
  * Maybe we should make an instance out of CraigScrape.new('us/fl/south florida') kind of thing..
  * Finsih testing out that geo location todo list
  	* Test out that array-paramter to the GeoListings constructor, make sure it actually works
