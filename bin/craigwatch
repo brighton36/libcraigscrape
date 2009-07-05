@@ -225,7 +225,7 @@ class CraigReportDefinition #:nodoc:
     end
     
     def match_against(condition, against)
-      (against.scan( condition.is_re? ? condition.to_re : condition).length > 0) ? true : false
+      (against.scan( condition.is_re? ? condition.to_re : /#{condition}/i).length > 0) ? true : false
     end
   end
 end

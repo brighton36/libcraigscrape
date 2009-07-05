@@ -1,13 +1,17 @@
 0.8.0 TODO: 
  * Reduce memory consumption in craigwatch.
- 	* i think, rather then have scrape_until we need a collect_scrape_until. 
- 	* But that would require both a a collect? and a stop? type return
- 	* Maybe we should just implement this in the craigwatch and not the full api ...
- * We should hve a listings.next_page which returns the next page - that would clean up our while loop a bit
- * Change craigwatch's default non-regex search to be case insensitive
- * I think we need to update the package to include the enw rake tasks for flogging
+ 	* here's what we do:
+ 		* rename Craigscrape::scrape_until to collect_posts_until
+ 		* create a new each_posts_until which doesn't collect
+	* Alternatively, we could make a syntax like :
+		miami = CraigScrape.new 'us/fl/miami'
+		
+		miami.posts['rea'].each{ |post|
+			break if post.date > whatever
+		}
+
  * Go through the rdoc todos
-   
+
 Post-0.7:
  * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)
  * Some pages are legitimate 404's and we just can't parse them no matter how hard we try - what to do about this?

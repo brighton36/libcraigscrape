@@ -4,6 +4,7 @@
 - Added :code_tests to the rakefile
 - Report definitions don't need a full path to the :dbfile, the parameter here can now be relative to the yaml file itself
 - Added a Listings::next_page
+- craigwatch: When not specifying a regex in _has or _has_no, we now perform an insensitive search
 
 === Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring
