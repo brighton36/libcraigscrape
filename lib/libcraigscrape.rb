@@ -3,11 +3,13 @@
 # All of libcraigscrape's objects and methods are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
 
+# A base class encapsulating the libcraigscrape objects, and providing some utility methods.
+class CraigScrape; end
+
 require 'listings'
 require 'posting'
 require 'geo_listings'
 
-# A base class encapsulating the libcraigscrape objects, and providing some utility methods.
 class CraigScrape
   cattr_accessor :time_now
 

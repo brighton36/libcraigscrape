@@ -456,4 +456,61 @@ class CraigslistGeolistingTest < Test::Unit::TestCase
     end
   end
 
+  def test_sites_in_path
+    hier_dir = relative_uri_for 'geolisting_samples/hierarchy_test071009/'
+
+    assert_equal(
+      %w(miami.craigslist.org), 
+      CraigScrape::GeoListings.find_sites( 
+        ["us/fl/south florida","+ us/fl/south florida", "-newyork.craigslist.org"], 
+        hier_dir
+      )
+    )
+    
+    assert_equal(
+      %w(
+        jacksonville panamacity orlando fortmyers keys tallahassee ocala gainesville tampa 
+        pensacola daytona treasure sarasota staugustine spacecoast lakeland newyork
+      ).collect{|p| "#{p}.craigslist.org"},
+      CraigScrape::GeoListings.find_sites( ["us/fl","-us/fl/miami", "+ newyork.craigslist.org"], hier_dir)
+    )
+
+    assert_equal(
+      %w(
+      westmd fortcollins charleston fayetteville dallas mendocino wichita valdosta terrahaute rockford erie 
+      decatur cedarrapids stillwater collegestation charlestonwv albany sacramento houston kalamazoo fortsmith 
+      maine minneapolis stockton pennstate bend grandisland palmsprings nmi waterloo topeka eastnc greenbay york
+      utica stgeorge oklahomacity grandrapids eastidaho lancaster gulfport sandiego reading kpr fresno iowacity 
+      chicago tuscaloosa smd monterey yubasutter victoriatx sd knoxville gadsden jonesboro ksu youngstown toledo 
+      lascruces annarbor danville delaware parkersburg appleton stcloud richmond muskegon jerseyshore redding 
+      ithaca hartford evansville corpuschristi binghamton chico modesto lynchburg hattiesburg morgantown 
+      harrisonburg lubbock carbondale florencesc imperial wenatchee semo savannah prescott lacrosse longisland 
+      huntsville santabarbara janesville mankato santafe pullman louisville lexington brunswick duluth columbus 
+      hudsonvalley pittsburgh wheeling westky waco shreveport eastoregon corvallis winstonsalem denver 
+      tippecanoe newhaven shoals wv greenville lansing detroit athensohio easttexas sanantonio raleigh phoenix 
+      honolulu inlandempire pueblo chattanooga lawton worcester twinfalls roseburg roanoke fredericksburg 
+      annapolis asheville seattle scranton quadcities oregoncoast stlouis newyork mobile atlanta visalia 
+      clarksville providence kansascity galveston madison bham harrisburg muncie bloomington anchorage ventura 
+      up tricities rockies elpaso slo indianapolis fayar columbusga bellingham abilene wichitafalls boston 
+      mcallen bn sierravista lasvegas sanmarcos nwct farmington mansfield jacksontn bgky altoona eugene 
+      lafayette boone odessa spokane norfolk hickory burlington nashville lawrence hiltonhead elmira westernmass 
+      southjersey myrtlebeach dothan goldcountry lincoln martinsburg dubuque brownsville washingtondc tucson 
+      columbiamo jxn yakima sheboygan olympic humboldt newjersey cosprings springfield beaumont macon eauclaire 
+      batonrouge buffalo mohave wilmington rochester sfbay northmiss bakersfield neworleans catskills wausau 
+      akroncanton cnj merced chambana flint capecod nh yuma tulsa charlottesville easternshore desmoines 
+      athensga austin newlondon outerbanks fortwayne dayton wyoming watertown provo medford texarkana cleveland 
+      memphis amarillo limaohio augusta flagstaff jackson plattsburgh peoria skagit saltlakecity saginaw 
+      portland syracuse swmi baltimore monroe littlerock boise laredo boulder philadelphia sandusky salem rmn 
+      montgomery blacksburg centralmich logan albuquerque losangeles poconos westslope southbend siouxcity reno 
+      porthuron greensboro orangecounty fargo ogden charlotte allentown joplin chautauqua lakecharles omaha 
+      springfieldil roswell montana killeen milwaukee nd williamsport columbia racine southcoast ames huntington 
+      cincinnati auburn miami
+      ).collect{|p| "#{p}.craigslist.org"},
+      CraigScrape::GeoListings.find_sites(
+        ["us","- us/fl", "+ us/fl/miami", ' -jacksonville.craigslist.org'], hier_dir
+      )
+    )
+    
+  end
+
 end

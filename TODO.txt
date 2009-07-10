@@ -1,15 +1,5 @@
 0.8.0 TODO: 
- * find_sites
- 	* Create a new find_sites
- 	* It should take an array of paths with a /^[ ]*([+|-]?)[ ]*(.+)[ ]*/ prefix, and allow me to do things like:
- 		'us','- us/fl'
- 		'us/fl/miami', 'us/fl/fortmeyers', '+ newyork.craigslist.org'
- 	* We need some way of testing this ...
-
  * Reduce memory consumption in craigwatch.
- 	* here's what we do:
- 		* rename Craigscrape::scrape_until to collect_posts_until
- 		* create a new each_posts_until which doesn't collect
 	* Alternatively, we could make a syntax like :
 		miami = CraigScrape.new 'us/fl/miami', 'singapore.craigslist.com.sg'
 		

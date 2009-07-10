@@ -13,6 +13,7 @@ class CraigScrape
     PATH_SCANNER     = /(?:\\\/|[^\/])+/
     URL_HOST_PART    = /^[^\:]+\:\/\/([^\/]+)[\/]?$/
     SITE_PREFIX      = /^([^\.]+)/
+    FIND_SITES_PARTS = /^[ ]*([\+|\-]?)[ ]*(.+)[ ]*/
 
     class BadGeoListingPath < StandardError #:nodoc:
     end
@@ -109,7 +110,37 @@ class CraigScrape
         geo_listing.sites.collect{|n,s| s }
       end
     end
-    
+
+    # find_sites takes a single array of strings as an argument. Each string is to be either a location path 
+    # (see sites_in_path), or a full site (in canonical form - ie "memphis.craigslist.org"). Optionally,
+    # each of this may/should contain a '+' or '-' prefix to indicate whether the string is supposed to 
+    # include sites from the master list, or remove them from the list. If no '+' or'-' is
+    # specified, the default assumption is '+'. Strings are processed from left to right, which gives
+    # a high degree of control over the selection set. Examples:
+    # - find_sites "us/fl", "- miami.craigslist.org"
+    # - find_sites "us", "- us/nm"
+    # - find_sites "us", "- us/ny", "+ newyork.craigslist.org"
+    # - find_sites "us/ny", "us/id", "caribbean.craigslist.org"
+    # There's a lot of flexibility here, you get the idea.
+    def self.find_sites(specs, base_url = GEOLISTING_BASE_URL)
+      ret = []
+      
+      specs.each do |spec|
+        (op,spec = $1,$2) if FIND_SITES_PARTS.match spec
+
+        spec = (spec.include? '.')  ? [spec] : sites_in_path(spec, base_url) 
+
+        if op == '-'
+          ret -= spec
+        else
+          # We're adding. Just need to make sure we don't list the same thing twice:
+          spec.each{|s| ret << s unless ret.include? s}
+        end
+      end
+      
+      ret
+    end
+
     private
     
     def self.bad_geo_path!(path)
