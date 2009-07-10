@@ -61,7 +61,9 @@ class CraigScrape
     # - Up to (and optionally, not including) the last component, the path should correspond against a valid GeoLocation url with the prefix of 'http://geo.craigslist.org/iso/'
     # - the last component can either be a site's 'prefix' on a GeoLocation page, or, the last component can just be a geolocation page itself, in which case all the sites on that page are selected.
     # - the site prefix is the first dns record in a website listed on a GeoLocation page. (So, for the case of us/fl/miami , the last 'miami' corresponds to the 'south florida' link on {'http://geo.craigslist.org/iso/us/fl'}[http://geo.craigslist.org/iso/us/fl]
-    def self.find_sites(full_path)
+    def self.sites_in_path(full_path, base_url = GEOLISTING_BASE_URL)
+      # the base_url paramter is mostly so we can test this method
+      
       # Unfortunately - the easiest way to understand much of this is to see how craigslist returns 
       # these geolocations. Watch what happens when you request us/fl/non-existant/page/here.
       # I also made this a little forgiving in a couple ways not specified with official support, per 
@@ -75,27 +77,44 @@ class CraigScrape
       # Then it assumes the next piece is site_prefix
       full_path_parts.each_with_index do |part, i|
         begin
-          l = GeoListings.new GEOLISTING_BASE_URL+full_path_parts[0...i+1].join('/')
+          # The URI escape is mostly needed to translate the space characters
+          l = GeoListings.new base_url+full_path_parts[0...i+1].collect{|p| URI.escape p}.join('/')
           
           if geo_listing.nil? or geo_listing.location != l.location
             geo_listing = l
           else
-            site_prefix = part
+            # We need the gsub to escape any \/ 's in the prefix
+            site_prefix = part.gsub "\\/", "/"
             break
           end
         rescue CraigScrape::Scraper::FetchError
-          raise BadGeoListingPath, "Unable to load path #{full_path.inspect}, either you're having problems accessing Craiglist, or your path is invalid."
+          bad_geo_path! full_path
         end
       end
 
       # Now we actually go through and figure out which sites apply
-      (site_prefix) ?
+      if site_prefix
         # First we see if there's a legitimate site prefix, alternatively see if they just used the name of the site in question:
-        geo_listing.sites.find{ |n,s| 
+        site = geo_listing.sites.find{ |n,s| 
           (SITE_PREFIX.match s and $1 == site_prefix) or n == site_prefix
-        }[1].to_a :
+        }
+
+        # If we didn't find something - pukage!
+        bad_geo_path! full_path unless site
+        
+        # We only need the site itself - not the description
+        [site.last]
+      else
         # Its possible they want everything on this geo listing page
-        geo_listing.sites.collect{|n,s| s }        
+        geo_listing.sites.collect{|n,s| s }
+      end
     end
+    
+    private
+    
+    def self.bad_geo_path!(path)
+      raise BadGeoListingPath, "Unable to load path #{path.inspect}, either you're having problems connecting to Craiglist, or your path is invalid."
+    end
+    
   end
 end

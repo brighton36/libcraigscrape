@@ -118,7 +118,8 @@ class CraigScrape
   
       case uri.scheme
         when 'file'
-          File.read uri.path
+          # If this is a directory, we'll try to approximate http a bit by loading a '/index.html'
+          File.read( File.directory?(uri.path) ? "#{uri.path}/index.html" : uri.path )
         when /^http[s]?/
           fetch_http uri
         else

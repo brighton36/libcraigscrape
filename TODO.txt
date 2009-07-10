@@ -1,12 +1,9 @@
 0.8.0 TODO: 
  * find_sites
- 	* Acts a little weird if you do : CraigScrape::GeoListings.find_sites "us/fl/south florida"
- 		* needs to translate the ' '
- 	* Rename existing find_sites(string) to a private sites_in_path(string)
  	* Create a new find_sites
  	* It should take an array of paths with a /^[ ]*([+|-]?)[ ]*(.+)[ ]*/ prefix, and allow me to do things like:
  		'us','- us/fl'
- 		'us/fl/miami', 'us/fl/fortmeyers'
+ 		'us/fl/miami', 'us/fl/fortmeyers', '+ newyork.craigslist.org'
  	* We need some way of testing this ...
 
  * Reduce memory consumption in craigwatch.

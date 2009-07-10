@@ -419,7 +419,41 @@ class CraigslistGeolistingTest < Test::Unit::TestCase
       { "saskatoon" => "saskatoon.craigslist.ca", "regina" => "regina.craigslist.ca" }, 
       geo_listing_ca_sk07020.sites
     )
+  end
+  
+  def test_sites_in_path
+    # This was really tough to test, and in the end, I don't know just how useful this really is...
+    hier_dir = relative_uri_for 'geolisting_samples/hierarchy_test071009/'
+        
+    %w(
+      us/fl/miami 
+      us/fl/miami/nonsense 
+      us/fl/miami/nonsense/more-nonsense 
+      us/fl/miami/south\ florida
+    ).each do |path|
+      assert_equal ["miami.craigslist.org"], CraigScrape::GeoListings.sites_in_path( path, hier_dir )
+    end
+    
+    assert_equal(
+      %w(
+        jacksonville panamacity orlando fortmyers keys tallahassee ocala gainesville tampa
+        pensacola daytona treasure sarasota staugustine spacecoast lakeland miami
+      ).collect{|p| "#{p}.craigslist.org"},
+      CraigScrape::GeoListings.sites_in_path( 'us/fl', hier_dir )    
+    )
 
+    # This tests those escaped funky paths. I *think* this file-based test is actually indicative
+    # that the http-retrieval version works as well;
+    us_fl_mia_ftmeyers = CraigScrape::GeoListings.sites_in_path(
+      "us/fl/ft myers \\/ SW florida", hier_dir
+    )
+    assert_equal ["fortmyers.craigslist.org"], us_fl_mia_ftmeyers
+    
+    # make sure we puke on obvious bad-stuff. I *think* this file-based test is actually indicative
+    # that the http-retrieval version works as well:
+    assert_raise(CraigScrape::GeoListings::BadGeoListingPath) do
+      CraigScrape::GeoListings.sites_in_path "us/fl/nonexist", hier_dir
+    end
   end
 
 end
