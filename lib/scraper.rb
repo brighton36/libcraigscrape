@@ -32,7 +32,7 @@ class CraigScrape
 
     # Set some defaults:
     self.retries_on_fetch_fail = 4
-    self.sleep_between_fetch_retries = 15
+    self.sleep_between_fetch_retries = 3
   
     class BadConstructionError < StandardError #:nodoc:
     end
