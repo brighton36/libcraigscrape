@@ -176,7 +176,7 @@ class CraigReportDefinition #:nodoc:
   class SearchDefinition #:nodoc:
     include Kwalify::Util::HashLike   
     
-    attr_reader :name, :listing
+    attr_reader :name, :sites, :listings
     attr_reader :full_post_has, :full_post_has_no
     attr_reader :summary_post_has, :summary_post_has_no
     
@@ -349,11 +349,21 @@ craig_report.each_search do |search|
 
   already_tracked_urls = search_track.tracked_posts.collect{|tp| tp.url}
 
-  # Let's collect all the summaries that could apply:
+  # Here's where we collect all the summaries that could apply:
   new_summaries = {}
-  search.listing.each do |listing|
-    CraigScrape.scrape_until(listing){|p| p.post_date <= last_tracked_at or already_tracked_urls.include? p.url }.each do |p_s|
-      new_summaries[p_s.url] = p_s unless new_summaries.has_key? p_s.url
+  
+  # And now we actually scrape:
+  scraper = CraigScrape.new(*search.sites)
+  scraper.each_listing(*search.listings) do |listing|
+    catch :list_break do
+      while listing
+        listing.posts.each do |p|
+          throw :list_break if p.post_date <= last_tracked_at or already_tracked_urls.include? p.url
+          
+          new_summaries[p.url] = p unless new_summaries.has_key? p.url
+        end
+        listing = listing.next_page
+      end
     end
   end
 

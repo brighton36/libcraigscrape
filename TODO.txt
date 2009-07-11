@@ -24,8 +24,12 @@
 		* Though - we'd need to override that default each - b/c the default array each will load everything and then iterate...
 		* We'd like a collect too
 		* maybe each_post('rea') { |post| } is easiest and makes more sense (in addition to the above)
-
- * Go through the rdoc todos - also adjust the reference(s) to use the CraigScrape.new(*paths) syntax
+* Make the tracking_database optional. Default to sqlite and the .yml's basename.db
+	* Make the report_name optional as well.
+ * Go through the rdoc README and otherwise todos - 
+ 	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
+ * craigwatch rdoc needs big revisions
+ 	* lsiting became sites and listings
 
 Post-0.7:
  * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)

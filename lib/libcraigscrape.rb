@@ -13,6 +13,10 @@ require 'geo_listings'
 class CraigScrape
   cattr_accessor :time_now
   
+  # The only reason I took this out is b/c I might want to make it a cattr_accessor and test with a file:// 
+  # prefix.
+  SITE_TO_URL_PREFIX = 'http://'
+  
   # Takes a variable number of site/path specifiers (strings) as an argument. 
   # This list gets flattened and passed to CraigScrape::GeoListings.find_sites
   # see that method's rdoc for a complete set of rules on what's allowed here.
@@ -64,8 +68,9 @@ class CraigScrape
   private
   
   def listing_urls_for(listing_fragments)
+    # TODO: what happens when a listing_fragment begins with a '/' - borkage?
     listing_fragments.collect{ |lf|
-      sites.collect { |site| 'http://%s/%s' % [site,lf] }
+      sites.collect { |site| '%s%s/%s' % [SITE_TO_URL_PREFIX,site,lf] }
     }.flatten
   end
 

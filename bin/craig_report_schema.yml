@@ -44,12 +44,17 @@ mapping:
               "full_post_has_no":    {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
               "summary_post_has":    {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
               "summary_post_has_no": {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
-              "listing":   
+              "sites":   
                  type: seq
                  required: yes
                  sequence:
                    - type: str
-                     pattern: /^http[s]?\:\/\//
+                     unique: yes
+              "listings":
+                 type: seq
+                 required: yes
+                 sequence:
+                   - type: str
                      unique: yes
               "starting":  
                  type: str
