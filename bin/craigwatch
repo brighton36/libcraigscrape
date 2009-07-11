@@ -231,23 +231,46 @@ class CraigReportDefinition #:nodoc:
 end
 
 class TrackedSearch < ActiveRecord::Base #:nodoc:
-  has_many :tracked_posts, :dependent => :destroy
+  has_many :listings, :dependent => :destroy, :class_name => 'TrackedListing'
   validates_uniqueness_of :search_name
   validates_presence_of   :search_name
-  
+end
+
+class TrackedListing < ActiveRecord::Base #:nodoc:
+  has_many :posts, :dependent => :destroy, :class_name => 'TrackedPost'
+  validates_presence_of :url, :tracked_search_id
+#  TODO: I don't think we actually need this, and I'd think it slows things down:
+#  validates_uniqueness_of :url, :scope => :tracked_search_id
+
   def already_tracked?(url)
-    ( self.tracked_posts.find :first, :conditions => ['url = ?', url]) ? true : false
+    ( self.posts.find :first, :conditions => ['url = ?', url]) ? true : false
+  end
+
+  def last_tracked_at
+    self.posts.maximum 'created_at'
   end
   
-  def last_tracked_at
-    self.tracked_posts.maximum 'created_at'
+  def delete_posts_older_than(cutoff_date)
+    # TODO: can't I use posts.delete 'created_at < ?' and keep it cleaner?
+    TrackedPost.delete_all [ 'tracked_listing_id = ? AND created_at < ?', self.id, cutoff_date ]
   end
 end
 
 class TrackedPost < ActiveRecord::Base #:nodoc:
-  belongs_to :tracked_search
-  validates_presence_of :url, :tracked_search_id
-  validates_uniqueness_of :url, :scope => :tracked_search_id
+  validates_presence_of :url, :tracked_listing_id
+#  TODO: I don't think we actually need this, and I'd think it slows things down:
+#  validates_uniqueness_of :url, :scope => :tracked_listing_id
+
+  def self.activate_all!
+    TrackedPost.update_all(
+      { :active => true }, 
+      [ 'active = ?', false ] 
+    )
+  end
+  
+  def self.destroy_inactive!
+    TrackedPost.delete_all [ 'active = ?', false ]
+  end
 end
 
 class ReportMailer < ActionMailer::Base #:nodoc:
@@ -323,14 +346,23 @@ ActiveRecord::Schema.define do
     create_table :tracked_searches do |t|
       t.column :search_name,      :string
     end unless table_exists? :tracked_searches
-  
-    create_table :tracked_posts do |t|
+    
+    create_table :tracked_listings do |t|
       t.column :url,                :string
       t.column :tracked_search_id,  :integer
+    end unless table_exists? :tracked_listings    
+    
+    create_table :tracked_posts do |t|
+      t.column :url,                :string
+      t.column :tracked_listing_id, :integer
       t.column :created_at,         :date
+      t.column :active,             :boolean, :default => 0
     end unless table_exists? :tracked_posts
   end
 end
+
+# Remove all posts which are inactive. They would be in there if the prior run was a failure. 
+TrackedPost.destroy_inactive!
 
 # We'll need these outside this next loop:
 report_summaries = []
@@ -344,41 +376,71 @@ craig_report.each_search do |search|
   
   # No Tracking found - let's set one up:
   search_track = TrackedSearch.create! :search_name => search.name unless search_track
-
-  last_tracked_at = (search_track.last_tracked_at) ? search_track.last_tracked_at : search.starting_at
-
-  already_tracked_urls = search_track.tracked_posts.collect{|tp| tp.url}
-
-  # Here's where we collect all the summaries that could apply:
+  
+  # This hash tracks what makes it into the report on this search.
+  # NOTE that keys are url's b/c sometimes the same posting will end up in multiple listings,
+  # And doing this ensures that we don't end-up reporting the same post twice.
   new_summaries = {}
   
   # And now we actually scrape:
-  scraper = CraigScrape.new(*search.sites)
-  scraper.each_listing(*search.listings) do |listing|
+  CraigScrape.new(*search.sites).each_listing(*search.listings) do |listing|
+    # Keep in mind that listing.url does change in the while loop. 
+    # But, this first one is a good base_url that will never change between runs.
+
+    tracked_listing = search_track.listings.find :first, :conditions => ['url = ?',  listing.url]
+    tracked_listing ||= search_track.listings.create! :url => listing.url
+    
+    # Gives us a sane stopping point (hopefully) : 
+    last_tracked_at = tracked_listing.last_tracked_at
+    last_tracked_at ||= search.starting_at
+
+    # Some more stopping points (probably):
+    already_tracked_urls = tracked_listing.posts.collect{|tp| tp.url}
+
+    # We'll use this in the loop to decide what posts to track:
+    newest_post_date = last_tracked_at    
+    tracked_urls = []
+    
+    # OK - Now let's go!
     catch :list_break do
       while listing
-        listing.posts.each do |p|
-          throw :list_break if p.post_date <= last_tracked_at or already_tracked_urls.include? p.url
+        listing.posts.each do |post|
+          throw :list_break if (
+            post.post_date <= last_tracked_at or 
+            already_tracked_urls.include? post.url
+          )
           
-          new_summaries[p.url] = p unless new_summaries.has_key? p.url
+          # If we want to report this post, add it to the collection:
+          new_summaries[post.url] = post if (
+            !new_summaries.has_key? post.url and 
+            search.passes_filter? post
+          )
+          
+          # Now let's see if the url should be kept in our tracking database for the future:
+          
+          # This post-date sets a limit for the 
+          if post.post_date > newest_post_date
+            newest_post_date = post.post_date
+            tracked_urls = [] # We'll 'reset' this, since anything already in here is now useless.
+          end
+            
+          tracked_urls << post.url unless post.post_date < newest_post_date
         end
+        
         listing = listing.next_page
       end
+    end
+    
+    # Now let's add these urls to the database so as to reduce memory overhead.
+    # Keep in mind - they're not active until the email goes out.
+    tracked_urls.each do |url| 
+      tracked_listing.posts.create :url => url, :created_at => newest_post_date
     end
   end
 
   # Let's flatten the unique'd hash into a more useable array:
   new_summaries = new_summaries.values.sort{|a,b| a.post_date <=> b.post_date} # oldest goes to bottom
   
-  # Let's tag all the newest tracked posts that should go into the database: 
-  # NOTE: Since all the dates are at_begining_of_day, we'll effectively have a chunk of dates tied for latest
-  new_summaries.reject{|p| p.post_date < new_summaries.last.post_date}.each do |p_s|
-    newly_tracked_posts << search_track.tracked_posts.build( :url => p_s.url, :created_at => p_s.post_date)
-  end
-  
-  # Reject anything from this report which doesn't match the has/has_no :
-  new_summaries.reject!{|s| !search.passes_filter? s }
-
   # Now Let's manage the tracking database:
   if new_summaries.length > 0  
 
@@ -405,11 +467,12 @@ ReportMailer.deliver_report(
   {:summaries => report_summaries, :definition => craig_report}
 ) if report_summaries.length > 0
 
-# Save the newly created posts:
-newly_tracked_posts.each{|tp| tp.save!}
+# Commit (make 'active') all newly created tracked post urls:
+TrackedPost.activate_all!
 
-# Now that we know the user has been informed, Let's commit all our database changes and end this scrape 'transaction':
-report_summaries.each do |s|
-  # Let's do some light cleanup to keep the database size down, by removing all the old posts we're no longer tracking:
-  TrackedPost.delete_all [ 'tracked_search_id = ? AND created_at < ?', s[:search_track].id, s[:latest_post_date] ]
+# Now remove all the no-longer-need posts from the prior run:
+report_summaries.each do |summary|
+  summary[:search_track].listings.each do |listing|
+    listing.delete_posts_older_than summary[:latest_post_date]
+  end
 end

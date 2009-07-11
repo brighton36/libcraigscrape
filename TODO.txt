@@ -1,7 +1,12 @@
 0.8.0 TODO: 
- * Make those geolisting fetches more ffficient
  
  * Reduce memory consumption in craigwatch.
+	* :tracked_listings needs to be handled
+	* clean up craigwatch a bit. I don't like:
+			craig_report.each_search do |search|
+		I prefer :
+			report_summaries = craig_report.searches.collect do |search|
+
   		
  	* Here's the goal :
 		south_fl = CraigScrape.new 'us/fl/miami', 'us/fl/keys'
