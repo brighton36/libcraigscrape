@@ -63,7 +63,7 @@ class CraigScrape
     # - the last component can either be a site's 'prefix' on a GeoLocation page, or, the last component can just be a geolocation page itself, in which case all the sites on that page are selected.
     # - the site prefix is the first dns record in a website listed on a GeoLocation page. (So, for the case of us/fl/miami , the last 'miami' corresponds to the 'south florida' link on {'http://geo.craigslist.org/iso/us/fl'}[http://geo.craigslist.org/iso/us/fl]
     def self.sites_in_path(full_path, base_url = GEOLISTING_BASE_URL)
-      # the base_url paramter is mostly so we can test this method
+      # the base_url parameter is mostly so we can test this method
       
       # Unfortunately - the easiest way to understand much of this is to see how craigslist returns 
       # these geolocations. Watch what happens when you request us/fl/non-existant/page/here.
@@ -71,44 +71,37 @@ class CraigScrape
       # the rules above.
       full_path_parts = full_path.scan PATH_SCANNER
 
-      geo_listing = nil      
-      site_prefix = nil
-
-      # This essentially counts up the geolocation path parts nutil we found the most specific, valid path
-      # Then it assumes the next piece is site_prefix
+      # We'll either find a single site in this loop andf return that, or, we'll find a whole listing
+      # and set the geo_listing object to reflect that
+      geo_listing = nil
       full_path_parts.each_with_index do |part, i|
+
+        # Let's un-escape the path-part, if needed:
+        part.gsub! "\\/", "/"        
+        
+        # If they're specifying a single site, this will catch and return it immediately
+        site = geo_listing.sites.find{ |n,s| 
+          (SITE_PREFIX.match s and $1 == part) or n == part
+        } if geo_listing
+        
+        # This returns the site component of the found array
+        return [site.last] if site 
+        
         begin
           # The URI escape is mostly needed to translate the space characters
           l = GeoListings.new base_url+full_path_parts[0...i+1].collect{|p| URI.escape p}.join('/')
-          
-          if geo_listing.nil? or geo_listing.location != l.location
-            geo_listing = l
-          else
-            # We need the gsub to escape any \/ 's in the prefix
-            site_prefix = part.gsub "\\/", "/"
-            break
-          end
         rescue CraigScrape::Scraper::FetchError
           bad_geo_path! full_path
         end
+
+        # This probably tells us the first part of the path was 'correct', but not the rest:
+        bad_geo_path! full_path if geo_listing and geo_listing.location == l.location
+
+        geo_listing = l
       end
 
-      # Now we actually go through and figure out which sites apply
-      if site_prefix
-        # First we see if there's a legitimate site prefix, alternatively see if they just used the name of the site in question:
-        site = geo_listing.sites.find{ |n,s| 
-          (SITE_PREFIX.match s and $1 == site_prefix) or n == site_prefix
-        }
-
-        # If we didn't find something - pukage!
-        bad_geo_path! full_path unless site
-        
-        # We only need the site itself - not the description
-        [site.last]
-      else
-        # Its possible they want everything on this geo listing page
-        geo_listing.sites.collect{|n,s| s }
-      end
+      # We have a valid listing page we found, and we can just return all the sites on it:
+      geo_listing.sites.collect{|n,s| s }
     end
 
     # find_sites takes a single array of strings as an argument. Each string is to be either a location path 

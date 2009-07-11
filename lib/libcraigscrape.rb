@@ -12,6 +12,35 @@ require 'geo_listings'
 
 class CraigScrape
   cattr_accessor :time_now
+  
+  # Takes a variable number of site/path specifiers (strings) as an argument. 
+  # This list gets flattened and passed to CraigScrape::GeoListings.find_sites
+  # see that method's rdoc for a complete set of rules on what's allowed here.
+  def initialize(*args)
+    @sites_specs = args.flatten
+  end
+
+  # Returns which sites are included in any operations performed by this object. This is directly
+  # ascertained from the initial constructor's spec-list
+  def sites
+    @sites ||= CraigScrape::GeoListings.find_sites @sites_specs    
+    @sites
+  end
+  
+  # TODO: what exactly is this rdoc going to be...? Maybe rename this to create_post_enumerator
+  def each_post(*in_listings)
+    in_listings.each do |l_frag|
+      sites.each do |site|
+        puts ''
+      end
+    end
+    
+  end
+
+  # TODO (make sure this gets rdoc'd): Alias for each_post
+  alias :[] each_post
+
+####################### TODO: Deprecate? :
 
   # Scrapes a single listing url and returns a Listings object representing the contents. 
   # Mostly here to preserve backwards-compatibility with the older api, CraigScrape::Listings.new "listing_url" does the same thing

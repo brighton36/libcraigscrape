@@ -5,6 +5,9 @@
 - Report definitions don't need a full path to the :dbfile, the parameter here can now be relative to the yaml file itself
 - Added a Listings::next_page
 - craigwatch: When not specifying a regex in _has or _has_no, we now perform an insensitive search
+- Created CraigScrape::GeoListings.find_sites, & CraigScrape::GeoListings.sites_in_path methods
+- *Large API changes* Added a constructor to CraigScrape, and changed a number of ways that sites are scraped
+- 
 
 === Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring

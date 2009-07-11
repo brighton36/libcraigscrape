@@ -1,16 +1,31 @@
 0.8.0 TODO: 
+ * Make those geolisting fetches more ffficient
+ 
  * Reduce memory consumption in craigwatch.
-	* Alternatively, we could make a syntax like :
-		miami = CraigScrape.new 'us/fl/miami', 'singapore.craigslist.com.sg'
+  		
+ 	* Here's the goal :
+		south_fl = CraigScrape.new 'us/fl/miami', 'us/fl/keys'
 		
-		miami.posts['rea'].each{ |post|
-			break if post.date > whatever
+		south_fl.each_listing('rea', 'search/sss?query=rack') do |listing|
+			listing.each_post do |post|
+				next if post.date > whatever
+			end
 		}
+		
+		south_fl.each_post('rea', 'search/sss?query=rack') do
+			# Not very memory efficient
+			# Should sort them by relative date! (this might actually work! )
+		end
+		
+		south_fl.posts['rea', 'search/sss?query=rack'].each do
+			break if post.older_then_we_could_care_about?
+		end
+		
 		* Though - we'd need to override that default each - b/c the default array each will load everything and then iterate...
 		* We'd like a collect too
 		* maybe each_post('rea') { |post| } is easiest and makes more sense (in addition to the above)
 
- * Go through the rdoc todos
+ * Go through the rdoc todos - also adjust the reference(s) to use the CraigScrape.new(*paths) syntax
 
 Post-0.7:
  * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)
