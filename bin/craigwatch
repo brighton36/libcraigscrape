@@ -399,12 +399,12 @@ craig_report.each_search do |search|
 
     # We'll use this in the loop to decide what posts to track:
     newest_post_date = last_tracked_at    
-    tracked_urls = []
     
     # OK - Now let's go!
     catch :list_break do
       while listing
         listing.posts.each do |post|
+          # Are we at a point in the scrape, past which we don't need to proceed?
           throw :list_break if (
             post.post_date <= last_tracked_at or 
             already_tracked_urls.include? post.url
@@ -416,25 +416,24 @@ craig_report.each_search do |search|
             search.passes_filter? post
           )
           
-          # Now let's see if the url should be kept in our tracking database for the future:
+          # Now let's see if the url should be kept in our tracking database for the future...
+
+          # This post-date sets a limit for the tracked_listing.posts.create below
+          newest_post_date = post.post_date if post.post_date > newest_post_date
           
-          # This post-date sets a limit for the 
-          if post.post_date > newest_post_date
-            newest_post_date = post.post_date
-            tracked_urls = [] # We'll 'reset' this, since anything already in here is now useless.
-          end
-            
-          tracked_urls << post.url unless post.post_date < newest_post_date
+          # Now let's add these urls to the database so as to reduce memory overhead.
+          # Keep in mind - they're not active until the email goes out.
+          # also - we shouldn't have to worry about putting 'irrelevant' posts in the db, since 
+          # the nbewest are always the first ones parsed:
+          tracked_listing.posts.create(
+            :url => post.url, 
+            :created_at => newest_post_date 
+          ) unless post.post_date < newest_post_date
+
         end
         
         listing = listing.next_page
       end
-    end
-    
-    # Now let's add these urls to the database so as to reduce memory overhead.
-    # Keep in mind - they're not active until the email goes out.
-    tracked_urls.each do |url| 
-      tracked_listing.posts.create :url => url, :created_at => newest_post_date
     end
   end
 

@@ -8,6 +8,8 @@
 - Created CraigScrape::GeoListings.find_sites, & CraigScrape::GeoListings.sites_in_path methods
 - *Large API changes* Added a constructor to CraigScrape, and changed a number of ways that sites are scraped
 - Changed the format of the craigwatch tracking db - you'll need to delete any db's you already have and let the migrations re-run
+- craigwatch is *much* more efficient with memory. Feel free to scrape the whole world now!
+- craigwatch's yml changed a bit - Rdoc TODO here: (document this)
 
 === Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring

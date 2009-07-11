@@ -6,6 +6,7 @@
 			craig_report.each_search do |search|
 		I prefer :
 			report_summaries = craig_report.searches.collect do |search|
+	* and clean up the sql. Rather then .find :first, ... , use a .find_url(url) kind of deal
 
   		
  	* Here's the goal :
