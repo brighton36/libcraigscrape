@@ -78,15 +78,15 @@ class CraigScrape
 
         # Let's un-escape the path-part, if needed:
         part.gsub! "\\/", "/"        
-        
+
         # If they're specifying a single site, this will catch and return it immediately
         site = geo_listing.sites.find{ |n,s| 
           (SITE_PREFIX.match s and $1 == part) or n == part
         } if geo_listing
-        
+
         # This returns the site component of the found array
         return [site.last] if site 
-        
+
         begin
           # The URI escape is mostly needed to translate the space characters
           l = GeoListings.new base_url+full_path_parts[0...i+1].collect{|p| URI.escape p}.join('/')
@@ -123,12 +123,7 @@ class CraigScrape
 
         spec = (spec.include? '.')  ? [spec] : sites_in_path(spec, base_url) 
 
-        if op == '-'
-          ret -= spec
-        else
-          # We're adding. Just need to make sure we don't list the same thing twice:
-          spec.each{|s| ret << s unless ret.include? s}
-        end
+        (op == '-') ? ret -= spec : ret |= spec
       end
       
       ret

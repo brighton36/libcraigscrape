@@ -23,22 +23,51 @@ class CraigScrape
   # Returns which sites are included in any operations performed by this object. This is directly
   # ascertained from the initial constructor's spec-list
   def sites
-    @sites ||= CraigScrape::GeoListings.find_sites @sites_specs    
+    @sites ||= GeoListings.find_sites @sites_specs    
     @sites
   end
   
   # TODO: what exactly is this rdoc going to be...? Maybe rename this to create_post_enumerator
-  def each_post(*in_listings)
-    in_listings.each do |l_frag|
-      sites.each do |site|
-        puts ''
+  def each_listing(*fragments)
+    listing_urls_for(fragments).each do |url|
+      listing = Listings.new url
+      yield listing
+    end
+  end
+  
+  # TODO: Rdoc? and test!
+  def listings(*fragments)
+    catch :scrape_break do
+      listing_urls_for(fragments).collect do |url| 
+        listing = Listings.new url
+        throw :scrape_break if yield listing
+        listing
       end
     end
+  end
+  
+  # TODO: 
+  def each_post(*fragments)
     
   end
-
-  # TODO (make sure this gets rdoc'd): Alias for each_post
-  alias :[] each_post
+  
+  # TODO: this actually replaces scrape_until
+  def posts(*fragments)
+    
+  end
+  
+  # TODO:   
+  def posts_since(listing, newer_then)
+    
+  end
+  
+  private
+  
+  def listing_urls_for(listing_fragments)
+    listing_fragments.collect{ |lf|
+      sites.collect { |site| 'http://%s/%s' % [site,lf] }
+    }.flatten
+  end
 
 ####################### TODO: Deprecate? :
 

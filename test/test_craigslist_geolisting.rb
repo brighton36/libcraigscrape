@@ -426,22 +426,22 @@ class CraigslistGeolistingTest < Test::Unit::TestCase
     hier_dir = relative_uri_for 'geolisting_samples/hierarchy_test071009/'
         
     %w(
-      us/fl/miami 
-      us/fl/miami/nonsense 
-      us/fl/miami/nonsense/more-nonsense 
-      us/fl/miami/south\ florida
+      us/fl/miami /us/fl/miami/ us/fl/miami/ /us/fl/miami us/fl/miami/nonsense 
+      us/fl/miami/nonsense/more-nonsense us/fl/miami/south\ florida
     ).each do |path|
       assert_equal ["miami.craigslist.org"], CraigScrape::GeoListings.sites_in_path( path, hier_dir )
     end
     
-    assert_equal(
-      %w(
-        jacksonville panamacity orlando fortmyers keys tallahassee ocala gainesville tampa
-        pensacola daytona treasure sarasota staugustine spacecoast lakeland miami
-      ).collect{|p| "#{p}.craigslist.org"},
-      CraigScrape::GeoListings.sites_in_path( 'us/fl', hier_dir )    
-    )
-
+    %w( us/fl /us/fl us/fl/ /us/fl/ ).each do |path|
+      assert_equal(
+        %w(
+          jacksonville panamacity orlando fortmyers keys tallahassee ocala gainesville tampa
+          pensacola daytona treasure sarasota staugustine spacecoast lakeland miami
+        ).collect{|p| "#{p}.craigslist.org"},
+        CraigScrape::GeoListings.sites_in_path( path, hier_dir )
+      )
+    end
+    
     # This tests those escaped funky paths. I *think* this file-based test is actually indicative
     # that the http-retrieval version works as well;
     us_fl_mia_ftmeyers = CraigScrape::GeoListings.sites_in_path(
@@ -453,6 +453,11 @@ class CraigslistGeolistingTest < Test::Unit::TestCase
     # that the http-retrieval version works as well:
     assert_raise(CraigScrape::GeoListings::BadGeoListingPath) do
       CraigScrape::GeoListings.sites_in_path "us/fl/nonexist", hier_dir
+    end
+    
+    assert_raise(CraigScrape::GeoListings::BadGeoListingPath) do
+      # You'll notice that we could actually guess a decent match, but we wont :
+      CraigScrape::GeoListings.sites_in_path "us/fl/miami/nonexist", hier_dir
     end
   end
 
