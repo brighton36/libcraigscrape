@@ -68,8 +68,11 @@ class CraigScrape
   private
   
   def listing_urls_for(listing_fragments)
-    # TODO: what happens when a listing_fragment begins with a '/' - borkage?
     listing_fragments.collect{ |lf|
+      # This removes any /'s from he beginning of the fragment
+      lf = $1 if /^\/(.*)/.match lf
+      # This adds a '/' to the end of a path, so long as its not a query we're dealing with...
+      lf += '/' unless lf.index '?'
       sites.collect { |site| '%s%s/%s' % [SITE_TO_URL_PREFIX,site,lf] }
     }.flatten
   end

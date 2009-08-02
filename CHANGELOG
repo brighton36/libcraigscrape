@@ -10,6 +10,10 @@
 - Changed the format of the craigwatch tracking db - you'll need to delete any db's you already have and let the migrations re-run
 - craigwatch is *much* more efficient with memory. Feel free to scrape the whole world now!
 - craigwatch's yml changed a bit - Rdoc TODO here: (document this)
+- We'll more or less automatically figure out the tracking_database in craigwatch if none is specified (will default to sqlite and auto-generated filename)
+- craigwatch report_name is optional too now and can largely figure itself out
+- Added summary_or_full_post_has and summary_or_full_post_has_no as craigwatch report parameters
+- If a craigwatch search comes up empty - we now indicate that no results were found...
 
 === Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring

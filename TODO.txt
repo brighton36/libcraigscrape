@@ -1,16 +1,25 @@
 0.8.0 TODO: 
- 
- * Reduce memory consumption in craigwatch.
-	* :tracked_listings needs to be handled
-	* clean up craigwatch a bit. I don't like:
-			craig_report.each_search do |search|
-		I prefer :
-			report_summaries = craig_report.searches.collect do |search|
-	* and clean up the sql. Rather then .find :first, ... , use a .find_url(url) kind of deal
+ * Try to use some of the YAML template features to increase DRYness of the Art and Caddy watches...
+	* use the 'Newlines folded' example from: http://en.wikipedia.org/wiki/YAML
+	* And the 'Data merge and references' to make it cleaner...
+	
+ * craigwatch BUG:
+ 	* Its possible(?) sure that these search listings are too aggressively loading posts
+ 		* watch what happens when you try a summary only on the fololoing?
+ 		* http://miami.craigslist.org/search/cta?hasPic=1&query=cadillac&s=300
+ 		* I actually think its not the case anymore...
 
-  		
- 	* Here's the goal :
-		south_fl = CraigScrape.new 'us/fl/miami', 'us/fl/keys'
+ * FEATURE: Add the craidgwatch_debug featuree - and monitor it...
+ 
+ * Start going through all the TODOs in lib and craigwatch.:
+
+ * Go through the rdoc README and otherwise todos - 
+ 	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
+ 	* Documentation TODO: let's just document this somewhere then: If we omit 'starting' fromt he yaml - it defaults to one day old... that right? Yea - I guess thats a sensible default.
+ * craigwatch rdoc needs big revisions
+ 	* lsiting became sites and listings
+ 	* Examples should be like:
+	 	south_fl = CraigScrape.new 'us/fl/miami', 'us/fl/keys'
 		
 		south_fl.each_listing('rea', 'search/sss?query=rack') do |listing|
 			listing.each_post do |post|
@@ -23,38 +32,22 @@
 			# Should sort them by relative date! (this might actually work! )
 		end
 		
-		south_fl.posts['rea', 'search/sss?query=rack'].each do
+		south_fl.posts('rea', 'search/sss?query=rack').each do
 			break if post.older_then_we_could_care_about?
 		end
-		
-		* Though - we'd need to override that default each - b/c the default array each will load everything and then iterate...
-		* We'd like a collect too
-		* maybe each_post('rea') { |post| } is easiest and makes more sense (in addition to the above)
-* Make the tracking_database optional. Default to sqlite and the .yml's basename.db
-	* Make the report_name optional as well.
- * Go through the rdoc README and otherwise todos - 
- 	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
- * craigwatch rdoc needs big revisions
- 	* lsiting became sites and listings
 
-Post-0.7:
+Post-0.8:
  * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)
- * Some pages are legitimate 404's and we just can't parse them no matter how hard we try - what to do about this?
- * Maybe we should make an instance out of CraigScrape.new('us/fl/south florida') kind of thing..
- * Finsih testing out that geo location todo list
- 	* Test out that array-paramter to the GeoListings constructor, make sure it actually works
-	* integrate it better nito craigscrape
-	* It'd be nice to tell craigscrape 'us/ca' or 'us/ca/losangeles' as the scrape location
-	* and maybe have 'search text" and "search section" type stuff where everything ends up scraping from there..
-	* We should really cache pages if we're going to do this - and I'd say to cache the geolisting pages first...
+ * Page-caching? Maybe? Any interest? would be nice particularly for geocaching...
  * Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
  
- * You might want to parse the sub-locations in the Craigslist object. (so for miami: brw/mia/wpb)
- * You might want to parse the categories in the Craigslist object. (community/apa, cta, etc..)
+ * We might want to parse the sub-locations in the geo-location code... (so for miami: brw/mia/wpb)
  
- * It'd also be nice to run an erb over the yaml file? No, we should take some steps to DRY out the code though. 
-	* Particularly with respect to the searches which the same regex for multiple searches.
-	* and particularly with those searches which are usingt he same listings urls to search for different things (IE 'cta' searches)
+ * Should we have 'defined searches' in the yaml and then apply these defitions to a report? 
+ 	* It would be nice to have one search definition for 'art I want' and then allow these
+ 	* to be referenced in separate reports for 'art in florida', 'art in nyc', 'art everywhere esle' ..
+ 	* The other  thing I'd like to do though is have "New art watch/Classic Artwatch" type reports that look
+ 	* separate - but that dont cause the crawl to happen twice. Just once with two reports per crawl..
 
 Recheks in a week (5.11.09 was last tried)
 
@@ -72,7 +65,7 @@ Recheks in a week (5.11.09 was last tried)
 	* Did this actuallyt post?: http://digg.com/tech_news/Stop_wasting_money_use_Craigslist_Watch
 
 email: 
-
+	http://www.craigdiddy.com/competition.html
 	http://www.dostuffright.com/Craigwatch
 	http://wareseeker.com/Network-Internet/Craigslist-All-City-Search-Tool-1.2.zip/8036652
 	http://www.killerstartups.com/Search/craigslittlebuddy-com-multiple-city-craigslist-search

@@ -1,14 +1,17 @@
 <h2><%=h @subject %></h2>
-
 <%@summaries.each do |summary| %>
    <h3><%=h summary[:search].name%></h3>
-      <%summary[:postings].each do |post|%>
-         <%='<p>%s <a href="%s">%s -</a>%s%s</p>' % [
-			h(post.post_date.strftime('%b %d')),
-			post.url,
-			h(post.label),
-			(post.location) ? '<font size="-1"> (%s)</font>' % h(post.location) : '',
-			(post.has_pic_or_img?) ? ' <span style="color: orange"> img</span>': ''
-      	] -%>
+      <% if summary[:postings].length > 0 %>
+         <%summary[:postings].each do |post|%>
+            <%='<p>%s <a href="%s">%s -</a>%s%s</p>' % [
+   			h(post.post_date.strftime('%b %d')),
+   			post.url,
+   			h(post.label),
+   			(post.location) ? '<font size="-1"> (%s)</font>' % h(post.location) : '',
+   			(post.has_pic_or_img?) ? ' <span style="color: orange"> img</span>': ''
+         	] -%>
+         <% end %>
+      <% else %>
+         <p><i>No new postings were found to match the search criteria.</i></p>
       <% end %>
 <% end %>
