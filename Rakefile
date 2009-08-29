@@ -53,7 +53,8 @@ Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
     rdoc.options += RDOC_OPTS
     rdoc.main = "README"
-    rdoc.rdoc_files.add RDOC_FILES+['lib/**/*.rb']
+    # NOTE: If you don't put libcraigscrape.rb at the beginning, the rdoc ends up looking a little screwy
+    rdoc.rdoc_files.add RDOC_FILES+Dir.glob('lib/*.rb').sort_by{|a,b| (a == 'lib/libcraigscrape.rb') ? -1 : 0 }
 end
 
 Rake::GemPackageTask.new(SPEC) do |p|

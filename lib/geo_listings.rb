@@ -1,4 +1,9 @@
-# TODO: file rdoc
+# = About geo_listings.rb
+#
+# This file contains the parsing code, and logic relating to geographic site pages and paths. You
+# should never need to include this file directly, as all of libcraigscrape's objects and methods 
+# are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
+#
 
 require 'scraper'
 

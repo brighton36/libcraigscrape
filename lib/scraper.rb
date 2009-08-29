@@ -1,4 +1,13 @@
-# TODO: file rdoc
+# = About scraper.rb
+#
+# This file defines:
+# - the base class from which other parse objects inherit
+# - Basic http and connection handling methods
+# - html utility methods used by objects
+# - Common Errors
+# You should never need to include this file directly, as all of libcraigscrape's objects and methods 
+# are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
+#
 
 require 'net/http'
 require 'zlib'

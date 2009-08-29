@@ -342,9 +342,9 @@ end
 parser = Kwalify::Yaml::Parser.new(
   Kwalify::Validator.new(
     Kwalify::Yaml.load_file(File.dirname(__FILE__)+'/craig_report_schema.yml')
-  )
+  ),
+  :data_binding => true
 )
-parser.data_binding = true
 
 craig_report = parser.parse_file report_definition_file
 
@@ -412,7 +412,7 @@ report_summaries = craig_report.searches.collect do |search|
   CraigScrape.new(*search.sites).each_listing(*search.listings) do |listing|
     # Keep in mind that listing.url does change in the while loop. 
     # But, this first one is a good base_url that will never change between runs.
-puts "base Listing: #{listing.url}"
+
     tracked_listing = search_track.find_listing_by_url listing.url
     tracked_listing ||= search_track.listings.create! :url => listing.url
     
@@ -444,7 +444,7 @@ puts "base Listing: #{listing.url}"
             )
           rescue CraigScrape::Scraper::FetchError => e
             # TODO: Put some error output to the screen if craigwatch_debug is on
-puts "TODO: Put some error output to the screen if craigwatch_debug is on #{post.url}\n\n\n"
+
             # Sometimes we do end up with 404's that will never load, and we dont want to
             # abort a run simply b/c we found some anomaly due to the craigslist index.
             # being out of date. This FetchError can occur due to post_date or filtering

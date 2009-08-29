@@ -1,18 +1,7 @@
 0.8.0 TODO: 
- * Try to use some of the YAML template features to increase DRYness of the Art and Caddy watches...
-	* use the 'Newlines folded' example from: http://en.wikipedia.org/wiki/YAML
-	* And the 'Data merge and references' to make it cleaner...
-	
- * craigwatch BUG:
- 	* Its possible(?) sure that these search listings are too aggressively loading posts
- 		* watch what happens when you try a summary only on the fololoing?
- 		* http://miami.craigslist.org/search/cta?hasPic=1&query=cadillac&s=300
- 		* I actually think its not the case anymore...
-
- * FEATURE: Add the craidgwatch_debug featuree - and monitor it...
- 
  * Start going through all the TODOs in lib and craigwatch.:
-
+ 	* Flesh out the missing methods
+ 	* Document the Public Instance methods
  * Go through the rdoc README and otherwise todos - 
  	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
  	* Documentation TODO: let's just document this somewhere then: If we omit 'starting' fromt he yaml - it defaults to one day old... that right? Yea - I guess thats a sensible default.
@@ -37,6 +26,10 @@
 		end
 
 Post-0.8:
+ * FEATURE: Add the craigwatch_debug feature - and monitor it...
+ * Get the YAML template features working in the chris_report.yml
+ 	* should be pretty easy - I think we just add to the schema
+ 	* Might have to do this yourself with a search_templates section and an search ':include' thing
  * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)
  * Page-caching? Maybe? Any interest? would be nice particularly for geocaching...
  * Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
