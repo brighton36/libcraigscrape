@@ -191,6 +191,7 @@ class CraigReportDefinition #:nodoc:
     include Kwalify::Util::HashLike   
     
     attr_reader :name, :sites, :listings
+    attr_reader :location_has, :location_has_no
     attr_reader :full_post_has, :full_post_has_no
     attr_reader :summary_post_has, :summary_post_has_no
     attr_reader :summary_or_full_post_has, :summary_or_full_post_has_no
@@ -215,9 +216,15 @@ class CraigReportDefinition #:nodoc:
         return false if @price_less_than and post.price >= @price_less_than
       end
       
+      # Label Filters:
       return false unless matches_all? summary_post_has, post.label
       return false unless doesnt_match_any? summary_post_has_no, post.label
       
+      # Location Filters:
+      return false unless matches_all? location_has, post.location
+      return false unless doesnt_match_any? location_has_no, post.location
+      
+      # Full post Filters:
       if full_post_has or full_post_has_no or summary_or_full_post_has or summary_or_full_post_has_no
         # We're going to download the page, so let's make sure we didnt hit a "This posting has been flagged for removal"
         return false if post.system_post?
@@ -267,8 +274,6 @@ end
 class TrackedListing < ActiveRecord::Base #:nodoc:
   has_many :posts, :dependent => :destroy, :class_name => 'TrackedPost'
   validates_presence_of :url, :tracked_search_id
-#  TODO: I don't think we actually need this, and I'd think it slows things down:
-#  validates_uniqueness_of :url, :scope => :tracked_search_id
 
   def already_tracked?(url)
     ( self.posts.find :first, :conditions => ['url = ?', url]) ? true : false
@@ -286,8 +291,6 @@ end
 
 class TrackedPost < ActiveRecord::Base #:nodoc:
   validates_presence_of :url, :tracked_listing_id
-#  TODO: I don't think we actually need this, and I'd think it slows things down:
-#  validates_uniqueness_of :url, :scope => :tracked_listing_id
 
   def self.activate_all!
     TrackedPost.update_all(

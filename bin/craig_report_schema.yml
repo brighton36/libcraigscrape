@@ -5,9 +5,9 @@ mapping:
    "debug_mailer":      { type: bool, required: no }
    "debug_craigscrape": { type: bool, required: no }
 
-   "report_name":   { type: str, required: no }
+   "report_name":   { type: str, required: no  }
    "email_to":      { type: str, required: yes }
-   "email_from":    { type: str, required: no }
+   "email_from":    { type: str, required: no  }
    "smtp_settings":
       type: map
       required: no
@@ -46,6 +46,8 @@ mapping:
               "summary_post_has_no":         {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
               "summary_or_full_post_has":    {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
               "summary_or_full_post_has_no": {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
+              "location_has":                {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
+              "location_has_no":             {type: seq, required: no, sequence: [ {type: str, unique: yes} ]}
               "sites":   
                  type: seq
                  required: yes

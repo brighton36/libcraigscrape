@@ -14,6 +14,7 @@
 - craigwatch report_name is optional too now and can largely figure itself out
 - Added summary_or_full_post_has and summary_or_full_post_has_no as craigwatch report parameters
 - If a craigwatch search comes up empty - we now indicate that no results were found...
+- Added location_has, location_has_no to craigwatch
 
 === Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring

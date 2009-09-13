@@ -1,10 +1,8 @@
 0.8.0 TODO: 
- * Start going through all the TODOs in lib and craigwatch.:
- 	* Flesh out the missing methods
- 	* Document the Public Instance methods
  * Go through the rdoc README and otherwise todos - 
  	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
  	* Documentation TODO: let's just document this somewhere then: If we omit 'starting' fromt he yaml - it defaults to one day old... that right? Yea - I guess thats a sensible default.
+
  * craigwatch rdoc needs big revisions
  	* lsiting became sites and listings
  	* Examples should be like:
@@ -26,21 +24,20 @@
 		end
 
 Post-0.8:
- * FEATURE: Add the craigwatch_debug feature - and monitor it...
- * Get the YAML template features working in the chris_report.yml
+ * FEATURE: Add the craigwatch_debug feature - and monitor it... (There's a TODO in there...)
+	* Shows the current progress...? (pages fetched, objects in caches..) 
+ * FEATURE: Get the YAML template features working in the chris_report.yml
  	* should be pretty easy - I think we just add to the schema
  	* Might have to do this yourself with a search_templates section and an search ':include' thing
- * A debug_craigwatch, which shows the current progress... (pages fetched, objects in caches..)
- * Page-caching? Maybe? Any interest? would be nice particularly for geocaching...
- * Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
+   * Should we have 'defined searches' in the yaml and then apply these defitions to a report? 
+ 		* It would be nice to have one search definition for 'art I want' and then allow these
+	 	* to be referenced in separate reports for 'art in florida', 'art in nyc', 'art everywhere esle' ..
+	 	* The other  thing I'd like to do though is have "New art watch/Classic Artwatch" type reports that look
+	 	* separate - but that dont cause the crawl to happen twice. Just once with two reports per crawl..
+ * FEATURE: Page-caching? Maybe? Any interest? would be nice particularly for geocaching...
+ * FEATURE: Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
  
- * We might want to parse the sub-locations in the geo-location code... (so for miami: brw/mia/wpb)
- 
- * Should we have 'defined searches' in the yaml and then apply these defitions to a report? 
- 	* It would be nice to have one search definition for 'art I want' and then allow these
- 	* to be referenced in separate reports for 'art in florida', 'art in nyc', 'art everywhere esle' ..
- 	* The other  thing I'd like to do though is have "New art watch/Classic Artwatch" type reports that look
- 	* separate - but that dont cause the crawl to happen twice. Just once with two reports per crawl..
+ * FEATURE: We might want to parse the sub-locations in the geo-location code... (so for miami: brw/mia/wpb)
 
 Recheks in a week (5.11.09 was last tried)
 
@@ -71,3 +68,30 @@ Scripts aggregators:
 	http://www.scriptsearch.com/
 	http://www.sitescripts.com/PHP/
 	http://www.scriptsbank.com/
+------------------------------------------
+# Quickie craigscrape examples/tests:
+$: << './lib'
+require 'libcraigscrape'
+
+CraigScrape.new('us/fl/miami', 'us/fl/keys').posts_since(Time.now - 3600*48, 'search/sss?query=z06')
+CraigScrape.new('us/fl/miami').posts('search/sss?query=z06')
+i=0; CraigScrape.new('us/fl/miami', 'us/fl/keys').each_post('rea', 'search/sss?query=rack'){|p| break if i>50; puts p.inspect ;i += 1;}
+CraigScrape.new('us/fl/miami', 'us/fl/keys').each_listing('rea', 'search/sss?query=rack'){ |listing| puts listing.inspect }
+CraigScrape.new('us/fl/miami', 'us/fl/keys').listings('rea', 'search/sss?query=rack')
+
+
+-----------------------------------------
+# Quickie way to analyze an email:
+email='email contents here'
+r=/regex-here/
+
+email.tr('\n', '').scan( /http\:\/\/[^ \"]+/).reject{|l| !/\.html/.match l}.each{ |l|
+  puts "\nURL: %s" % l
+  c = CraigScrape::Posting.new l
+  puts "  * Label : %s" % r.match(c.label).to_a[0]
+  puts "  * Contents: %s" % r.match(c.contents_as_plain).to_a[0]
+}
+
+
+c = CraigScrape::Posting.new 'http://miami.craigslist.org/mdc/apa/1365874979.html'
+r.match c.contents_as_plain
