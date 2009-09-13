@@ -1,29 +1,12 @@
 0.8.0 TODO: 
  * Go through the rdoc README and otherwise todos - 
  	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
- 	* Documentation TODO: let's just document this somewhere then: If we omit 'starting' fromt he yaml - it defaults to one day old... that right? Yea - I guess thats a sensible default.
 
- * craigwatch rdoc needs big revisions
- 	* lsiting became sites and listings
- 	* Examples should be like:
-	 	south_fl = CraigScrape.new 'us/fl/miami', 'us/fl/keys'
-		
-		south_fl.each_listing('rea', 'search/sss?query=rack') do |listing|
-			listing.each_post do |post|
-				next if post.date > whatever
-			end
-		}
-		
-		south_fl.each_post('rea', 'search/sss?query=rack') do
-			# Not very memory efficient
-			# Should sort them by relative date! (this might actually work! )
-		end
-		
-		south_fl.posts('rea', 'search/sss?query=rack').each do
-			break if post.older_then_we_could_care_about?
-		end
+ * Test the examples in README, and publish!
+
 
 Post-0.8:
+ * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
  * FEATURE: Add the craigwatch_debug feature - and monitor it... (There's a TODO in there...)
 	* Shows the current progress...? (pages fetched, objects in caches..) 
  * FEATURE: Get the YAML template features working in the chris_report.yml

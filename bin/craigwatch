@@ -15,10 +15,14 @@
 # - price_required - yes/no
 # - price_greater_than - (int)
 # - price_less_than - (int)
-# - full_post_has - (string or regexp) Only post whose full-post's contents contains/matches
-# - full_post_has_no - (string or regexp) Only post whose full-post's contents_ contains doesn't contain/match
-# - summary_post_has - (string or regexp) Only post whose listing's label contains/matches
-# - summary_post_has_no - (string or regexp) Only post whose listing's label doesn't contain/match
+# - full_post_has - (array of string or regexp) Only post whose full-post's contents contains/matches
+# - full_post_has_no - (array of string or regexp) Only post whose full-post's contents_ contains doesn't contain/match
+# - summary_post_has - (array of string or regexp) Only post whose listing's label contains/matches
+# - summary_post_has_no - (array of string or regexp) Only post whose listing's label doesn't contain/match
+# - summary_or_full_post_has - (array of string or regexp) Filter's out results which don't match either the post label <b>or</b> the post contents
+# - summary_or_full_post_has_no - (array of string or regexp)  Filter's out results which match either the post label <b>or</b> the post contents
+# - location_has - (array of string or regexp) Only include posts which match against the post location
+# - location_has_no - (array of string or regexp) Only include posts which don't match against the post location
 #
 # Multiple searches can be combined into a single report, and results can be sorted by newest-first or oldest-first (default)
 # 
@@ -58,8 +62,44 @@
 # - debug_craigscrape
 #
 # == Definition File Sample
-# 
-# Here's a simple annotated report which uses most of the available craigwatch features:
+#
+# Let's start with a minimal report, just enough needed to get something quick working: 
+#    # We need some kind of destination to send this to
+#    email_to: Chris DeRose <cderose@derosetechnologies.com>
+#    
+#    # This is an array of specific 'searches' we'll be performing in this report:
+#    searches:
+#         # We're looking for 90's era cadillac, something cheap, confortable and in white...
+#       - name: 90's White/Creme Convertible Cadillacs
+#
+#         # This starting date is mostly for the first run, and gives us a reasonable cut-off point from whcih to build.
+#         # Its optional, and if omitted, craigwatch defaults to 'yesterday'
+#         starting: 9/10/09
+#
+#         # We want to check all the labels, and filter out years not in the 90's, and cars not made by cadillac
+#         summary_post_has:
+#            - /(?:^|[^\d]|19)9[\d](?:[^\dk]|$)/i
+#            - /cadillac/i
+#
+#         # I said we're looking for something *comfortable* !
+#         summary_post_has_no: [ /xlr/i ]
+#
+#         # We were convertable, and white/cream/etc:
+#         full_post_has: 
+#            - /convertible/i
+#            - /(white|yellow|banana|creme|cream)/i
+#
+#         # Convertible - not *simulated* convertible!
+#         full_post_has_no:
+#            - /simulated[^a-z]{0,2}convertible/i
+#
+#         # We want to search all of craigslist's in the us, and we'll want to find it using 
+#         # the '/search/cta?hasPic=1&query=cadillac' url on the site
+#         sites: [ us ]
+#         listings:
+#            - /search/cta?hasPic=1&query=cadillac
+#
+# Here's another annotated report which uses most of the other available craigwatch features:
 #
 #    # The report_name is fed into Time.now.strftime, hence the formatting characters
 #    report_name: Craig Watch For Johnathan on %D at %I:%M %p
@@ -73,13 +113,13 @@
 #    searches:
 #       # Search #1:
 #       - name: Schwinn Bikes For Sale in/near New York
+#         starting: 9/10/2009
+#
+#         # Scrape the following sites/servers:
+#         sites: [ us/ny/newyork, us/nj/southjersey ]
 #
 #         # Scrape the following listings pages:
-#         listing:
-#            - http://newyork.craigslist.org/bik/
-#            - http://newyork.craigslist.org/jsy/bik/
-#         # This starting date is mostly for the first run, and gives us a reasonable cut-off point from whcih to build
-#         starting: 5/2/2009
+#         listings: [ bik ]
 #
 #         # We want listings with Schwinn in the summary
 #         summary_post_has: [ /schwinn/i ]
@@ -92,10 +132,13 @@
 #     
 #       # Search #2
 #       - name: Large apartment rentals in San Francisco
+#         sites: [ us/ca/sfbay ]
+#         starting: 9/10/2009
+#    
 #         # We're going to rely on craigslist's built-in search for this one since there's a lot of listings, and we 
 #         # want to conserve some bandwidth
-#         listing: [ http://sfbay.craigslist.org/search/apa?query=pool&minAsk=min&maxAsk=max&bedrooms=5 ]
-#         starting: 5/2/2009
+#         listings: [ /search/apa?query=pool&minAsk=min&maxAsk=max&bedrooms=5 ]
+#
 #         # We'll require a price to be listed, 'cause it keeps out some of the unwanted fluff
 #         price_required: yes
 # 

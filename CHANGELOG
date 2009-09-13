@@ -1,20 +1,22 @@
 == Change Log
 
 === Release 0.8.0 (TODO, 2009)
+- Lots of substantial changes to the API & craigwatch (though backwards compatibility is mostly there)
 - Added :code_tests to the rakefile
 - Report definitions don't need a full path to the :dbfile, the parameter here can now be relative to the yaml file itself
 - Added a Listings::next_page
 - craigwatch: When not specifying a regex in _has or _has_no, we now perform an insensitive search
 - Created CraigScrape::GeoListings.find_sites, & CraigScrape::GeoListings.sites_in_path methods
-- *Large API changes* Added a constructor to CraigScrape, and changed a number of ways that sites are scraped
+- <b>Large API changes</b> Added a constructor to CraigScrape, and changed a number of ways that sites are scraped
 - Changed the format of the craigwatch tracking db - you'll need to delete any db's you already have and let the migrations re-run
 - craigwatch is *much* more efficient with memory. Feel free to scrape the whole world now!
-- craigwatch's yml changed a bit - Rdoc TODO here: (document this)
+- craigwatch's yml changed a bit - documented in craigwatch
 - We'll more or less automatically figure out the tracking_database in craigwatch if none is specified (will default to sqlite and auto-generated filename)
 - craigwatch report_name is optional too now and can largely figure itself out
 - Added summary_or_full_post_has and summary_or_full_post_has_no as craigwatch report parameters
 - If a craigwatch search comes up empty - we now indicate that no results were found...
 - Added location_has, location_has_no to craigwatch
+- Cleaned up thge rdoc to clarify all the new syntax/features
 
 === Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring
