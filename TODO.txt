@@ -1,9 +1,9 @@
-0.8.0 TODO: 
- * Go through the rdoc README and otherwise todos - 
+* Go through the rdoc README and otherwise todos - 
  	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
-
- * Test the examples in README, and publish!
-
+   * Add a listings: [ brw/apa ] example in both the api and the examples (notice the brw)
+   * Make a note about how to think ahead so your memory consumption doesnt get ridiculous
+   
+* Test the examples in README, and publish!
 
 Post-0.8:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
@@ -65,7 +65,12 @@ CraigScrape.new('us/fl/miami', 'us/fl/keys').listings('rea', 'search/sss?query=r
 
 -----------------------------------------
 # Quickie way to analyze an email:
-email='email contents here'
+$: << './lib'
+require 'libcraigscrape'
+
+email=<<EOD
+email contents here
+EOD
 r=/regex-here/
 
 email.tr('\n', '').scan( /http\:\/\/[^ \"]+/).reject{|l| !/\.html/.match l}.each{ |l|
@@ -74,7 +79,3 @@ email.tr('\n', '').scan( /http\:\/\/[^ \"]+/).reject{|l| !/\.html/.match l}.each
   puts "  * Label : %s" % r.match(c.label).to_a[0]
   puts "  * Contents: %s" % r.match(c.contents_as_plain).to_a[0]
 }
-
-
-c = CraigScrape::Posting.new 'http://miami.craigslist.org/mdc/apa/1365874979.html'
-r.match c.contents_as_plain

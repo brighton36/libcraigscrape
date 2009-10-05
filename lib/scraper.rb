@@ -158,7 +158,7 @@ class CraigScrape::Scraper
         
         raise FetchError, error_description
       end
-    rescue FetchError,Timeout::Error,Errno::ECONNRESET => err
+    rescue FetchError,Timeout::Error,Errno::ECONNRESET,EOFError => err
       logger.info 'Timeout error while requesting "%s"' % @url if logger and err.class == Timeout::Error
       logger.info 'Connection reset while requesting "%s"' % @url if logger and err.class == Errno::ECONNRESET
       
