@@ -38,8 +38,8 @@ class CraigScrape::Scraper
   attr_reader :url
 
   # Set some defaults:
-  self.retries_on_fetch_fail = 4
-  self.sleep_between_fetch_retries = 8
+  self.retries_on_fetch_fail = 8
+  self.sleep_between_fetch_retries = 30
 
   class BadConstructionError < StandardError #:nodoc:
   end
