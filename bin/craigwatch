@@ -488,13 +488,12 @@ report_summaries = craig_report.searches.collect do |search|
               !new_summaries.has_key? post.url and 
               search.passes_filter? post
             )
-          rescue CraigScrape::Scraper::FetchError => e
-            # TODO: Put some error output to the screen if craigwatch_debug is on
-
+          rescue CraigScrape::Scraper::ResourceNotFoundError => e
             # Sometimes we do end up with 404's that will never load, and we dont want to
             # abort a run simply b/c we found some anomaly due to the craigslist index.
-            # being out of date. This FetchError can occur due to post_date or filtering
-            # which will load the post url in full
+            # being out of date. This ResourceNotFoundError can occur due to 
+            # loading the post url in full, only to see that it was yanked - or craigslist 
+            # is acting funny.
             next
           end
       

@@ -77,7 +77,7 @@ This grabs the post summaries of the single listings at http://miami.craigslist.
   require 'rubygems'
   require 'libcraigscrape'
   
-  listing = CraigScrape::Listing.new 'http://miami.craigslist.org/search/sss?query=laptop'
+  listing = CraigScrape::Listings.new 'http://miami.craigslist.org/search/sss?query=laptop'
   puts 'Found %d posts for the search "laptop" on this page' % listing.posts.length
 
 == Author

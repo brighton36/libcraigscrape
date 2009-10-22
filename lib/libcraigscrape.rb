@@ -54,9 +54,10 @@ class CraigScrape
   # Passes <b>each page on every listing</b> for the passed URLs to the provided block.
   def each_page_in_each_listing(*fragments)
     each_listing(*fragments) do |listing|
-      listing.posts.each{|post| yield listing}
-      listing = listing.next_page 
-      retry if listing
+      while listing
+        yield listing
+        listing = listing.next_page 
+      end
     end
   end
   
@@ -95,9 +96,8 @@ class CraigScrape
   # (Returns 'newest' posts first).
   def posts_since(newer_then, *fragments)
     ret = []
-    
     fragments.each do |frag|
-      each_post(frag) do |p| 
+      each_post(frag) do |p|
         break if p.post_date <= newer_then
         ret << p
       end

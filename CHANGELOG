@@ -17,6 +17,7 @@
 - If a craigwatch search comes up empty - we now indicate that no results were found...
 - Added location_has, location_has_no to craigwatch
 - Cleaned up thge rdoc to clarify all the new syntax/features
+- Added Scraper::retries_on_404_fail, Scraper::sleep_between_404_retries to help deal with some of the subtleties in handling connection reset errors different than the 404's
 
 === Release 0.7.0 (Jul 5, 2009)
 - A good bit of refactoring

@@ -30,6 +30,8 @@ class CraigScrape::Scraper
   cattr_accessor :logger
   cattr_accessor :sleep_between_fetch_retries
   cattr_accessor :retries_on_fetch_fail
+  cattr_accessor :retries_on_404_fail
+  cattr_accessor :sleep_between_404_retries
 
   URL_PARTS = /^(?:([^\:]+)\:\/\/([^\/]*))?(.*)$/
   HTML_TAG  = /<\/?[^>]*>/
@@ -40,6 +42,9 @@ class CraigScrape::Scraper
   # Set some defaults:
   self.retries_on_fetch_fail = 8
   self.sleep_between_fetch_retries = 30
+  
+  self.retries_on_404_fail = 3
+  self.sleep_between_404_retries = 3
 
   class BadConstructionError < StandardError #:nodoc:
   end
@@ -51,6 +56,9 @@ class CraigScrape::Scraper
   end
 
   class FetchError < StandardError #:nodoc:
+  end
+
+  class ResourceNotFoundError < StandardError #:nodoc:
   end
   
   # Scraper Objects can be created from either a full URL (string), or a Hash.
@@ -136,6 +144,7 @@ class CraigScrape::Scraper
   
   def fetch_http(uri)
     fetch_attempts = 0
+    resource_not_found_attempts = 0
       
     begin
       # This handles the redirects for us          
@@ -152,18 +161,26 @@ class CraigScrape::Scraper
         fetch_uri URI.parse(url_from_href(redirect_to))
       else
         # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
-        error_description = 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
-
-        logger.info error_description if logger
-        
-        raise FetchError, error_description
+        raise ResourceNotFoundError, 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
       end
+    rescue ResourceNotFoundError => err
+      logger.info err.message if logger
+      
+      resource_not_found_attempts += 1
+      
+      if resource_not_found_attempts <= self.retries_on_404_fail
+        sleep self.sleep_between_404_retries if self.sleep_between_404_retries
+        logger.info 'Retrying ....' if logger
+        retry
+      else
+        raise err
+      end      
     rescue FetchError,Timeout::Error,Errno::ECONNRESET,EOFError => err
       logger.info 'Timeout error while requesting "%s"' % @url if logger and err.class == Timeout::Error
       logger.info 'Connection reset while requesting "%s"' % @url if logger and err.class == Errno::ECONNRESET
       
       fetch_attempts += 1
-
+      
       if fetch_attempts <= self.retries_on_fetch_fail
         sleep self.sleep_between_fetch_retries if self.sleep_between_fetch_retries
         logger.info 'Retrying fetch ....' if logger
