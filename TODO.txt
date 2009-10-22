@@ -1,13 +1,7 @@
-* Fix that annoying fucking 404 bug in the craigwatch where it wont stop!
 * Go through the rdoc README and otherwise todos - 
  	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
    * Add a listings: [ brw/apa ] example in both the api and the examples (notice the brw)
    * Make a note about how to think ahead so your memory consumption doesnt get ridiculous
-
-
-* Test the last of the examples, and publish!
-	* TEST: Scrape Single Craigslist Posting
-	* TEST: Scrape Single Craigslist Listing
 
 Post-0.8.0:
 	* Ruby 1.9 support

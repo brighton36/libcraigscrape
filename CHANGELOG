@@ -1,6 +1,6 @@
 == Change Log
 
-=== Release 0.8.0 (TODO, 2009)
+=== Release 0.8.0 (Oct 22, 2009)
 - Lots of substantial changes to the API & craigwatch (though backwards compatibility is mostly there)
 - Added :code_tests to the rakefile
 - Report definitions don't need a full path to the :dbfile, the parameter here can now be relative to the yaml file itself
