@@ -7,12 +7,6 @@ require File.dirname(__FILE__)+'/libcraigscrape_test_helpers'
 class CraigslistListingTest < Test::Unit::TestCase
   include LibcraigscrapeTestHelpers
   
-  def test_pukes
-    assert_raise(CraigScrape::Scraper::ParseError) do
-      CraigScrape::Listings.new( relative_uri_for('google.html') ).posts
-    end
-  end
-
   def test_listings_parse 
     category = CraigScrape::Listings.new relative_uri_for('listing_samples/category_output.html')
     assert_equal 'index100.html', category.next_page_href
@@ -213,6 +207,11 @@ class CraigslistListingTest < Test::Unit::TestCase
      
      miami_search_sss_rack1000_061809 = CraigScrape::Listings.new relative_uri_for('listing_samples/miami_search_sss_rack.6.18.09/miami_search_sss_rack1000.6.18.09.html')
      assert_equal nil, miami_search_sss_rack1000_061809.next_page_href
+     
+     # The first post on these results were causing problems at one point, due to the CraigScrape::Listings::LABEL regex
+     mia_sss_kittens021010 = CraigScrape::Listings.new relative_uri_for('listing_samples/mia_sss_kittens2.10.10.html')
+     assert_equal 'Two adorable kittens need new homes', mia_sss_kittens021010.posts[0].label
+     assert_equal '/brw/pet/1594409444.html', mia_sss_kittens021010.posts[0].href
   end
 
 

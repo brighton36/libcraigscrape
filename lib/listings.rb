@@ -9,7 +9,7 @@ require 'scraper'
 
 # Listings represents a parsed Craigslist listing page and is generally returned by CraigScrape.scrape_listing
 class CraigScrape::Listings < CraigScrape::Scraper
-  LABEL          = /^(.+?)[ ]*\-$/
+  LABEL          = /^(.+?)[ ]*[\-]?$/
   LOCATION       = /^[ ]*\((.*?)\)$/
   IMG_TYPE       = /^[ ]*(.+)[ ]*$/
   HEADER_DATE    = /^[ ]*[^ ]+[ ]+([^ ]+)[ ]+([^ ]+)[ ]*$/
@@ -23,7 +23,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
       @posts = []
 
       post_tags = html.get_elements_by_tag_name('p','h4')
-      
+
       # The last p in the list is sometimes a 'next XXX pages' link. We don't want to include this in our PostSummary output:
       post_tags.pop if (
         post_tags.length > 0 and 
@@ -36,7 +36,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
         case el.name
           when 'p'
            post_summary = self.class.parse_summary el, current_date
-           
+
            # Validate that required fields are present:
            parse_error! unless [post_summary[:label],post_summary[:href]].all?{|f| f and f.length > 0}
     
