@@ -2,6 +2,8 @@
 
 === Release 0.8.1 (Feb 10, 2010)
 - Found an odd parsing bug occured for the first time today. Scrape sample is in 'listing_samples/mia_sss_kittens2.10.10.html', Adjusted CraigScrape::Listings::LABEL to fix. 
+- Switched to require "active_support" per the deprecation notices
+- Little adjustments to fix the rdoc readibility
 
 === Release 0.8.0 (Oct 22, 2009)
 - Lots of substantial changes to the API & craigwatch (though backwards compatibility is mostly there)

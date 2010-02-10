@@ -3,16 +3,19 @@
 # All of libcraigscrape's objects and methods are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
 
+require 'net/http'
+require 'zlib'
+
+require 'rubygems'
+require 'active_support'
+require 'hpricot'
+require 'htmlentities'
+
 # A base class encapsulating the various libcraigscrape objects, and providing most of the 
 # craigslist interaction methods. Currently, we're supporting the old Class methods 
 # in a legacy-compatibility mode, but these methods are marked for deprecation. Instead,
 # create an instance of the Craigslist object, and use its Public Instance methods.
 # See the README for easy to follow examples.
-class CraigScrape; end
-
-require 'listings'
-require 'posting'
-require 'geo_listings'
 
 class CraigScrape
   cattr_accessor :time_now
@@ -203,3 +206,7 @@ class CraigScrape
   end
 
 end
+
+require 'listings'
+require 'posting'
+require 'geo_listings'

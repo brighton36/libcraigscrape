@@ -9,14 +9,6 @@
 # are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
 
-require 'net/http'
-require 'zlib'
-
-require 'rubygems'
-require 'activesupport'
-require 'hpricot'
-require 'htmlentities'
-
 # Scraper is a general-pupose base class for all libcraigscrape Objects. Scraper facilitates all http-related 
 # functionality, and adds some useful helpers for dealing with eager-loading of http-objects and general html
 # methods. It also contains the http-related cattr_accessors:
