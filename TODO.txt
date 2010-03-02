@@ -1,10 +1,17 @@
+* There's a bug where the rdoc generates Crauigscrape weird in the package. It has to do with this not being the case in the gem:
+	  * # NOTE: If you don't put libcraigscrape.rb at the beginning, the rdoc ends up looking a little screwy
+      rdoc.rdoc_files.add RDOC_FILES+Dir.glob('lib/*.rb').sort_by{|a,b| (a == 'lib/libcraigscrape.rb') ? -1 : 0 } 
+		* In fact, we might want to move all those requires up to the top of libcraigscrape again  once we fix this... 
+* I think a lot of stuff below has been adjusted - clean up this todo?
+
+
 * Go through the rdoc README and otherwise todos - 
  	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
    * Add a listings: [ brw/apa ] example in both the api and the examples (notice the brw)
    * Make a note about how to think ahead so your memory consumption doesnt get ridiculous
 
 Post-0.8.0:
-	* Ruby 1.9 support
+	* Ruby 1.9 support - respond to Jarom West (see bottom)
 	
 Post-0.8.1:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
@@ -80,3 +87,40 @@ email.tr('\n', '').scan( /http\:\/\/[^ \"]+/).reject{|l| !/\.html/.match l}.each
   puts "  * Label : %s" % r.match(c.label).to_a[0]
   puts "  * Contents: %s" % r.match(c.contents_as_plain).to_a[0]
 }
+
+-----------------------------------------
+From: 	Jarom West <jarom.west@gmail.com>
+To: 	cderose@derosetechnologies.com
+Subject: 	libcraigscrape question
+Date: 	10/15/2009 03:22:27 PM (Thu, 15 Oct 2009 12:22:27 -0700)
+
+
+Hi Mr. DeRose,
+
+I've been tinkering with your libcraigscrape library over the past few months to find things on craigslist, and recently upgraded my version of Ruby and Ruby Gems. As of this upgrade, I can't seem to make the "craigwatch" script run anymore. I really find your software very useful and wonder if perhaps maybe you have a suggestion as to where I might be going wrong. Below is the output I'm receiving.
+
+bash-3.2$ craigwatch
+/usr/local/bin/craigwatch:19:in `load': /usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:139: syntax error, unexpected ':', expecting keyword_then or ',' or ';' or '\n' (SyntaxError)
+        when 'i': Regexp::IGNORECASE
+                 ^
+/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:140: syntax error, unexpected keyword_when, expecting keyword_end
+        when 'x': Regexp::EXTENDED
+            ^
+/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:140: syntax error, unexpected ':', expecting keyword_end
+        when 'x': Regexp::EXTENDED
+                 ^
+/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:141: syntax error, unexpected keyword_when, expecting keyword_end
+        when 'm': Regexp::MULTILINE
+            ^
+/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:141: syntax error, unexpected ':', expecting keyword_end
+        when 'm': Regexp::MULTILINE
+                 ^
+/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:147: syntax error, unexpected keyword_end, expecting $end
+        from /usr/local/bin/craigwatch:19:in `<main>'
+-bash-3.2$ 
+
+I'm not exactly a Ruby wizard, and I'm not sure where I might be going wrong. I re-installed all the required gems to make this work and can't seem to figure out out. Maybe you have a suggestion?
+
+A big fan,
+
+J. West
