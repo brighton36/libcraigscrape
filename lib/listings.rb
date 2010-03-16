@@ -4,7 +4,6 @@
 # should never need to include this file directly, as all of libcraigscrape's objects and methods 
 # are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
-
 require 'scraper'
 
 # Listings represents a parsed Craigslist listing page and is generally returned by CraigScrape.scrape_listing
@@ -12,7 +11,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
   LABEL          = /^(.+?)[ ]*[\-]?$/
   LOCATION       = /^[ ]*\((.*?)\)$/
   IMG_TYPE       = /^[ ]*(.+)[ ]*$/
-  HEADER_DATE    = /^[ ]*[^ ]+[ ]+([^ ]+)[ ]+([^ ]+)[ ]*$/
+  HEADER_DATE    = /^[ ]*(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Nov|Dec)[ ]+([0-9]{1,2})[ ]*$/i
   SUMMARY_DATE   = /^[ ]([^ ]+)[ ]+([^ ]+)[ ]*[\-][ ]*$/
   NEXT_PAGE_LINK = /^[ ]*next [\d]+ postings[ ]*$/
 
@@ -30,7 +29,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
         post_tags.last.at('a') and 
         NEXT_PAGE_LINK.match post_tags.last.at('a').inner_html
       )
-      
+
       # Now we iterate though the listings:
       post_tags.each do |el|
         case el.name

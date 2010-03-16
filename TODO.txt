@@ -2,18 +2,13 @@
 	  * # NOTE: If you don't put libcraigscrape.rb at the beginning, the rdoc ends up looking a little screwy
       rdoc.rdoc_files.add RDOC_FILES+Dir.glob('lib/*.rb').sort_by{|a,b| (a == 'lib/libcraigscrape.rb') ? -1 : 0 } 
 		* In fact, we might want to move all those requires up to the top of libcraigscrape again  once we fix this... 
-* I think a lot of stuff below has been adjusted - clean up this todo?
 
+* Add craigwatch object tests....
 
-* Go through the rdoc README and otherwise todos - 
- 	* adjust the scrape_ reference(s) to use the CraigScrape.new(*paths) syntax
-   * Add a listings: [ brw/apa ] example in both the api and the examples (notice the brw)
-   * Make a note about how to think ahead so your memory consumption doesnt get ridiculous
-
-Post-0.8.0:
+Post-0.8.2:
 	* Ruby 1.9 support - respond to Jarom West (see bottom)
-	
-Post-0.8.1:
+
+Post-0.8.2:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
  * FEATURE: Add the craigwatch_debug feature - and monitor it... (There's a TODO in there...)
 	* Shows the current progress...? (pages fetched, objects in caches..) 
@@ -30,35 +25,6 @@ Post-0.8.1:
  
  * FEATURE: We might want to parse the sub-locations in the geo-location code... (so for miami: brw/mia/wpb)
 
-Recheks in a week (5.11.09 was last tried)
-
-	* This thread:
-	http://sfbay.craigslist.org/forums/?ID=29345737
-	Title: craigwatch does this - if you're a little handy 
-	Message: 
-		craigwatch and libcraigscrape are a tightly-coupled, ruby solution for (largely) unix-based systems. 
-		<br>
-		<br>
-		Check it out here: 
-		<br>
-		<a target="_top" href="http://www.derosetechnologies.com/community/libcraigscrape">http://www.derosetechnologies.com/community/libcraigscrape</a>
-	* http://www.craigslistwatch.com/
-	* Did this actuallyt post?: http://digg.com/tech_news/Stop_wasting_money_use_Craigslist_Watch
-
-email: 
-	http://www.craigdiddy.com/competition.html
-	http://www.dostuffright.com/Craigwatch
-	http://wareseeker.com/Network-Internet/Craigslist-All-City-Search-Tool-1.2.zip/8036652
-	http://www.killerstartups.com/Search/craigslittlebuddy-com-multiple-city-craigslist-search
-	
-Scripts aggregators:
-	  bigwebmaster.com 
-	http://www.scripts.com/
-	http://www.scriptarchive.com/
-	http://www.needscripts.com/
-	http://www.scriptsearch.com/
-	http://www.sitescripts.com/PHP/
-	http://www.scriptsbank.com/
 ------------------------------------------
 # Quickie craigscrape examples/tests:
 $: << './lib'

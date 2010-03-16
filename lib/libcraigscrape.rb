@@ -2,7 +2,6 @@
 #
 # All of libcraigscrape's objects and methods are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
-
 require 'net/http'
 require 'zlib'
 
@@ -197,7 +196,7 @@ class CraigScrape
   # Returns the most recentlt expired  time for the provided month and day
   def self.most_recently_expired_time(month, day)  #:nodoc:
     now = (time_now) ? time_now : Time.now
-    
+
     # This ensures we always generate a time in the past, by guessing the year and subtracting one if we guessed wrong
     ret = Time.local now.year, month, day
     ret = Time.local now.year-1, month, day if ret > now 
