@@ -106,8 +106,24 @@ class CraigScrape::Listings < CraigScrape::Scraper
   # We separate this from the rest of the parsing both for readability and ease of testing
   def self.parse_summary(p_element, date = nil)  #:nodoc:
     ret = {}
+
+    title_anchor   = nil
+    section_anchor = nil
+
+    # This loop got a little more complicated after Craigslist start inserting weird <spans>'s in 
+    # its list summary postings (See test_new_listing_span051710) 
+    p_element.search('a').each do |a_el|
+      # We want the first a-tag that doesn't have spans in it to be the title anchor
+      if title_anchor.nil?
+        title_anchor = a_el if !a_el.at('span')
+      # We want the next a-tag after the title_anchor to be the section anchor
+      elsif section_anchor.nil?
+        section_anchor = a_el
+        # We have no need to tranverse these further:
+        break
+      end
+    end
     
-    title_anchor, section_anchor  = p_element.search 'a'
     location_tag = p_element.at 'font'
     has_pic_tag = p_element.at 'span'
     

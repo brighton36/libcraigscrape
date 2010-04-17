@@ -17,7 +17,7 @@ PKG = "#{NAME}-#{VERS}"
 RDOC_OPTS = ['--quiet', '--title', 'The libcraigscrape Reference', '--main', 'README', '--inline-source']
 RDOC_FILES = ['README', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/craigwatch']
 PKG_FILES = (%w(Rakefile) + RDOC_FILES + Dir.glob("{bin,test,lib}/**/*")).uniq.sort_by{|a,b| (a == 'lib/libcraigscrape.rb') ? -1 : 0 }
-puts PKG_FILES
+
 SPEC =
   Gem::Specification.new do |s|
     s.name = NAME

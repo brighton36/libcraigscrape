@@ -254,5 +254,109 @@ class CraigslistListingTest < Test::Unit::TestCase
 
   end
 
-
+  def test_new_listing_span051710_labels
+    new_listing_span051710 = CraigScrape::Listings.new relative_uri_for('listing_samples/new_listing_span.4.17.10.html')
+    
+    assert_equal " Art Directly for Sale from the Artist", new_listing_span051710.posts[0].label
+    assert_equal "Wall Art, Contemporary Abstract by Vista Gallories", new_listing_span051710.posts[1].label
+    assert_equal "Gary George \"Darice\" Giclee Semi Nude Woman COA NEW", new_listing_span051710.posts[2].label
+    assert_equal "electric clock kits", new_listing_span051710.posts[3].label
+    assert_equal "Artificial Bonsai arrangements (3)", new_listing_span051710.posts[4].label
+    assert_equal "Wall Canvass", new_listing_span051710.posts[5].label
+    assert_equal "seeking drafting table", new_listing_span051710.posts[6].label
+    assert_equal "great electrical  air compressor LIKE NEW", new_listing_span051710.posts[7].label
+    assert_equal "Mannequin Male Full Torso Display Form", new_listing_span051710.posts[8].label
+    assert_equal "CRAB NETS 12 X12 X7", new_listing_span051710.posts[9].label
+    assert_equal "Hundreds of Loose Beads from old Jewelry &newer Seed Beads arts crafts", new_listing_span051710.posts[10].label
+    assert_equal "HUNDREDS OF LOOSE BEADS VARIETY FOR ARTS CRAFTS MAKING JEWELRY", new_listing_span051710.posts[11].label
+    assert_equal "consolidated b-24d liberator", new_listing_span051710.posts[12].label
+    assert_equal "nort american p-51b mustang", new_listing_span051710.posts[13].label
+    assert_equal "spitfire mk.ixc kenley wing", new_listing_span051710.posts[14].label
+    assert_equal "republic p-47d thunderbolt bubbletop", new_listing_span051710.posts[15].label
+    assert_equal "Artistic & Commercial Mannequin Female Torso Ladies Form", new_listing_span051710.posts[16].label
+    assert_equal "Start your own Bath & Beauty company", new_listing_span051710.posts[17].label
+    assert_equal "hurricane mk.2 eagle squadron", new_listing_span051710.posts[18].label
+    assert_equal "HUGE Lot Iron-Ons Appliques-Craft Decals-Fabric-Holidays, Looney Tunes", new_listing_span051710.posts[19].label
+    assert_equal "typhoon mk.ib", new_listing_span051710.posts[20].label
+    assert_equal "Beautiful Handmade Sea Shell Candles - Great Gift Ideas", new_listing_span051710.posts[21].label
+    assert_equal "bristol beaufighter mk.vi", new_listing_span051710.posts[22].label
+    assert_equal "hawker tempest mk.v", new_listing_span051710.posts[23].label
+    assert_equal "gloster meteor f.1.v.1", new_listing_span051710.posts[24].label
+    assert_equal "Painted art picture with frame 43\"L X 31\"H", new_listing_span051710.posts[25].label
+    assert_equal "messerschmitt me 410b-2/u4", new_listing_span051710.posts[26].label
+    assert_equal "Matching Set 4 Wild Cat Prints Framed in Gold-Cheetah, Leopard, Lion", new_listing_span051710.posts[27].label
+    assert_equal "CATS IN PAJAMAS FRAMED PRINT-SIGNED-KATHRYN RAMSEUR GLICK 1995-NUMBERD", new_listing_span051710.posts[28].label
+    assert_equal "4 Needlecraft Books", new_listing_span051710.posts[29].label
+    assert_equal "UNIQUE HIDDEN ANGEL PRINT-MATTED & FRAMED Retails $89.99-Signed-Ocampa", new_listing_span051710.posts[30].label
+    assert_equal "royal air force hawker hurricane", new_listing_span051710.posts[31].label
+    assert_equal "UNIQUE LARGE PRINT-HANDS OF TIME-BY OCTAVIO - RETAILS $139.00", new_listing_span051710.posts[32].label
+    assert_equal "LARGE COBBLESTONE FRAMED PRINT LANDSCAPE BY HAILS - SIGNED 1996", new_listing_span051710.posts[33].label
+    assert_equal "zero fighier", new_listing_span051710.posts[34].label
+    assert_equal "UNIQUE 1 OF A KIND -HANDMADE JEWELRY", new_listing_span051710.posts[35].label
+    assert_equal "YARN YARN YARN", new_listing_span051710.posts[36].label
+    assert_equal "2012 Original Paintings", new_listing_span051710.posts[37].label
+    assert_equal "picture with birds songs$10", new_listing_span051710.posts[38].label
+    assert_equal "Modern original Still Life painting SIGNED", new_listing_span051710.posts[39].label
+    assert_equal "afghans", new_listing_span051710.posts[40].label
+    assert_equal "Teamwork Print-Inspirational", new_listing_span051710.posts[41].label
+    assert_equal "Large number of ceramic molds for sale at Reasonable prices!", new_listing_span051710.posts[42].label
+    assert_equal "1982  Knitting Collection", new_listing_span051710.posts[43].label
+    assert_equal "Bell Small Wilton Cake Pan", new_listing_span051710.posts[44].label
+    assert_equal "Winnie The Pooh Wilton Cake Pan", new_listing_span051710.posts[45].label
+    assert_equal "Holly Hobbie Wilton Cake Pan", new_listing_span051710.posts[46].label
+    assert_equal "Quilt~ Hand Crafted~Beautiful hand crafted quilted wall hanging", new_listing_span051710.posts[47].label
+    assert_equal "Pretty Pictures", new_listing_span051710.posts[48].label
+    assert_equal "messerschmitt bf 109d", new_listing_span051710.posts[49].label
+    assert_equal "douglas a-20 g havoc", new_listing_span051710.posts[50].label
+    assert_equal "me262a-1a/u3 reconnaissance", new_listing_span051710.posts[51].label
+    assert_equal "p-36 pearl harbor defender", new_listing_span051710.posts[52].label
+    assert_equal "spitfire mk.xivc", new_listing_span051710.posts[53].label
+    assert_equal "ART KIT", new_listing_span051710.posts[54].label
+    assert_equal "Unique Recycled Glass  Melted Bottle Cheese Trays and dishes", new_listing_span051710.posts[55].label
+    assert_equal "T-SHIRT HEAT PRESS", new_listing_span051710.posts[56].label
+    assert_equal "Metal Alligator Wall Art With Neon Light", new_listing_span051710.posts[57].label
+    assert_equal "SOLAR GARDEN DECO LITES", new_listing_span051710.posts[58].label
+    assert_equal "POMPELL CHEETAH FRAMED ART PRINT & MATCHING THROW PILLOWS 35 X 27", new_listing_span051710.posts[59].label
+    assert_equal "\"YOU CAN DRAW\" 8 BOOKS IN 1", new_listing_span051710.posts[60].label
+    assert_equal "ROSEART SMART 3 IN 1 PORTFOLIO", new_listing_span051710.posts[61].label
+    assert_equal "art supplies", new_listing_span051710.posts[62].label
+    assert_equal "ZINC OXIDE", new_listing_span051710.posts[63].label
+    assert_equal "Wood Veneer", new_listing_span051710.posts[64].label
+    assert_equal "Scrapbook magazines", new_listing_span051710.posts[65].label
+    assert_equal "henri plisson fine art", new_listing_span051710.posts[66].label
+    assert_equal "Beautiful brand new bronze Fountain", new_listing_span051710.posts[67].label
+    assert_equal "Contemporary fine arts and quality handmade crafts", new_listing_span051710.posts[68].label
+    assert_equal "p-61 black widow", new_listing_span051710.posts[69].label
+    assert_equal "New Abstract Oil Paintings for Sale - Made in USA!", new_listing_span051710.posts[70].label
+    assert_equal "Fun Stamps", new_listing_span051710.posts[71].label
+    assert_equal "For Sale - Salvador Dali Print - Lincoln in Dalivision", new_listing_span051710.posts[72].label
+    assert_equal "For Sale Print on Canvas Gone with the Wind", new_listing_span051710.posts[73].label
+    assert_equal "For Sale - Two Framed Egyptian Prints on Papyrus", new_listing_span051710.posts[74].label
+    assert_equal "4/16 and 4/17 Gallery art unframed - gallery closed", new_listing_span051710.posts[75].label
+    assert_equal "Sewing patterns TONS 4/16 and 4/17", new_listing_span051710.posts[76].label
+    assert_equal "For Sale 4 panel Asian folding Art", new_listing_span051710.posts[77].label
+    assert_equal "@@@ Original Artwork on Print & signed", new_listing_span051710.posts[78].label
+    assert_equal "Three Moai Tikis", new_listing_span051710.posts[79].label
+    assert_equal "Stained Glass Kiln", new_listing_span051710.posts[80].label
+    assert_equal "Tiki Carved From Palm", new_listing_span051710.posts[81].label
+    assert_equal "The End is Near! 2012 painting", new_listing_span051710.posts[82].label
+    assert_equal "PAINTING BY KENT", new_listing_span051710.posts[83].label
+    assert_equal "ART SALE! ONLY $29 to $69 FOR THESE ORIGINAL PHOTO ART PIECES!", new_listing_span051710.posts[84].label
+    assert_equal " Contemporary Painting for Sale!!!", new_listing_span051710.posts[85].label
+    assert_equal "gift baskets and bears", new_listing_span051710.posts[86].label
+    assert_equal "Eyvind Earle Nocturne Serigraph", new_listing_span051710.posts[87].label
+    assert_equal "jo's watercolors", new_listing_span051710.posts[88].label
+    assert_equal "Eyvind Earle Carmel Cypress Serigraph", new_listing_span051710.posts[89].label
+    assert_equal "Eyvind Earle Stardust Blue Serigraph", new_listing_span051710.posts[90].label
+    assert_equal "Portraits painted of your loved ones", new_listing_span051710.posts[91].label
+    assert_equal "Attn Crafters! 10 Strands of Lemons", new_listing_span051710.posts[92].label
+    assert_equal "SARAH E. AND GULLS", new_listing_span051710.posts[93].label
+    assert_equal "cavalier 98", new_listing_span051710.posts[94].label
+    assert_equal "model kit fairey swordfish mk 2", new_listing_span051710.posts[95].label
+    assert_equal "jo's watercolors", new_listing_span051710.posts[96].label
+    assert_equal "Stampin' Up Rubber Stamps", new_listing_span051710.posts[97].label
+    assert_equal "Wyland Oil Painting", new_listing_span051710.posts[98].label
+    assert_equal "Denim Fabric Blocks for Crafts", new_listing_span051710.posts[99].label
+  end
+  
 end
