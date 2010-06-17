@@ -1,5 +1,8 @@
 == Change Log
 
+=== Release 0.8.3 (When?)
+- Added test_bugs_found061710 posting test. Note the fix of setting a high ulimit...
+
 === Release 0.8.2 (April 17, 2010)
 - Found another odd parsing bug. Scrape sample is in 'listing_samples/mia_search_kitten.3.15.10.html', Adjusted CraigScrape::Listings::HEADER_DATE to fix.
 - Craigslist started added <span> tags in its post summaries. Fixed. See sample in test_new_listing_span051710

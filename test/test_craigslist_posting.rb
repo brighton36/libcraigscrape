@@ -300,7 +300,35 @@ EOD
     assert_equal [], sfbay_art_1223614914.images
     assert_equal ["http://images.craigslist.org/3kf3o93laZZZZZZZZZ96fbc594a6ceb1f1025.jpg"], sfbay_art_1223614914.pics
     assert_equal [:pic], sfbay_art_1223614914.img_types
-
+  end
+  
+  # This is actually a 'bug' with hpricot itself when the ulimit is set too low. the Easy fix is running "ulimit -s 16384" before the tests.... 
+  def test_bugs_found061710
+    posting_061710 = CraigScrape::Posting.new relative_uri_for('post_samples/posting1796890756-061710.html')
+    
+    assert_equal false, posting_061710.deleted_by_author?
+    assert_equal true, posting_061710.downloaded?
+    assert_equal false, posting_061710.flagged_for_removal?
+    assert_equal ["south florida craigslist", "miami / dade", "for sale / wanted", "general for sale"], posting_061710.full_section
+    assert_equal false, posting_061710.has_img?
+    assert_equal false, posting_061710.has_pic?
+    assert_equal false, posting_061710.has_pic_or_img?
+    assert_equal "*****SOFTWARE**** (Dade/Broward)", posting_061710.header
+    assert_equal "*****SOFTWARE**** (Dade/Broward)", posting_061710.header_as_plain
+    assert_equal nil, posting_061710.href
+    assert_equal [], posting_061710.images
+    assert_equal [], posting_061710.img_types
+    assert_equal "*****SOFTWARE****", posting_061710.label
+    assert_equal "Dade/Broward", posting_061710.location
+    assert_equal [], posting_061710.pics
+    assert_equal [0, 0, 0, 17, 6, 2010, 4, 168, true, "EDT"], posting_061710.post_date.to_a
+    assert_equal [0, 22, 13, 17, 6, 2010, 4, 168, true, "EDT"], posting_061710.post_time.to_a
+    assert_equal 1796890756, posting_061710.posting_id
+    assert_equal nil, posting_061710.price
+    assert_equal nil, posting_061710.reply_to
+    assert_equal "general for sale", posting_061710.section
+    assert_equal false, posting_061710.system_post?
+    assert_equal "*****SOFTWARE****", posting_061710.title
   end
 
 end
