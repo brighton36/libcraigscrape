@@ -1,7 +1,7 @@
 == Change Log
 
 === Release 0.8.3 (When?)
-- Added test_bugs_found061710 posting test. Note the fix of setting a high ulimit...
+- Someone was posting really bad html that was screwing up Hpricot. Such is to be expected when you're soliciting html from the general public I suppose. Added test_bugs_found061710 posting test, and fixed by stripping out the user body before parsing with Hpricot.
 
 === Release 0.8.2 (April 17, 2010)
 - Found another odd parsing bug. Scrape sample is in 'listing_samples/mia_search_kitten.3.15.10.html', Adjusted CraigScrape::Listings::HEADER_DATE to fix.

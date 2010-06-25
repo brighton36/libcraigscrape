@@ -302,7 +302,9 @@ EOD
     assert_equal [:pic], sfbay_art_1223614914.img_types
   end
   
-  # This is actually a 'bug' with hpricot itself when the ulimit is set too low. the Easy fix is running "ulimit -s 16384" before the tests.... 
+  # This is actually a 'bug' with hpricot itself when the ulimit is set too low. 
+  # the Easy fix is running "ulimit -s 16384" before the tests. But the better fix was
+  # to remove the userbody sending these pages to be parsed by Hpricot
   def test_bugs_found061710
     posting_061710 = CraigScrape::Posting.new relative_uri_for('post_samples/posting1796890756-061710.html')
     
@@ -329,6 +331,31 @@ EOD
     assert_equal "general for sale", posting_061710.section
     assert_equal false, posting_061710.system_post?
     assert_equal "*****SOFTWARE****", posting_061710.title
+    
+    posting1808219423 = CraigScrape::Posting.new relative_uri_for('post_samples/posting1808219423.html')
+    assert_equal false, posting1808219423.deleted_by_author?
+    assert_equal true, posting1808219423.downloaded?
+    assert_equal false, posting1808219423.flagged_for_removal?
+    assert_equal ["south florida craigslist", "miami / dade", "for sale / wanted", "general for sale"], posting1808219423.full_section
+    assert_equal true, posting1808219423.has_img?
+    assert_equal false, posting1808219423.has_pic?
+    assert_equal true, posting1808219423.has_pic_or_img?
+    assert_equal "*Software*AdobeCS5*RosettaStone*AutoCAD*Windows7*Office2010*&* More (Dade/Broward)", posting1808219423.header
+    assert_equal "*Software*AdobeCS5*RosettaStone*AutoCAD*Windows7*Office2010*&* More (Dade/Broward)", posting1808219423.header_as_plain
+    assert_equal nil, posting1808219423.href
+    assert_equal ["http://i800.photobucket.com/albums/yy287/todofull69/Programas/office-2010.jpg", "http://i844.photobucket.com/albums/ab10/fziqe/adobeblogcopy.jpg", "http://i31.photobucket.com/albums/c383/drapizan/RosettaStone.jpg", "http://i1002.photobucket.com/albums/af142/tagurtoast/Windows_7.jpg", "http://i800.photobucket.com/albums/yy287/todofull69/Programas/office-2010.jpg", "http://i844.photobucket.com/albums/ab10/fziqe/adobeblogcopy.jpg", "http://i31.photobucket.com/albums/c383/drapizan/RosettaStone.jpg", "http://i1002.photobucket.com/albums/af142/tagurtoast/Windows_7.jpg", "http://i800.photobucket.com/albums/yy287/todofull69/Programas/office-2010.jpg", "http://i844.photobucket.com/albums/ab10/fziqe/adobeblogcopy.jpg", "http://i31.photobucket.com/albums/c383/drapizan/RosettaStone.jpg", "http://i1002.photobucket.com/albums/af142/tagurtoast/Windows_7.jpg", "http://i800.photobucket.com/albums/yy287/todofull69/Programas/office-2010.jpg", "http://i844.photobucket.com/albums/ab10/fziqe/adobeblogcopy.jpg", "http://i31.photobucket.com/albums/c383/drapizan/RosettaStone.jpg", "http://i1002.photobucket.com/albums/af142/tagurtoast/Windows_7.jpg", "http://i800.photobucket.com/albums/yy287/todofull69/Programas/office-2010.jpg", "http://i844.photobucket.com/albums/ab10/fziqe/adobeblogcopy.jpg", "http://i31.photobucket.com/albums/c383/drapizan/RosettaStone.jpg", "http://i1002.photobucket.com/albums/af142/tagurtoast/Windows_7.jpg"], posting1808219423.images
+    assert_equal [:img], posting1808219423.img_types
+    assert_equal "*Software*AdobeCS5*RosettaStone*AutoCAD*Windows7*Office2010*&* More", posting1808219423.label
+    assert_equal "Dade/Broward", posting1808219423.location
+    assert_equal [], posting1808219423.pics
+    assert_equal [0, 0, 0, 24, 6, 2010, 4, 175, true, "EDT"], posting1808219423.post_date.to_a
+    assert_equal [0, 35, 7, 24, 6, 2010, 4, 175, true, "EDT"], posting1808219423.post_time.to_a
+    assert_equal 1808219423, posting1808219423.posting_id
+    assert_equal nil, posting1808219423.price
+    assert_equal nil, posting1808219423.reply_to
+    assert_equal "general for sale", posting1808219423.section
+    assert_equal false, posting1808219423.system_post?
+    assert_equal "*Software*AdobeCS5*RosettaStone*AutoCAD*Windows7*Office2010*&* More", posting1808219423.title
   end
 
 end

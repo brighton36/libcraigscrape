@@ -19,6 +19,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   REPLY_TO        = /(.+)/
   PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
   USERBODY_PARTS  = /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m
+  HTML_HEADER     = /^(.+)\<div id\=\"userbody\">/m
   IMAGE_SRC       = /\<im[a]?g[e]?[^\>]*src=(?:\'([^\']+)\'|\"([^\"]+)\"|([^ ]+))[^\>]*\>/
 
   # This is really just for testing, in production use, uri.path is a better solution
@@ -33,12 +34,12 @@ class CraigScrape::Posting < CraigScrape::Scraper
       contents,posting_id,post_time,header,title,full_section
     ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
   end
-      
+
 
   # String, The contents of the item's html body heading
   def header
     unless @header
-      h2 = html.at 'h2' if html
+      h2 = html_head.at 'h2' if html_head
       @header = he_decode h2.inner_html if h2
     end
     
@@ -48,7 +49,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # String, the item's title
   def title
     unless @title
-      title_tag = html.at 'title' if html
+      title_tag = html_head.at 'title' if html_head
       @title = he_decode title_tag.inner_html if title_tag
       @title = nil if @title and @title.length == 0
     end
@@ -61,9 +62,9 @@ class CraigScrape::Posting < CraigScrape::Scraper
     unless @full_section
       @full_section = []
       
-      (html/"div[@class='bchead']//a").each do |a|
+      (html_head/"div[@class='bchead']//a").each do |a|
         @full_section << he_decode(a.inner_html) unless a['id'] and a['id'] == 'ef'
-      end if html
+      end if html_head
     end
 
     @full_section
@@ -72,7 +73,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # String, represents the post's reply-to address, if listed
   def reply_to
     unless @reply_to
-      cursor = html.at 'hr' if html
+      cursor = html_head.at 'hr' if html_head
       cursor = cursor.next_sibling until cursor.nil? or cursor.name == 'a'
       @reply_to = $1 if cursor and REPLY_TO.match he_decode(cursor.inner_html)
     end
@@ -83,7 +84,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # Time, reflects the full timestamp of the posting 
   def post_time
     unless @post_time
-      cursor = html.at 'hr' if html
+      cursor = html_head.at 'hr' if html_head
       cursor = cursor.next_node until cursor.nil? or POST_DATE.match cursor.to_s
       @post_time = Time.parse $1 if $1
     end
@@ -276,6 +277,16 @@ class CraigScrape::Posting < CraigScrape::Scraper
   end
 
   private
+
+  # I set apart from html to work around the SystemStackError bugs in test_bugs_found061710. Essentially we 
+  # return everything above the user_body
+  def html_head
+    @html_head = Hpricot.parse $1 if @html_head.nil? and HTML_HEADER.match html.to_s
+    # We return html itself if HTML_HEADER doesn't match, which would be case for a 404 page or something
+    @html_head ||= html
+     
+    @html_head
+  end
 
   # OK - so the biggest problem parsing the contents of a craigslist post is that users post invalid html all over the place
   # This bad html trips up hpricot, and I've resorted to splitting the page up using string parsing like so:
