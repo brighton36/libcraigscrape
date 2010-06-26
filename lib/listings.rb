@@ -48,7 +48,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
             # Generally, the H4 tags contain valid dates. When they do - this is easy:
             current_date = CraigScrape.most_recently_expired_time $1, $2
           elsif html.at('h4:last-of-type') == el
-            # There's a specific bug, where these nonsense h4's just appear without anything relevant inside them.
+            # There's a specific bug in craigslist, where these nonsense h4's just appear without anything relevant inside them.
             # They're safe to ignore if they're not the last h4 on the page. I fthey're the last h4 on the page, 
             # we need to pull up the full post in order to accurate tell the date.
             # Setting this to nil will achieve the eager-load.

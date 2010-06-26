@@ -488,7 +488,7 @@ report_summaries = craig_report.searches.collect do |search|
               !new_summaries.has_key? post.url and 
               search.passes_filter? post
             )
-          rescue CraigScrape::Scraper::ResourceNotFoundError => e
+          rescue CraigScrape::Scraper::ResourceNotFoundError,CraigScrape::Scraper::MaxRedirectError => e
             # Sometimes we do end up with 404's that will never load, and we dont want to
             # abort a run simply b/c we found some anomaly due to the craigslist index.
             # being out of date. This ResourceNotFoundError can occur due to 

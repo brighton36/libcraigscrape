@@ -29,6 +29,7 @@ class CraigScrape::Scraper
   cattr_accessor :retries_on_fetch_fail
   cattr_accessor :retries_on_404_fail
   cattr_accessor :sleep_between_404_retries
+  cattr_accessor :maximum_redirects_per_request
 
   URL_PARTS = /^(?:([^\:]+)\:\/\/([^\/]*))?(.*)$/
   HTML_TAG  = /<\/?[^>]*>/
@@ -42,6 +43,8 @@ class CraigScrape::Scraper
   
   self.retries_on_404_fail = 3
   self.sleep_between_404_retries = 3
+  
+  self.maximum_redirects_per_request = 20
 
   class BadConstructionError < StandardError #:nodoc:
   end
@@ -50,6 +53,9 @@ class CraigScrape::Scraper
   end
 
   class BadUrlError < StandardError #:nodoc:
+  end
+
+  class MaxRedirectError < StandardError #:nodoc:
   end
 
   class FetchError < StandardError #:nodoc:
@@ -125,21 +131,23 @@ class CraigScrape::Scraper
     '%s://%s%s' % [scheme, host, path]
   end
   
-  def fetch_uri(uri)
-    logger.info "Requesting: %s" % @url if logger
+  def fetch_uri(uri, redirect_count = 0)
+    logger.info "Requesting (%d): %s" % [redirect_count, @url.inspect] if logger
+
+    raise MaxRedirectError, "Max redirects (#{redirect_count}) reached for URL: #{@url}" if redirect_count > self.maximum_redirects_per_request-1 
 
     case uri.scheme
       when 'file'
         # If this is a directory, we'll try to approximate http a bit by loading a '/index.html'
         File.read( File.directory?(uri.path) ? "#{uri.path}/index.html" : uri.path )
       when /^http[s]?/
-        fetch_http uri
+        fetch_http uri, redirect_count
       else
         raise BadUrlError, "Unknown URI scheme for the url: #{@url}"
     end
   end
   
-  def fetch_http(uri)
+  def fetch_http(uri, redirect_count = 0)
     fetch_attempts = 0
     resource_not_found_attempts = 0
       
@@ -155,7 +163,7 @@ class CraigScrape::Scraper
       elsif resp.response['Location']
         redirect_to = resp.response['Location']
         
-        fetch_uri URI.parse(url_from_href(redirect_to))
+        fetch_uri URI.parse(url_from_href(redirect_to)), redirect_count+1
       else
         # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
         raise ResourceNotFoundError, 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
