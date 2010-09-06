@@ -90,7 +90,7 @@ class CraigScrape::Scraper
   # Indicates whether the resource has yet been retrieved from its associated url.
   # This is useful to distinguish whether the instance was instantiated for the purpose of an eager-load,
   # but hasn't yet been fetched.
-  def downloaded?; !@html.nil?; end
+  def downloaded?; !@html_source.nil?; end
 
   # A URI object corresponding to this Scraped URL
   def uri
@@ -196,8 +196,15 @@ class CraigScrape::Scraper
     end
   end
   
+  # Returns a string, of the current URI's source code
+  def html_source
+    @html_source ||= fetch_uri uri if uri
+    @html_source
+  end
+  
+  # Returns an hpricot parse, of the current URI
   def html
-    @html ||= Hpricot.parse fetch_uri(uri) if uri
+    @html ||= Hpricot.parse html_source if html_source
     @html
   end
 end  

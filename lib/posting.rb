@@ -18,7 +18,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   POSTING_ID      = /PostingID\:[ ]+([\d]+)/
   REPLY_TO        = /(.+)/
   PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
-  USERBODY_PARTS  = /\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>/m
+  USERBODY_PARTS  = /^(.+)\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>(.+)$/m
   HTML_HEADER     = /^(.+)\<div id\=\"userbody\">/m
   IMAGE_SRC       = /\<im[a]?g[e]?[^\>]*src=(?:\'([^\']+)\'|\"([^\"]+)\"|([^ ]+))[^\>]*\>/
 
@@ -94,10 +94,11 @@ class CraigScrape::Posting < CraigScrape::Scraper
 
   # Integer, Craigslist's unique posting id
   def posting_id
-    unless @posting_id
-      cursor = (html/"#userbody").first if html
+    unless @posting_id     
+      cursor = Hpricot.parse html_footer if html_footer
       cursor = cursor.next_node until cursor.nil? or POSTING_ID.match cursor.to_s
       @posting_id = $1.to_i if $1
+      #@posting_id = $1.to_i if POSTING_ID.match user_body
     end
   
     @posting_id
@@ -106,7 +107,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # String, The full-html contents of the post
   def contents
     unless @contents
-      @contents = user_body if html
+      @contents = user_body if html_source
       @contents = he_decode @contents.strip if @contents
     end
     
@@ -281,24 +282,31 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # I set apart from html to work around the SystemStackError bugs in test_bugs_found061710. Essentially we 
   # return everything above the user_body
   def html_head
-    @html_head = Hpricot.parse $1 if @html_head.nil? and HTML_HEADER.match html.to_s
+    @html_head = Hpricot.parse $1 if @html_head.nil? and HTML_HEADER.match html_source
     # We return html itself if HTML_HEADER doesn't match, which would be case for a 404 page or something
     @html_head ||= html
      
     @html_head
   end
 
+
+  # Since we started having so many problems with Hpricot flipping out, I added this to return everything south
+  # of the user_body
+  def html_footer     
+    $4 if USERBODY_PARTS.match html_source
+  end
+
   # OK - so the biggest problem parsing the contents of a craigslist post is that users post invalid html all over the place
   # This bad html trips up hpricot, and I've resorted to splitting the page up using string parsing like so:
   # We return this as a string, since it makes sense, and since its tough to say how hpricot might mangle this if the html is whack
   def user_body     
-    $1 if USERBODY_PARTS.match html.to_s
+    $2 if USERBODY_PARTS.match html_source
   end
   
   # Read the notes on user_body. However,  unlike the user_body, the craigslist portion of this div can be relied upon to be valid html. 
   # So - we'll return it as an Hpricot object.
   def craigslist_body
-    Hpricot.parse $2 if USERBODY_PARTS.match html.to_s
+    Hpricot.parse $3 if USERBODY_PARTS.match html_source
   end
 
 end

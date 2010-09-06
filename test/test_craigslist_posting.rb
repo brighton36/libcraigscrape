@@ -139,7 +139,7 @@ EOD
     assert_equal [], posting0.img_types
     
     posting1 = CraigScrape::Posting.new relative_uri_for('post_samples/posting1.html')
-    assert_equal "Residential income property\227Investors this property is for you! This duplex has a 2bedroom/1bath unit on each side. It features updated kitchens and baths (new tubs, toilet, sink, vanities), ceramic tile flooring throughout, separate water and electric meters and on site laundry facilities. It is also closed to the Galleria, beaches and downtown Fort Lauderdale! \r<br />\n\r<br />\nJe parle le Fran\347ais\r<br />\n\r<br />\nThis property is being offered by Blaunch Perrier, Broker Associate, Atlantic Properties International. Blaunch can be reached at 954-593-0077. For additional property information you may also visit www.garylanham.com\r<br />\n\r<br />", posting1.contents
+    assert_equal "Residential income property\227Investors this property is for you! This duplex has a 2bedroom/1bath unit on each side. It features updated kitchens and baths (new tubs, toilet, sink, vanities), ceramic tile flooring throughout, separate water and electric meters and on site laundry facilities. It is also closed to the Galleria, beaches and downtown Fort Lauderdale! \r<br>\n\r<br>\nJe parle le Fran\347ais\r<br>\n\r<br>\nThis property is being offered by Blaunch Perrier, Broker Associate, Atlantic Properties International. Blaunch can be reached at 954-593-0077. For additional property information you may also visit www.garylanham.com\r<br>\n\r<br>", posting1.contents
     assert_equal ["south florida craigslist", "broward county", "real estate - by broker"], posting1.full_section
     assert_equal "$189900 / 4br - Investment Property--Duplex in Fort Lauderdale", posting1.header
     assert_equal "$189900 / 4br - Investment Property--Duplex in Fort Lauderdale", posting1.label
@@ -156,7 +156,7 @@ EOD
     assert_equal [:pic], posting1.img_types
 
     posting2 = CraigScrape::Posting.new relative_uri_for('post_samples/posting2.html')
-    assert_equal 15775, posting2.contents.length # This is easy, and probably fine enough
+    assert_equal 15488, posting2.contents.length # This is easy, and probably fine enough
     assert_equal ["south florida craigslist", "broward county", "cars & trucks - by dealer"], posting2.full_section
     assert_equal "PRESENTING A ELECTRON BLUE METALLIC 2002 CHEVROLET CORVETTE Z06 6 SPEE - $23975 (Fort Lauderdale)", posting2.header
     assert_equal "PRESENTING A ELECTRON BLUE METALLIC 2002 CHEVROLET CORVETTE Z06 6 SPEE - $23975", posting2.label
@@ -172,7 +172,7 @@ EOD
     assert_equal [:img], posting2.img_types
 
     posting3 = CraigScrape::Posting.new relative_uri_for('post_samples/posting3.html')
-    assert_equal "1992 Twin Turbo 300ZX. This car is pearl white outside and Camel leather interior with suede accents. Motor was re-done from the ground up two years ago. 23,000 on new motor rebuild! New Leather seats and center arm rest done also two years ago. Has Alpine Am/Fm Cd with Ipod cable, Viper pager alarm New! JL Audio Amp & JLAudio sub box custom made. Mtx mids& highs component speakers sparate tweeter. Car runs strong & straight. Just detailed the interior. Exterior should be painted. This car once painted will sell for over $10,000. \r<br />\nCome get a great deal now! offers and trades will be considered. 786-303-6550 Manny", posting3.contents
+    assert_equal "1992 Twin Turbo 300ZX. This car is pearl white outside and Camel leather interior with suede accents. Motor was re-done from the ground up two years ago. 23,000 on new motor rebuild! New Leather seats and center arm rest done also two years ago. Has Alpine Am/Fm Cd with Ipod cable, Viper pager alarm New! JL Audio Amp & JLAudio sub box custom made. Mtx mids& highs component speakers sparate tweeter. Car runs strong & straight. Just detailed the interior. Exterior should be painted. This car once painted will sell for over $10,000. \r<br>\nCome get a great deal now! offers and trades will be considered. 786-303-6550 Manny", posting3.contents
     assert_equal ["south florida craigslist", "miami / dade", "cars & trucks - by owner"], posting3.full_section
     assert_equal "300ZX Nissan Twin Turbo 1992 - $5800 (N.Miami/ Hialeah)", posting3.header
     assert_equal "300ZX Nissan Twin Turbo 1992 - $5800", posting3.label
@@ -190,7 +190,7 @@ EOD
 
     # This one ended up being quite a curveball since the user uploaded HTML was such junk:
     posting4 = CraigScrape::Posting.new relative_uri_for('post_samples/posting4.html')
-    assert_equal 20640, posting4.contents.length
+    assert_equal 19412, posting4.contents.length
     assert_equal ["south florida craigslist", "broward county", "real estate - by broker"], posting4.full_section
     assert_equal "$225000 / 3br - Palm Aire Golf Corner Unit!", posting4.header
     assert_equal "Palm Aire Golf Corner Unit!", posting4.title
@@ -200,7 +200,7 @@ EOD
     assert_equal "hous-sk9f2-1139303170@craigslist.org", posting4.reply_to 
     assert_equal [0, 8, 9, 25, 4, 2009, 6, 115, true, "EDT"], posting4.post_time.to_a
     assert_equal [], posting4.pics
-    assert_equal 6399,posting4.contents_as_plain.length
+    assert_equal 6396,posting4.contents_as_plain.length
     assert_equal 225000.0, posting4.price
     assert_equal ["http://fortlauderdaleareahomesales.com/myfiles/5.jpg", "http://fortlauderdaleareahomesales.com/myfiles/4.jpg", "http://fortlauderdaleareahomesales.com/myfiles/7.jpg", "http://fortlauderdaleareahomesales.com/myfiles/10.jpg", "http://fortlauderdaleareahomesales.com/myfiles/1.jpg", "http://fortlauderdaleareahomesales.com/myfiles/2.jpg", "http://fortlauderdaleareahomesales.com/myfiles/3.jpg", "http://fortlauderdaleareahomesales.com/myfiles/8.jpg", "http://fortlauderdaleareahomesales.com/myfiles/9.jpg", "http://fortlauderdaleareahomesales.com/myfiles/11.jpg", "http://fortlauderdaleareahomesales.com/myfiles/14.jpg", "http://fortlauderdaleareahomesales.com/myfiles/6.jpg"], posting4.images
     assert_equal [:img], posting4.img_types    
@@ -240,7 +240,7 @@ EOD
     assert_equal [], posting_deleted.img_types
 
     posting6 = CraigScrape::Posting.new relative_uri_for('post_samples/1207457727.html')
-    assert_equal "<p><br />Call!! asking for a new owner.<br />  no deposit required rent to own properties. <br /> <br /> Defaulting payment records are not a problem, <br /> we will help you protect the previous owners credit history! 202-567-6371  <br /><br /></p>",posting6.contents
+    assert_equal "<p><br>Call!! asking for a new owner.<br>  no deposit required rent to own properties. <br> <br> Defaulting payment records are not a problem, <br> we will help you protect the previous owners credit history! 202-567-6371  <br><br></p>",posting6.contents
     assert_equal "Call!! asking for a new owner.  no deposit required rent to own properties.   Defaulting payment records are not a problem,  we will help you protect the previous owners credit history! 202-567-6371  ",posting6.contents_as_plain
     assert_equal false,posting6.deleted_by_author?
     assert_equal false,posting6.flagged_for_removal?
@@ -259,7 +259,7 @@ EOD
     assert_equal [:pic], posting6.img_types
     
     brw_reb_1224008903 = CraigScrape::Posting.new relative_uri_for('post_samples/brw_reb_1224008903.html')
-    assert_equal "Nice 3 Bedroom/ 2 Bathroom/ Garage Home in Sunrise.  1,134 square feet of living area with a 6,000 square foot lot.  Wood laminate flooring throughout the entire house.  House has been updated.  Stamped concrete driveway which leads to garage.  Big back yard.  Central AC.  Washer/Dryer.  Not a short sale or foreclosure. Asking $189,999.  Call Charles Schneider (The Best Damn Real Estate Company Period!) at 954-478-4784.\r<br />\n\r<br />\nDirections: Take Pine Island Road north off of Sunrise Boulevard (past Sunset Strip) to N.W. 25th Court.  Head west (left) on N.W. 25th Court to N.W. 91st Lane.  Head north (right) on N.W. 91st Lane to N.W. 26th Street.  Head east (right) on N.W. 26th Street to the property- 9163 N.W. 26th Street, Sunrise, FL 33322", brw_reb_1224008903.contents
+    assert_equal "Nice 3 Bedroom/ 2 Bathroom/ Garage Home in Sunrise.  1,134 square feet of living area with a 6,000 square foot lot.  Wood laminate flooring throughout the entire house.  House has been updated.  Stamped concrete driveway which leads to garage.  Big back yard.  Central AC.  Washer/Dryer.  Not a short sale or foreclosure. Asking $189,999.  Call Charles Schneider (The Best Damn Real Estate Company Period!) at 954-478-4784.\r<br>\n\r<br>\nDirections: Take Pine Island Road north off of Sunrise Boulevard (past Sunset Strip) to N.W. 25th Court.  Head west (left) on N.W. 25th Court to N.W. 91st Lane.  Head north (right) on N.W. 91st Lane to N.W. 26th Street.  Head east (right) on N.W. 26th Street to the property- 9163 N.W. 26th Street, Sunrise, FL 33322", brw_reb_1224008903.contents
     assert_equal "Nice 3 Bedroom/ 2 Bathroom/ Garage Home in Sunrise.  1,134 square feet of living area with a 6,000 square foot lot.  Wood laminate flooring throughout the entire house.  House has been updated.  Stamped concrete driveway which leads to garage.  Big back yard.  Central AC.  Washer/Dryer.  Not a short sale or foreclosure. Asking $189,999.  Call Charles Schneider (The Best Damn Real Estate Company Period!) at 954-478-4784.\r\n\r\nDirections: Take Pine Island Road north off of Sunrise Boulevard (past Sunset Strip) to N.W. 25th Court.  Head west (left) on N.W. 25th Court to N.W. 91st Lane.  Head north (right) on N.W. 91st Lane to N.W. 26th Street.  Head east (right) on N.W. 26th Street to the property- 9163 N.W. 26th Street, Sunrise, FL 33322", brw_reb_1224008903.contents_as_plain
     assert_equal false, brw_reb_1224008903.deleted_by_author?
     assert_equal false, brw_reb_1224008903.flagged_for_removal?
@@ -280,7 +280,7 @@ EOD
     assert_equal [:pic], brw_reb_1224008903.img_types
     
     sfbay_art_1223614914 = CraigScrape::Posting.new relative_uri_for('post_samples/sfbay_art_1223614914.html')
-    assert_equal "Bombay Company Beautiful Art Postered Painting \r<br />\n\225\tThe most beautiful piece of art you could have\r<br />\n\225\tMatches with any type of furnishing and decoration\r<br />\n\225\tA must see/Only one year old\r<br />\n\225\tRegular Price @ $1500.00\r<br />\n\225\tSale Price @ $650.00\r<br />", sfbay_art_1223614914.contents
+    assert_equal "Bombay Company Beautiful Art Postered Painting \r<br>\n\225\tThe most beautiful piece of art you could have\r<br>\n\225\tMatches with any type of furnishing and decoration\r<br>\n\225\tA must see/Only one year old\r<br>\n\225\tRegular Price @ $1500.00\r<br>\n\225\tSale Price @ $650.00\r<br>", sfbay_art_1223614914.contents
     assert_equal "Bombay Company Beautiful Art Postered Painting \r\n\225\tThe most beautiful piece of art you could have\r\n\225\tMatches with any type of furnishing and decoration\r\n\225\tA must see/Only one year old\r\n\225\tRegular Price @ $1500.00\r\n\225\tSale Price @ $650.00\r", sfbay_art_1223614914.contents_as_plain
     assert_equal false, sfbay_art_1223614914.deleted_by_author?
     assert_equal false, sfbay_art_1223614914.flagged_for_removal?
@@ -356,6 +356,36 @@ EOD
     assert_equal "general for sale", posting1808219423.section
     assert_equal false, posting1808219423.system_post?
     assert_equal "*Software*AdobeCS5*RosettaStone*AutoCAD*Windows7*Office2010*&* More", posting1808219423.title
+  end
+  
+  def test_bug_found090610
+    posting_090610 = CraigScrape::Posting.new relative_uri_for('post_samples/posting1938291834-090610.html')
+
+    assert_equal 27629, posting_090610.contents.length 
+    assert_equal 2326, posting_090610.contents_as_plain.length
+    assert_equal false, posting_090610.deleted_by_author?
+    assert_equal true, posting_090610.downloaded?
+    assert_equal false, posting_090610.flagged_for_removal?
+    assert_equal ["boston craigslist", "boston/camb/brook", "for sale / wanted", "arts & crafts"], posting_090610.full_section
+    assert_equal true, posting_090610.has_img?
+    assert_equal false, posting_090610.has_pic?
+    assert_equal true, posting_090610.has_pic_or_img?
+    assert_equal "2008 GMC Sierra 2500HD - $14800 (boston)", posting_090610.header
+    assert_equal "2008 GMC Sierra 2500HD - $14800 (boston)", posting_090610.header_as_plain
+    assert_equal nil, posting_090610.href
+    assert_equal ["http://i866.photobucket.com/albums/ab228/rodreigo/GMC%20Sierra/used-2008-gmc-sierra_2500hd-slttruckcrewcabstandardbed-5703-5793520-2-400-1.jpg", "http://i866.photobucket.com/albums/ab228/rodreigo/GMC%20Sierra/used-2008-gmc-sierra_2500hd-slttruckcrewcabstandardbed-5703-5793520-1-400.jpg", "http://i866.photobucket.com/albums/ab228/rodreigo/GMC%20Sierra/used-2008-gmc-sierra_2500hd-slttruckcrewcabstandardbed-5703-5793520-29-640.jpg", "http://i866.photobucket.com/albums/ab228/rodreigo/GMC%20Sierra/used-2008-gmc-sierra_2500hd-slttruckcrewcabstandardbed-5703-5793520-11-640.jpg"], posting_090610.images
+    assert_equal [:img], posting_090610.img_types
+    assert_equal "2008 GMC Sierra 2500HD - $14800", posting_090610.label
+    assert_equal "boston", posting_090610.location
+    assert_equal [], posting_090610.pics
+    assert_equal [0, 0, 0, 5, 9, 2010, 0, 248, true, "EDT"], posting_090610.post_date.to_a
+    assert_equal [0, 29, 18, 5, 9, 2010, 0, 248, true, "EDT"], posting_090610.post_time.to_a
+    assert_equal 1938291834, posting_090610.posting_id
+    assert_equal 14800.0, posting_090610.price
+    assert_equal nil, posting_090610.reply_to
+    assert_equal "arts & crafts", posting_090610.section
+    assert_equal false, posting_090610.system_post?
+    assert_equal "2008 GMC Sierra 2500HD", posting_090610.title
   end
 
 end

@@ -122,7 +122,7 @@ class CraigslistListingTest < Test::Unit::TestCase
     assert_equal false, fortmyers_art_index600_060909.posts[0].system_post?
     assert_equal "Husqvarna Viking Rose Embroidery-Sewing Machine", fortmyers_art_index600_060909.posts[0].title
     
-    assert_equal "Multiple artists' moving sale. Lots of unusual items including art, art supplies, ceramics and ceramic glazes, furniture, clothes, books, electronics, cd's and much more. Also for sale is alot of restaurant equpment.\r<br />\n\r<br />\nSale to be held at 3570 Bayshore Dr. next to Bayshore Coffee Co.\r<br />\n\r<br />\nSaturday 8:00 a.m. until 2:00 Rain or shine.\r<br />", fortmyers_art_index600_060909.posts[1].contents
+    assert_equal "Multiple artists' moving sale. Lots of unusual items including art, art supplies, ceramics and ceramic glazes, furniture, clothes, books, electronics, cd's and much more. Also for sale is alot of restaurant equpment.\r<br>\n\r<br>\nSale to be held at 3570 Bayshore Dr. next to Bayshore Coffee Co.\r<br>\n\r<br>\nSaturday 8:00 a.m. until 2:00 Rain or shine.\r<br>", fortmyers_art_index600_060909.posts[1].contents
     assert_equal "Multiple artists' moving sale. Lots of unusual items including art, art supplies, ceramics and ceramic glazes, furniture, clothes, books, electronics, cd's and much more. Also for sale is alot of restaurant equpment.\r\n\r\nSale to be held at 3570 Bayshore Dr. next to Bayshore Coffee Co.\r\n\r\nSaturday 8:00 a.m. until 2:00 Rain or shine.\r", fortmyers_art_index600_060909.posts[1].contents_as_plain
     assert_equal false, fortmyers_art_index600_060909.posts[1].deleted_by_author?
     assert_equal true, fortmyers_art_index600_060909.posts[1].downloaded?
@@ -174,7 +174,7 @@ class CraigslistListingTest < Test::Unit::TestCase
     assert_equal false, fortmyers_art_index600_060909.posts[2].system_post?
     assert_equal "tapestry sewing machine and embroidery arm luggage", fortmyers_art_index600_060909.posts[2].title
     
-    assert_equal "Gorgeous and one of a kind!   Museum-collected artist Jay von Koffler's Aurora Series - cast glass nude sculpture - Aurora.  Mounted on marble and enhanced with bronze beak.   \r<br />\n\r<br />\nDimensions:  30x16x6\r<br />\nCall for appointment for studio viewing - 239.595.1793", fortmyers_art_index600_060909.posts[3].contents
+    assert_equal "Gorgeous and one of a kind!   Museum-collected artist Jay von Koffler's Aurora Series - cast glass nude sculpture - Aurora.  Mounted on marble and enhanced with bronze beak.   \r<br>\n\r<br>\nDimensions:  30x16x6\r<br>\nCall for appointment for studio viewing - 239.595.1793", fortmyers_art_index600_060909.posts[3].contents
     assert_equal "Gorgeous and one of a kind!   Museum-collected artist Jay von Koffler's Aurora Series - cast glass nude sculpture - Aurora.  Mounted on marble and enhanced with bronze beak.   \r\n\r\nDimensions:  30x16x6\r\nCall for appointment for studio viewing - 239.595.1793", fortmyers_art_index600_060909.posts[3].contents_as_plain
     assert_equal false, fortmyers_art_index600_060909.posts[3].deleted_by_author?
     assert_equal true, fortmyers_art_index600_060909.posts[3].downloaded?
