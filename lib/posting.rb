@@ -98,7 +98,6 @@ class CraigScrape::Posting < CraigScrape::Scraper
       cursor = Hpricot.parse html_footer if html_footer
       cursor = cursor.next_node until cursor.nil? or POSTING_ID.match cursor.to_s
       @posting_id = $1.to_i if $1
-      #@posting_id = $1.to_i if POSTING_ID.match user_body
     end
   
     @posting_id
@@ -290,8 +289,8 @@ class CraigScrape::Posting < CraigScrape::Scraper
   end
 
 
-  # Since we started having so many problems with Hpricot flipping out, I added this to return everything south
-  # of the user_body
+  # Since we started having so many problems with Hpricot flipping out on whack content bodies, 
+  # I added this to return everything south of the user_body
   def html_footer     
     $4 if USERBODY_PARTS.match html_source
   end
