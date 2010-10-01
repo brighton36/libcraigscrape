@@ -11,7 +11,7 @@ include FileUtils
 RbConfig = Config unless defined? RbConfig
 
 NAME = "libcraigscrape"
-VERS = ENV['VERSION'] || "0.8.4"
+VERS = ENV['VERSION'] || "0.9"
 PKG = "#{NAME}-#{VERS}"
 
 RDOC_OPTS = ['--quiet', '--title', 'The libcraigscrape Reference', '--main', 'README', '--inline-source']
@@ -37,9 +37,10 @@ SPEC =
     s.files = PKG_FILES
     s.require_paths = ["lib"] 
     s.test_files = FileList['test/test_*.rb']
-    s.add_dependency 'hpricot'
-    s.add_dependency 'htmlentities'
-    s.add_dependency 'activesupport'
+    s.add_dependency 'hpricot',      '> 0.8'
+    s.add_dependency 'htmlentities', '>= 4.0.0'
+    s.add_dependency 'activesupport','>= 2.3.0', '< 3'
+    s.add_dependency 'activerecord', '>= 2.3.0', '< 3'
   end
 
 desc "Run all the tests"

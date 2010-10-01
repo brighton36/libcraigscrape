@@ -159,10 +159,15 @@
 $: << File.dirname(__FILE__) + '/../lib'
 
 require 'rubygems'
+
+gem 'kwalify',      '~> 0.7'
+gem 'activerecord', '~> 2.3'
+gem 'actionmailer', '~> 2.3'
+
 require 'kwalify'
-require 'kwalify/util/hashlike'
 require 'active_record'
 require 'action_mailer'
+require 'kwalify/util/hashlike'
 require 'libcraigscrape'
 require "socket"
 
@@ -179,9 +184,9 @@ class String #:nodoc:
 
     options.each_char do |c| 
       mods |= case c
-        when 'i': Regexp::IGNORECASE
-        when 'x': Regexp::EXTENDED
-        when 'm': Regexp::MULTILINE
+        when 'i' then Regexp::IGNORECASE
+        when 'x' then Regexp::EXTENDED
+        when 'm' then Regexp::MULTILINE
       end
     end unless options.nil? or options.empty?
 
@@ -217,7 +222,7 @@ class CraigReportDefinition #:nodoc:
     # We'll setup a SQLite db using some defaults if needed
     @tracking_database ||= {
       :adapter => 'sqlite3',
-      :dbfile => File.basename(for_yaml_file, File.extname(for_yaml_file))+'.db'
+      :database => File.basename(for_yaml_file, File.extname(for_yaml_file))+'.db'
     } if for_yaml_file
     
     # This is a little hack to make sqlite definitions a little more portable, by allowing them 

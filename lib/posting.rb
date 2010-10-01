@@ -288,7 +288,6 @@ class CraigScrape::Posting < CraigScrape::Scraper
     @html_head
   end
 
-
   # Since we started having so many problems with Hpricot flipping out on whack content bodies, 
   # I added this to return everything south of the user_body
   def html_footer     

@@ -2,13 +2,18 @@
 #
 # All of libcraigscrape's objects and methods are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
+require 'rubygems'
+
+gem 'activesupport', '~> 2.3'
+gem 'hpricot',       '~> 0.8'
+gem 'htmlentities',  '~> 4.0.0'
+
 require 'net/http'
 require 'zlib'
-
-require 'rubygems'
-require 'active_support'
 require 'hpricot'
 require 'htmlentities'
+require 'active_support'
+
 
 # A base class encapsulating the various libcraigscrape objects, and providing most of the 
 # craigslist interaction methods. Currently, we're supporting the old Class methods 

@@ -1,8 +1,11 @@
 == Change Log
 
-=== Release 0.8.4 (TODO)
+=== Release 0.8.5 (Sep 27, 2010)
+- Minor adjustments to craigwatch to fix deprecation warnings in new ActiveRecord and ActionMailer gems
+
+=== Release 0.8.4 (Sep 6, 2010)
 - Someone found a way to screw up hpricot's to_s method (posting1938291834-090610.html) and fixed by added html_source to the craigslist Scraper object, which returns the body of the post without passing it through hpricot. Its a better way to go anyways, and re-wrote a couple incidentals to use the html_source method...
-- Adjusted the test cases a bit, since the user bodies being returned have slightly less cleanup in their output than they had prior    
+- Adjusted the test cases a bit, since the user bodies being returned have less cleanup in their output than they had prior    
 
 === Release 0.8.3 (August 2, 2010)
 - Someone was posting really bad html that was screwing up Hpricot. Such is to be expected when you're soliciting html from the general public I suppose. Added test_bugs_found061710 posting test, and fixed by stripping out the user body before parsing with Hpricot.
