@@ -60,9 +60,9 @@ end
 
 Rake::GemPackageTask.new(SPEC) do |p|
   p.need_tar = false
-  p.need_tar_gz = true
-  p.need_tar_bz2 = true
-  p.need_zip = true
+  p.need_tar_gz = false
+  p.need_tar_bz2 = false
+  p.need_zip = false
   p.gem_spec = SPEC
 end
 

@@ -477,14 +477,20 @@ report_summaries = craig_report.searches.collect do |search|
     # We'll use this in the loop to decide what posts to track:
     newest_post_date = last_tracked_at    
     
+    # We keep track of post.post_date here, b/c in some circumstances, you can be in the below loop
+    # but have no post.post_date since the posting was removed and it parsed to nil
+    most_recent_posting_date = Time.now
+    
     # OK - Now let's go!
     catch :list_break do
       while listing
         listing.posts.each do |post|
           begin
+            most_recent_posting_date = post.post_date if post.post_date
+            
             # Are we at a point in the scrape, past which we don't need to proceed?
             throw :list_break if (
-              post.post_date < last_tracked_at or
+              most_recent_posting_date < last_tracked_at or
               already_tracked_urls.include? post.url
             )
   
@@ -505,7 +511,7 @@ report_summaries = craig_report.searches.collect do |search|
           # Now let's see if the url should be kept in our tracking database for the future...
 
           # This post-date sets a limit for the tracked_listing.posts.create below
-          newest_post_date = post.post_date if post.post_date > newest_post_date
+          newest_post_date = most_recent_posting_date if most_recent_posting_date > newest_post_date
           
           # Now let's add these urls to the database so as to reduce memory overhead.
           # Keep in mind - they're not active until the email goes out.
@@ -514,7 +520,7 @@ report_summaries = craig_report.searches.collect do |search|
           tracked_listing.posts.create(
             :url => post.url, 
             :created_at => newest_post_date 
-          ) unless post.post_date < newest_post_date
+          ) unless most_recent_posting_date < newest_post_date
 
         end
         
