@@ -1,0 +1,13 @@
+debug_craigscrape: yes
+email_to: Chris DeRose <cderose@derosetechnologies.com>
+searches:
+   - name:     NYC Condos For Sale
+     sites:    [ us/ny/newyork ]
+     listings: [ mnh/aap ]
+     starting: 9/30/2010
+     price_greater_than: 90000
+     price_less_than:    150000
+     summary_or_full_post_has:
+        - /central[^a-z]{0,2}park/i
+     location_has_no:
+        - /(bronx|brooklyn|queens|staten[^a-z]{0,2}island|new[^a-z]{0,2}jersey|long[^a-z]{0,2}island|westchester|fairfield)/i

@@ -4,13 +4,12 @@
       rdoc.rdoc_files.add RDOC_FILES+Dir.glob('lib/*.rb').sort_by{|a,b| (a == 'lib/libcraigscrape.rb') ? -1 : 0 } 
 		* In fact, we might want to move all those requires up to the top of libcraigscrape again  once we fix this... 
 
-* Add craigwatch object tests....
+* Add craigwatch filter object tests....
 
-Post-0.8.2:
-	* Ruby 1.9 support - respond to Jarom West (see bottom)
-
-Post-0.8.2:
+------------------------------------------
+Possible features?:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
+ * FEATURE: Support for post submissions?
  * FEATURE: Add the craigwatch_debug feature - and monitor it... (There's a TODO in there...)
 	* Shows the current progress...? (pages fetched, objects in caches..) 
  * FEATURE: Get the YAML template features working in the chris_report.yml
@@ -21,7 +20,7 @@ Post-0.8.2:
 	 	* to be referenced in separate reports for 'art in florida', 'art in nyc', 'art everywhere esle' ..
 	 	* The other  thing I'd like to do though is have "New art watch/Classic Artwatch" type reports that look
 	 	* separate - but that dont cause the crawl to happen twice. Just once with two reports per crawl..
- * FEATURE: Page-caching? Maybe? Any interest? would be nice particularly for geocaching...
+ * FEATURE: Page-caching? Maybe? Any interest? might be nice for geocaching...
  * FEATURE: Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
  
  * FEATURE: We might want to parse the sub-locations in the geo-location code... (so for miami: brw/mia/wpb)
@@ -56,38 +55,3 @@ email.tr('\n', '').scan( /http\:\/\/[^ \"]+/).reject{|l| !/\.html/.match l}.each
 }
 
 -----------------------------------------
-From: 	Jarom West <jarom.west@gmail.com>
-To: 	cderose@derosetechnologies.com
-Subject: 	libcraigscrape question
-Date: 	10/15/2009 03:22:27 PM (Thu, 15 Oct 2009 12:22:27 -0700)
-
-
-Hi Mr. DeRose,
-
-I've been tinkering with your libcraigscrape library over the past few months to find things on craigslist, and recently upgraded my version of Ruby and Ruby Gems. As of this upgrade, I can't seem to make the "craigwatch" script run anymore. I really find your software very useful and wonder if perhaps maybe you have a suggestion as to where I might be going wrong. Below is the output I'm receiving.
-
-bash-3.2$ craigwatch
-/usr/local/bin/craigwatch:19:in `load': /usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:139: syntax error, unexpected ':', expecting keyword_then or ',' or ';' or '\n' (SyntaxError)
-        when 'i': Regexp::IGNORECASE
-                 ^
-/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:140: syntax error, unexpected keyword_when, expecting keyword_end
-        when 'x': Regexp::EXTENDED
-            ^
-/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:140: syntax error, unexpected ':', expecting keyword_end
-        when 'x': Regexp::EXTENDED
-                 ^
-/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:141: syntax error, unexpected keyword_when, expecting keyword_end
-        when 'm': Regexp::MULTILINE
-            ^
-/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:141: syntax error, unexpected ':', expecting keyword_end
-        when 'm': Regexp::MULTILINE
-                 ^
-/usr/local/lib/ruby/gems/1.9.1/gems/libcraigscrape-0.7.0/bin/craigwatch:147: syntax error, unexpected keyword_end, expecting $end
-        from /usr/local/bin/craigwatch:19:in `<main>'
--bash-3.2$ 
-
-I'm not exactly a Ruby wizard, and I'm not sure where I might be going wrong. I re-installed all the required gems to make this work and can't seem to figure out out. Maybe you have a suggestion?
-
-A big fan,
-
-J. West

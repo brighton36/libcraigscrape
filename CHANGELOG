@@ -6,6 +6,7 @@
 - Moved repo to github
 - Fixed an esoteric bug in craigwatch, affecting the last scraped post in a listing when that post was 'flagged for removal'.  
 - Took all those extra package-building tasts out of the Rakefile since this is 2010 and we only party with gemfiles
+- Ruby 1.9 compatibility adjustments
 
 === Release 0.8.4 (Sep 6, 2010)
 - Someone found a way to screw up hpricot's to_s method (posting1938291834-090610.html) and fixed by added html_source to the craigslist Scraper object, which returns the body of the post without passing it through hpricot. Its a better way to go anyways, and re-wrote a couple incidentals to use the html_source method...
