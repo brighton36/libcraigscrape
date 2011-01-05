@@ -1,5 +1,9 @@
 == Change Log
 
+=== Release 0.9.1
+- Added support for posting_has_expired? and expired post recognition
+- Fixed a weird bug in craigwatch that would cause a scrape to abort if a flagged_for_removal? was encountered when using certain (minimal) filtering 
+
 === Release 0.9 (Oct 01, 2010)
 - Minor adjustments to craigwatch to fix deprecation warnings in new ActiveRecord and ActionMailer gems
 - Added gem version specifiers to the Gem spec and to the require statements

@@ -30,9 +30,14 @@ class CraigScrape::Posting < CraigScrape::Scraper
     super(*args)
 
     # Validate that required fields are present, at least - if we've downloaded it from a url
-    parse_error! if args.first.kind_of? String and !flagged_for_removal? and !deleted_by_author? and [
-      contents,posting_id,post_time,header,title,full_section
-    ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)}
+    parse_error! if ( 
+      args.first.kind_of? String and 
+      !flagged_for_removal? and 
+      !posting_has_expired? and 
+      !deleted_by_author? and [
+        contents,posting_id,post_time,header,title,full_section
+      ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)} 
+    )
   end
 
 
@@ -186,6 +191,15 @@ class CraigScrape::Posting < CraigScrape::Scraper
     ) if @deleted_by_author.nil?
     
     @deleted_by_author
+  end
+  
+  # Returns true if this Post was parsed, and represents a 'This posting has expired.' notice
+  def posting_has_expired?
+    @posting_has_expired = (
+      system_post? and header_as_plain == "This posting has expired."
+    ) if @posting_has_expired.nil?
+    
+    @posting_has_expired
   end
   
   

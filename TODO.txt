@@ -1,3 +1,4 @@
+
 ------------------------------------------
 * There's a bug where the rdoc generates Crauigscrape weird in the package. It has to do with this not being the case in the gem:
 	  * # NOTE: If you don't put libcraigscrape.rb at the beginning, the rdoc ends up looking a little screwy

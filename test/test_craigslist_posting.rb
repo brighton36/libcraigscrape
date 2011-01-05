@@ -388,4 +388,25 @@ EOD
     assert_equal "2008 GMC Sierra 2500HD", posting_090610.title
   end
 
+  def test_expired_post
+    posting_expired = CraigScrape::Posting.new relative_uri_for('post_samples/this_post_has_expired.html')
+    assert_equal true, posting_expired.posting_has_expired?
+    assert_equal true, posting_expired.system_post?    
+    assert_equal nil, posting_expired.contents
+    assert_equal ["charleston craigslist", "for sale / wanted", "cars & trucks - by owner" ], posting_expired.full_section
+    assert_equal "This posting has expired.", posting_expired.header
+    assert_equal nil, posting_expired.label
+    assert_equal nil, posting_expired.title
+    assert_equal nil, posting_expired.location
+    assert_equal nil, posting_expired.posting_id
+    assert_equal nil, posting_expired.reply_to 
+    assert_equal nil, posting_expired.post_time
+    assert_equal [],  posting_expired.pics
+    assert_equal nil, posting_expired.contents_as_plain
+    assert_equal nil, posting_expired.price
+    assert_equal [], posting_expired.images
+    assert_equal [], posting_expired.img_types
+    
+  end
+
 end

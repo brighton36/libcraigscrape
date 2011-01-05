@@ -529,8 +529,18 @@ report_summaries = craig_report.searches.collect do |search|
     end
   end
 
+  
+
   # Let's flatten the unique'd hash into a more useable array:
-  new_summaries = new_summaries.values.sort{|a,b| a.post_date <=> b.post_date} # oldest goes to bottom
+  # NOTE: The reason we included a reject is a little complicated, but here's the gist:
+  #  * We try not to load the whole post if we don't have to
+  #  * Its possible that we met all the criterion of the passes_filter? with merely a header, and
+  #    if so we add a url to the summaries stack
+  #  * Unfortunately, when we later load that post in full, we may find that the post was posting_has_expired? 
+  #    or flagged_for_removal?, etc.
+  #  * If this was the case, below we'll end up sorting against nil post_dates. This would fail.
+  #  * So - before we sort, we run a quick reject on nil post_dates 
+  new_summaries = new_summaries.values.reject{|v| v.post_date.nil? }.sort{|a,b| a.post_date <=> b.post_date} # oldest goes to bottom
   
   # Now Let's manage the tracking database:
   if new_summaries.length > 0  
