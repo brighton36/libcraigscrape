@@ -210,47 +210,47 @@ class CraigslistListingTest < Test::Unit::TestCase
           
     mia_search_kitten031510 = CraigScrape::Listings.new relative_uri_for('listing_samples/mia_search_kitten.3.15.10.html')
     assert_equal "Adopt a 7 month on kitten- $75", mia_search_kitten031510.posts[0].label
-    assert_equal [0, 0, 0, 15, 3, 2010, 1, 74, true, "EDT"], mia_search_kitten031510.posts[0].post_date.to_a
+    assert_equal [15, 3], mia_search_kitten031510.posts[0].post_date.to_a[3..4]
     assert_equal "Adorable Kitten! Free!!!", mia_search_kitten031510.posts[1].label
-    assert_equal [0, 0, 0, 15, 3, 2010, 1, 74, true, "EDT"], mia_search_kitten031510.posts[1].post_date.to_a
+    assert_equal [15, 3], mia_search_kitten031510.posts[1].post_date.to_a[3..4]
     assert_equal "KITTENS,5 months, 1 Russian blue, 1 grey & white,vac spy/neu,$35fee ea", mia_search_kitten031510.posts[2].label
-    assert_equal [0, 0, 0, 13, 3, 2010, 6, 72, false, "EST"], mia_search_kitten031510.posts[2].post_date.to_a
+    assert_equal [13, 3], mia_search_kitten031510.posts[2].post_date.to_a[3..4]
     assert_equal "Kitties need a good home", mia_search_kitten031510.posts[3].label
-    assert_equal [0, 0, 0, 13, 3, 2010, 6, 72, false, "EST"], mia_search_kitten031510.posts[3].post_date.to_a
+    assert_equal [13, 3], mia_search_kitten031510.posts[3].post_date.to_a[3..4]
     assert_equal "7 week old kittens for adoption", mia_search_kitten031510.posts[4].label
-    assert_equal [0, 0, 0, 13, 3, 2010, 6, 72, false, "EST"], mia_search_kitten031510.posts[4].post_date.to_a
+    assert_equal [13, 3], mia_search_kitten031510.posts[4].post_date.to_a[3..4]
     assert_equal "Adorable Orange Kitten Free to Good Home", mia_search_kitten031510.posts[5].label
-    assert_equal [0, 0, 0, 12, 3, 2010, 5, 71, false, "EST"], mia_search_kitten031510.posts[5].post_date.to_a
+    assert_equal [12, 3], mia_search_kitten031510.posts[5].post_date.to_a[3..4]
     assert_equal "7 month old kitten free to good home", mia_search_kitten031510.posts[6].label
-    assert_equal [0, 0, 0, 12, 3, 2010, 5, 71, false, "EST"], mia_search_kitten031510.posts[6].post_date.to_a
+    assert_equal [12, 3], mia_search_kitten031510.posts[6].post_date.to_a[3..4]
     assert_equal "FEMALE KITTEN FOR GOOD HOME", mia_search_kitten031510.posts[7].label
-    assert_equal [0, 0, 0, 9, 3, 2010, 2, 68, false, "EST"], mia_search_kitten031510.posts[7].post_date.to_a
+    assert_equal [9, 3], mia_search_kitten031510.posts[7].post_date.to_a[3..4]
     assert_equal "Kitten", mia_search_kitten031510.posts[8].label
-    assert_equal [0, 0, 0, 4, 3, 2010, 4, 63, false, "EST"], mia_search_kitten031510.posts[8].post_date.to_a
+    assert_equal [4, 3], mia_search_kitten031510.posts[8].post_date.to_a[3..4]
     assert_equal "Kitties need a good home", mia_search_kitten031510.posts[9].label
-    assert_equal [0, 0, 0, 4, 3, 2010, 4, 63, false, "EST"], mia_search_kitten031510.posts[9].post_date.to_a
+    assert_equal [4, 3], mia_search_kitten031510.posts[9].post_date.to_a[3..4]
     assert_equal "Persain Cat And Tabby Cat", mia_search_kitten031510.posts[10].label
-    assert_equal [0, 0, 0, 1, 3, 2010, 1, 60, false, "EST"], mia_search_kitten031510.posts[10].post_date.to_a
+    assert_equal [1, 3], mia_search_kitten031510.posts[10].post_date.to_a[3..4]
     assert_equal "Tabby female kitten in a parking lot needs your help", mia_search_kitten031510.posts[11].label
-    assert_equal [0, 0, 0, 23, 2, 2010, 2, 54, false, "EST"], mia_search_kitten031510.posts[11].post_date.to_a
+    assert_equal [23, 2], mia_search_kitten031510.posts[11].post_date.to_a[3..4]
     assert_equal "Spring is almost officially here, grow your family, adopt a kitty!", mia_search_kitten031510.posts[12].label
-    assert_equal [0, 0, 0, 22, 2, 2010, 1, 53, false, "EST"], mia_search_kitten031510.posts[12].post_date.to_a
+    assert_equal [22, 2], mia_search_kitten031510.posts[12].post_date.to_a[3..4]
     assert_equal "Many adorable kittens for adoption!", mia_search_kitten031510.posts[13].label
-    assert_equal [0, 0, 0, 22, 2, 2010, 1, 53, false, "EST"], mia_search_kitten031510.posts[13].post_date.to_a
+    assert_equal [22, 2], mia_search_kitten031510.posts[13].post_date.to_a[3..4]
     assert_equal "2 free cats/kitten to good home", mia_search_kitten031510.posts[14].label
-    assert_equal [0, 0, 0, 19, 2, 2010, 5, 50, false, "EST"], mia_search_kitten031510.posts[14].post_date.to_a
+    assert_equal [19, 2], mia_search_kitten031510.posts[14].post_date.to_a[3..4]
     assert_equal "BEAUTIFUL KITTENS", mia_search_kitten031510.posts[15].label
-    assert_equal [0, 0, 0, 19, 2, 2010, 5, 50, false, "EST"], mia_search_kitten031510.posts[15].post_date.to_a
+    assert_equal [19, 2], mia_search_kitten031510.posts[15].post_date.to_a[3..4]
     assert_equal "MANY new adorable kittens for good homes!!!", mia_search_kitten031510.posts[16].label
-    assert_equal [0, 0, 0, 18, 2, 2010, 4, 49, false, "EST"], mia_search_kitten031510.posts[16].post_date.to_a
+    assert_equal [18, 2], mia_search_kitten031510.posts[16].post_date.to_a[3..4]
     assert_equal "Kitten living in a parking lot needs your help", mia_search_kitten031510.posts[17].label
-    assert_equal [0, 0, 0, 16, 2, 2010, 2, 47, false, "EST"], mia_search_kitten031510.posts[17].post_date.to_a
+    assert_equal [16, 2], mia_search_kitten031510.posts[17].post_date.to_a[3..4]
     assert_equal "BEAUTIFUL 8 WEEK KITTENS", mia_search_kitten031510.posts[18].label
-    assert_equal [0, 0, 0, 16, 2, 2010, 2, 47, false, "EST"], mia_search_kitten031510.posts[18].post_date.to_a
+    assert_equal [16, 2], mia_search_kitten031510.posts[18].post_date.to_a[3..4]
     assert_equal "ORANGE TABBY KITTEN", mia_search_kitten031510.posts[19].label
-    assert_equal [0, 0, 0, 13, 2, 2010, 6, 44, false, "EST"], mia_search_kitten031510.posts[19].post_date.to_a
+    assert_equal [13, 2], mia_search_kitten031510.posts[19].post_date.to_a[3..4]
     assert_equal "Lots of kittens to choose from! Pics!!", mia_search_kitten031510.posts[20].label
-    assert_equal [0, 0, 0, 13, 2, 2010, 6, 44, false, "EST"], mia_search_kitten031510.posts[20].post_date.to_a
+    assert_equal [13, 2], mia_search_kitten031510.posts[20].post_date.to_a[3..4]
 
   end
 

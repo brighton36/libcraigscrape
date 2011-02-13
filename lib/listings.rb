@@ -21,7 +21,8 @@ class CraigScrape::Listings < CraigScrape::Scraper
       current_date = nil
       @posts = []
 
-      post_tags = html.get_elements_by_tag_name('p','h4')
+      # All we care about are p and h4 tags. This seemed to be the only way I could do this on Nokogiri:
+      post_tags = html.search('*').reject{|n| !/^(?:p|h4)$/i.match n.name } 
 
       # The last p in the list is sometimes a 'next XXX pages' link. We don't want to include this in our PostSummary output:
       post_tags.pop if (
@@ -82,7 +83,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
 
         # If there's no 'a' in the next sibling, we'll have just performed a nil assignment, otherwise
         # We're looking good.
-        next_link = cursor.next_sibling if cursor and /^[\d]+$/.match cursor.inner_html
+        next_link = cursor.next_element if cursor and /^[\d]+$/.match cursor.inner_html
       end
       
       # We have an anchor tag - so - let's assign the href:

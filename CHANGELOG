@@ -1,5 +1,8 @@
 == Change Log
 
+=== Release 1.0
+- Replaced hpricot dependency with Nokogiri. Nokogiri should be faster and more reliable. Whoo-hoo!
+
 === Release 0.9.1
 - Added support for posting_has_expired? and expired post recognition
 - Fixed a weird bug in craigwatch that would cause a scrape to abort if a flagged_for_removal? was encountered when using certain (minimal) filtering 

@@ -5,12 +5,13 @@
 require 'rubygems'
 
 gem 'activesupport', '~> 2.3'
-gem 'hpricot',       '~> 0.8'
+gem 'nokogiri',      '~> 1.4.4'
 gem 'htmlentities',  '~> 4.0.0'
+
 
 require 'net/http'
 require 'zlib'
-require 'hpricot'
+require 'nokogiri'
 require 'htmlentities'
 require 'active_support'
 

@@ -37,7 +37,9 @@ EOD
 <p><a href="/mdc/jwl/1128691192.html">925 Sterling Silver Dragonfly Charm Bracelet - $25 -</a> <span class="p"> img</span></p>
 EOD
 
-    one = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_one).at('p'))
+    one = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(
+      Nokogiri::HTML(search_html_one, nil, CraigScrape::Scraper::HTML_ENCODING).at('p')
+    )
     assert_equal true, one.has_img?
     assert_equal false, one.has_pic?
     assert_equal true, one.has_pic_or_img?
@@ -49,7 +51,9 @@ EOD
     assert_equal 18, one.post_date.day
     assert_equal nil, one.price
 
-    two = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_two).at('p'))
+    two = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(
+      Nokogiri::HTML(search_html_two, nil, CraigScrape::Scraper::HTML_ENCODING).at('p')
+    )
     assert_equal true, two.has_img?
     assert_equal true, two.has_pic?
     assert_equal true, two.has_pic_or_img?
@@ -61,7 +65,9 @@ EOD
     assert_equal 4, two.post_date.day
     assert_equal 348000.0, two.price
 
-    three = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_three).at('p'))
+    three = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(
+      Nokogiri::HTML(search_html_three, nil, CraigScrape::Scraper::HTML_ENCODING).at('p')
+    )
     assert_equal false, three.has_img?
     assert_equal true, three.has_pic?
     assert_equal true, three.has_pic_or_img?
@@ -73,7 +79,9 @@ EOD
     assert_equal 31, three.post_date.day
     assert_equal 22.0, three.price
 
-    four = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_four).at('p'))
+    four = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(
+      Nokogiri::HTML(search_html_four, nil, CraigScrape::Scraper::HTML_ENCODING).at('p')
+    )
     assert_equal false, four.has_img?
     assert_equal false, four.has_pic?
     assert_equal false, four.has_pic_or_img?
@@ -85,7 +93,9 @@ EOD
     assert_equal 22, four.post_date.day
     assert_equal 325000.0, four.price
 
-    five = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(Hpricot.parse(search_html_five).at('p'))
+    five = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(
+      Nokogiri::HTML(search_html_five, nil, CraigScrape::Scraper::HTML_ENCODING).at('p')
+    )
     assert_equal false, five.has_img?
     assert_equal true, five.has_pic?
     assert_equal true, five.has_pic_or_img?
@@ -97,27 +107,31 @@ EOD
     assert_equal 9, five.post_date.day
     assert_equal 105000.0, five.price
 
-    five = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(Hpricot.parse(category_listing_one).at('p'))
-    assert_equal false, five.has_img?
-    assert_equal true,  five.has_pic?
-    assert_equal true, five.has_pic_or_img?
-    assert_equal '/pbc/reb/1128661387.html', five.href
-    assert_equal "$2995000 / 5br - Downtown Boca New Home To Be Built", five.label
-    assert_equal "real estate - by broker", five.section
-    assert_equal "Boca Raton", five.location
-    assert_equal nil, five.post_date
-    assert_equal 2995000.0, five.price
-
-    six = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(Hpricot.parse(category_listing_two).at('p'))
-    assert_equal true, six.has_img?
-    assert_equal false,  six.has_pic?
+    six = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(
+      Nokogiri::HTML(category_listing_one, nil, CraigScrape::Scraper::HTML_ENCODING).at('p')
+    )
+    assert_equal false, six.has_img?
+    assert_equal true,  six.has_pic?
     assert_equal true, six.has_pic_or_img?
-    assert_equal '/mdc/jwl/1128691192.html', six.href
-    assert_equal "925 Sterling Silver Dragonfly Charm Bracelet - $25", six.label
-    assert_equal nil, six.section
-    assert_equal nil, six.location
+    assert_equal '/pbc/reb/1128661387.html', six.href
+    assert_equal "$2995000 / 5br - Downtown Boca New Home To Be Built", six.label
+    assert_equal "real estate - by broker", six.section
+    assert_equal "Boca Raton", six.location
     assert_equal nil, six.post_date
-    assert_equal 25.0, six.price
+    assert_equal 2995000.0, six.price
+
+    seven = CraigScrape::Posting.new CraigScrape::Listings.parse_summary(
+      Nokogiri::HTML(category_listing_two, nil, CraigScrape::Scraper::HTML_ENCODING).at('p')
+    )
+    assert_equal true, seven.has_img?
+    assert_equal false,  seven.has_pic?
+    assert_equal true, seven.has_pic_or_img?
+    assert_equal '/mdc/jwl/1128691192.html', seven.href
+    assert_equal "925 Sterling Silver Dragonfly Charm Bracelet - $25", seven.label
+    assert_equal nil, seven.section
+    assert_equal nil, seven.location
+    assert_equal nil, seven.post_date
+    assert_equal 25.0, seven.price
   end
   
 
@@ -302,7 +316,7 @@ EOD
     assert_equal [:pic], sfbay_art_1223614914.img_types
   end
   
-  # This is actually a 'bug' with hpricot itself when the ulimit is set too low. 
+  # This was actually a 'bug' with hpricot itself when the ulimit is set too low. 
   # the Easy fix is running "ulimit -s 16384" before the tests. But the better fix was
   # to remove the userbody sending these pages to be parsed by Hpricot
   def test_bugs_found061710

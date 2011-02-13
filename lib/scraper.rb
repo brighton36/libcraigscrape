@@ -33,6 +33,8 @@ class CraigScrape::Scraper
 
   URL_PARTS = /^(?:([^\:]+)\:\/\/([^\/]*))?(.*)$/
   HTML_TAG  = /<\/?[^>]*>/
+  # We have to specify this to nokogiri. Sometimes it tries to figure out encoding on its own, and craigslist users post crazy bytes sometimes  
+  HTML_ENCODING = "UTF-8"
   
   # Returns the full url that corresponds to this resource
   attr_reader :url
@@ -202,9 +204,9 @@ class CraigScrape::Scraper
     @html_source
   end
   
-  # Returns an hpricot parse, of the current URI
+  # Returns an Nokogiri parse, of the current URI
   def html
-    @html ||= Hpricot.parse html_source if html_source
+    @html ||= Nokogiri::HTML html_source, nil, HTML_ENCODING if html_source
     @html
   end
 end  

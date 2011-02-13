@@ -36,7 +36,7 @@ class CraigScrape
     def location
       unless @location
         cursor = html % 'h3 > b > a:first-of-type'
-        cursor = cursor.next_node if cursor       
+        cursor = cursor.next if cursor       
         @location = $1 if cursor and LOCATION_NAME.match he_decode(cursor.to_s)
       end
       

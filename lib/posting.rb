@@ -79,7 +79,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   def reply_to
     unless @reply_to
       cursor = html_head.at 'hr' if html_head
-      cursor = cursor.next_sibling until cursor.nil? or cursor.name == 'a'
+      cursor = cursor.next until cursor.nil? or cursor.name == 'a'
       @reply_to = $1 if cursor and REPLY_TO.match he_decode(cursor.inner_html)
     end
     
@@ -90,7 +90,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   def post_time
     unless @post_time
       cursor = html_head.at 'hr' if html_head
-      cursor = cursor.next_node until cursor.nil? or POST_DATE.match cursor.to_s
+      cursor = cursor.next until cursor.nil? or POST_DATE.match cursor.to_s
       @post_time = Time.parse $1 if $1
     end
     
@@ -100,8 +100,8 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # Integer, Craigslist's unique posting id
   def posting_id
     unless @posting_id     
-      cursor = Hpricot.parse html_footer if html_footer
-      cursor = cursor.next_node until cursor.nil? or POSTING_ID.match cursor.to_s
+      cursor = Nokogiri::HTML html_footer, nil, HTML_ENCODING if html_footer
+      cursor = cursor.next until cursor.nil? or POSTING_ID.match cursor.to_s
       @posting_id = $1.to_i if $1
     end
   
@@ -135,7 +135,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
       # Real estate listings can work a little different for location:
       unless @location
         cursor = craigslist_body.at 'small'
-        cursor = cursor.previous_node until cursor.nil? or cursor.text?
+        cursor = cursor.previous until cursor.nil? or cursor.text?
         
         @location = he_decode(cursor.to_s.strip) if cursor
       end
@@ -295,7 +295,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # I set apart from html to work around the SystemStackError bugs in test_bugs_found061710. Essentially we 
   # return everything above the user_body
   def html_head
-    @html_head = Hpricot.parse $1 if @html_head.nil? and HTML_HEADER.match html_source
+    @html_head = Nokogiri::HTML  $1, nil, HTML_ENCODING if @html_head.nil? and HTML_HEADER.match html_source
     # We return html itself if HTML_HEADER doesn't match, which would be case for a 404 page or something
     @html_head ||= html
      
@@ -316,9 +316,9 @@ class CraigScrape::Posting < CraigScrape::Scraper
   end
   
   # Read the notes on user_body. However,  unlike the user_body, the craigslist portion of this div can be relied upon to be valid html. 
-  # So - we'll return it as an Hpricot object.
+  # So - we'll return it as a Nokogiri object.
   def craigslist_body
-    Hpricot.parse $3 if USERBODY_PARTS.match html_source
+    Nokogiri::HTML $3, nil, HTML_ENCODING if USERBODY_PARTS.match html_source
   end
 
 end
