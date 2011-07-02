@@ -548,14 +548,15 @@ report_summaries = craig_report.searches.collect do |search|
   }
 end
 
-# Time to send the email:
-ReportMailer.report(
-  craig_report.email_to,
-  craig_report.email_from,
-  craig_report.report_name,
-  {:summaries => report_summaries, :definition => craig_report}
-).deliver if report_summaries.length > 0
-
+# Time to send the email (maybe):
+unless report_summaries.select { |s| !s[:postings].empty? }.empty?
+  ReportMailer.report(
+    craig_report.email_to,
+    craig_report.email_from,
+    craig_report.report_name,
+    {:summaries => report_summaries, :definition => craig_report}
+  ).deliver
+end
 
 # Commit (make 'active') all newly created tracked post urls:
 TrackedPost.activate_all!
