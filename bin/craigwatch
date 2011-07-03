@@ -392,7 +392,8 @@ parser = Kwalify::Yaml::Parser.new(
   :data_binding => true
 )
 
-craig_report = parser.parse_file report_definition_file
+report_definition_file_content = ERB.new(File.read(report_definition_file)).result
+craig_report = parser.parse(report_definition_file_content, filename: report_definition_file)
 
 parser.errors.each do |e|
   puts "Definition Validation Error (line #{e.linenum}, char #{e.column}): #{e.message}"
