@@ -153,7 +153,7 @@ class CraigScrape::Scraper
       
     begin
       # This handles the redirects for us          
-      resp, data = Net::HTTP.new( uri.host, uri.port).get uri.request_uri, nil
+      resp, data = Net::HTTP.new( uri.host, uri.port).get uri.request_uri
   
       if resp.response.code == "200"
         # Check for gzip, and decode:
