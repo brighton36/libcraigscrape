@@ -161,8 +161,8 @@ $: << File.dirname(__FILE__) + '/../lib'
 require 'rubygems'
 
 gem 'kwalify',      '~> 0.7'
-gem 'activerecord', '~> 2.3'
-gem 'actionmailer', '~> 2.3'
+gem 'activerecord'
+gem 'actionmailer'
 
 require 'kwalify'
 require 'active_record'
@@ -367,8 +367,8 @@ class ReportMailer < ActionMailer::Base #:nodoc:
   def generate_view_parts(view_name, tmpl)
     part( :content_type => "multipart/alternative" ) do |p|
       [
-        { :content_type => "text/plain", :body => render_message("#{view_name.to_s}.plain.erb", tmpl) },
-        { :content_type => "text/html",  :body => render_message("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
+        { :content_type => "text/plain", :body => render("#{view_name.to_s}.plain.erb", tmpl) },
+        { :content_type => "text/html",  :body => render("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
       ].each { |parms| p.part parms.merge( { :charset => "UTF-8", :transfer_encoding => "7bit" } ) }
     end
   end
@@ -551,7 +551,7 @@ report_summaries = craig_report.searches.collect do |search|
 end
 
 # Time to send the email:
-ReportMailer.deliver_report(
+ReportMailer.report(
   craig_report.email_to, 
   craig_report.email_from, 
   craig_report.report_name, 

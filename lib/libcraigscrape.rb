@@ -4,7 +4,7 @@
 #
 require 'rubygems'
 
-gem 'activesupport', '~> 2.3'
+gem 'activesupport'
 gem 'hpricot',       '~> 0.8'
 gem 'htmlentities',  '~> 4.0.0'
 
