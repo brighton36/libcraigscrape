@@ -290,12 +290,12 @@ class CraigReportDefinition #:nodoc:
     private
     
     def matches_all?(conditions, against)
-      against = against.to_a
+      against = against.lines.to_a unless against.nil?
       (conditions.nil? or conditions.all?{|c| against.any?{|a| match_against c, a } }) ? true : false
     end
     
     def doesnt_match_any?(conditions, against)
-      against = against.to_a
+      against = against.lines.to_a unless against.nil?
       (conditions.nil? or conditions.all?{|c| against.any?{|a| !match_against c, a } }) ? true : false
     end
     
