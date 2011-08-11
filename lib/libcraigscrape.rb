@@ -5,8 +5,8 @@
 require 'rubygems'
 
 gem 'activesupport'
-gem 'hpricot',       '~> 0.8'
-gem 'htmlentities',  '~> 4.0.0'
+gem 'hpricot'
+gem 'htmlentities'
 
 require 'net/http'
 require 'zlib'
