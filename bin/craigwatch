@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# encoding: utf-8
 #
 # =craigwatch - A email-based "post monitoring" solution
 #
@@ -160,7 +161,7 @@ $: << File.dirname(__FILE__) + '/../lib'
 
 require 'rubygems'
 
-gem 'kwalify',      '~> 0.7'
+gem 'kwalify'
 gem 'activerecord'
 gem 'actionmailer'
 
@@ -357,19 +358,20 @@ class ReportMailer < ActionMailer::Base #:nodoc:
 
     formatted_subject = Time.now.strftime(subject_template)
 
-    recipients  to
-    from        sender
-    subject     formatted_subject
-
-    generate_view_parts 'craigslist_report', report_tmpl.merge({:subject =>formatted_subject})
+    mail(:to => to, :from => sender, :subject => formatted_subject) do |format|
+      format.text { render "craigslist_report.plain.erb", :locals => {:summaries => report_tmpl[:summaries]}  }
+      format.html { render "craigslist_report.html.erb", :locals => {:summaries => report_tmpl[:summaries]}  }
+    end
   end
 
   def generate_view_parts(view_name, tmpl)
-    part( :content_type => "multipart/alternative" ) do |p|
-      [
-        { :content_type => "text/plain", :body => render("#{view_name.to_s}.plain.erb", tmpl) },
-        { :content_type => "text/html",  :body => render("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
-      ].each { |parms| p.part parms.merge( { :charset => "UTF-8", :transfer_encoding => "7bit" } ) }
+    mail = Mail.new do
+      part( :content_type => "multipart/alternative" ) do |p|
+        [
+          { :content_type => "text/plain", :body => render("#{view_name.to_s}.plain.erb", tmpl) },
+          { :content_type => "text/html",  :body => render("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
+        ].each { |parms| p.part parms.merge( { :charset => "UTF-8", :transfer_encoding => "7bit" } ) }
+      end
     end
   end
 end
@@ -516,7 +518,7 @@ report_summaries = craig_report.searches.collect do |search|
           # Now let's add these urls to the database so as to reduce memory overhead.
           # Keep in mind - they're not active until the email goes out.
           # also - we shouldn't have to worry about putting 'irrelevant' posts in the db, since
-          # the nbewest are always the first ones parsed:
+          # the newest are always the first ones parsed:
           tracked_listing.posts.create(
             :url => post.url,
             :created_at => newest_post_date
@@ -555,8 +557,9 @@ ReportMailer.report(
   craig_report.email_to,
   craig_report.email_from,
   craig_report.report_name,
-  {:summaries => report_summaries, :definition => craig_report}
-) if report_summaries.length > 0
+  {:summaries => report_summaries, :definition => craig_report, @summaries => report_summaries}
+).deliver if report_summaries.length > 0
+
 
 # Commit (make 'active') all newly created tracked post urls:
 TrackedPost.activate_all!
