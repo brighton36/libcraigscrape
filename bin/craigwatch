@@ -1,9 +1,10 @@
 #!/usr/bin/ruby
+# encoding: utf-8
 #
 # =craigwatch - A email-based "post monitoring" solution
 #
-# Created alongside the libcraigscrape library, libcraigwatch was designed to take the monotony out of regular 
-# craiglist monitoring. craigwatch is designed to be run at periodic intervals (hourly/daily/etc) through crontab 
+# Created alongside the libcraigscrape library, libcraigwatch was designed to take the monotony out of regular
+# craiglist monitoring. craigwatch is designed to be run at periodic intervals (hourly/daily/etc) through crontab
 # and report all new postings within a listing or search url, since its last run, by email.
 #
 # For more information, head to the {craiglist monitoring}[http://www.derosetechnologies.com/community/libcraigscrape] help section of our website.
@@ -25,29 +26,29 @@
 # - location_has_no - (array of string or regexp) Only include posts which don't match against the post location
 #
 # Multiple searches can be combined into a single report, and results can be sorted by newest-first or oldest-first (default)
-# 
+#
 # Reporting output is easily customized html, handled by ActionMailer, and emails can be delivered via smtp or sendmail.
-# Database tracking of already-delivered posts is handled by ActiveRecord, and its driver-agnostic SQL supports all the 
+# Database tracking of already-delivered posts is handled by ActiveRecord, and its driver-agnostic SQL supports all the
 # major backends (sqllite/mysql/postgres/probably-all-others). Database sizes are contained by automatically pruning old results
 # that are no longer required at the end of each run.
 #
 # Pretty useful, no?
-# 
+#
 # == Installation
-# craigwatch is coupled with libcraigscrape, and is installed via ruby gems. However, since we focused on keeping the 
+# craigwatch is coupled with libcraigscrape, and is installed via ruby gems. However, since we focused on keeping the
 # libcraigscrape download 'lightweight' some additional gems need to be installed in addition to the initial libcraigscrape
-# gem itself. 
+# gem itself.
 #
 # This should take care of the craigwatch install on all systems:
 #    sudo gem install libcraigscrape kwalify activerecord actionmailer
 # Alternatively, if you've already installed libcraigscrape and want to start working with craigwatch:
 #    sudo gem install kwalify activerecord actionmailer
-# 
-# This script was initially developed with activerecord 2.3, actionmailer 2.3 and kwalify 0.7, but will likely work with most 
+#
+# This script was initially developed with activerecord 2.3, actionmailer 2.3 and kwalify 0.7, but will likely work with most
 # prior and future versions of these libraries.
-# 
+#
 # == Usage
-# When craigwatch is invoked, it is designed to run a single report and then terminate. There is only one parameter to craigwatch, and 
+# When craigwatch is invoked, it is designed to run a single report and then terminate. There is only one parameter to craigwatch, and
 # this parameter is the path to a valid report-definition yml file. ie:
 #    craigwatch johns_daily_watch.yml
 #
@@ -63,10 +64,10 @@
 #
 # == Definition File Sample
 #
-# Let's start with a minimal report, just enough needed to get something quick working: 
+# Let's start with a minimal report, just enough needed to get something quick working:
 #    # We need some kind of destination to send this to
 #    email_to: Chris DeRose <cderose@derosetechnologies.com>
-#    
+#
 #    # This is an array of specific 'searches' we'll be performing in this report:
 #    searches:
 #         # We're looking for 90's era cadillac, something cheap, confortable and in white...
@@ -85,7 +86,7 @@
 #         summary_post_has_no: [ /xlr/i ]
 #
 #         # We were convertable, and white/cream/etc:
-#         full_post_has: 
+#         full_post_has:
 #            - /convertible/i
 #            - /(white|yellow|banana|creme|cream)/i
 #
@@ -93,7 +94,7 @@
 #         full_post_has_no:
 #            - /simulated[^a-z]{0,2}convertible/i
 #
-#         # We want to search all of craigslist's in the us, and we'll want to find it using 
+#         # We want to search all of craigslist's in the us, and we'll want to find it using
 #         # the '/search/cta?hasPic=1&query=cadillac' url on the site
 #         sites: [ us ]
 #         listings:
@@ -129,21 +130,21 @@
 #
 #         # Oh, and we're on a budget:
 #         price_less_than: 120
-#     
+#
 #       # Search #2
 #       - name: Large apartment rentals in San Francisco
 #         sites: [ us/ca/sfbay ]
 #         starting: 9/10/2009
-#    
-#         # We're going to rely on craigslist's built-in search for this one since there's a lot of listings, and we 
+#
+#         # We're going to rely on craigslist's built-in search for this one since there's a lot of listings, and we
 #         # want to conserve some bandwidth
 #         listings: [ /search/apa?query=pool&minAsk=min&maxAsk=max&bedrooms=5 ]
 #
 #         # We'll require a price to be listed, 'cause it keeps out some of the unwanted fluff
 #         price_required: yes
-# 
+#
 #         # Hopefully this will keep us away from a bad part of town:
-#         price_greater_than: 1000        
+#         price_greater_than: 1000
 #
 #         # Since we dont have time to driv to each location, we'll require only listings with pictures
 #         has_image: yes
@@ -160,9 +161,9 @@ $: << File.dirname(__FILE__) + '/../lib'
 
 require 'rubygems'
 
-gem 'kwalify',      '~> 0.7'
-gem 'activerecord', '~> 2.3'
-gem 'actionmailer', '~> 2.3'
+gem 'kwalify'
+gem 'activerecord'
+gem 'actionmailer'
 
 require 'kwalify'
 require 'active_record'
@@ -173,16 +174,16 @@ require "socket"
 
 class String #:nodoc:
   RE = /^\/(.*)\/([ixm]*)$/
-  
+
   def is_re?
     (RE.match self) ? true : false
   end
-  
+
   def to_re
     source, options = ( RE.match(self) )? [$1, $2] : [self,nil]
     mods = 0
 
-    options.each_char do |c| 
+    options.each_char do |c|
       mods |= case c
         when 'i' then Regexp::IGNORECASE
         when 'x' then Regexp::EXTENDED
@@ -224,59 +225,59 @@ class CraigReportDefinition #:nodoc:
       :adapter => 'sqlite3',
       :database => File.basename(for_yaml_file, File.extname(for_yaml_file))+'.db'
     } if for_yaml_file
-    
-    # This is a little hack to make sqlite definitions a little more portable, by allowing them 
+
+    # This is a little hack to make sqlite definitions a little more portable, by allowing them
     # to be specify dbfile's relative to the yml's directory:
     ret = @tracking_database
     ret['dbfile'] = '%s/%s' % [File.dirname(for_yaml_file), $1] if (
       for_yaml_file and ret.has_key? 'dbfile' and /^([^\/].*)$/.match ret['dbfile']
     )
-    
+
     ret
   end
 
   class SearchDefinition #:nodoc:
-    include Kwalify::Util::HashLike   
-    
+    include Kwalify::Util::HashLike
+
     attr_reader :name, :sites, :listings
     attr_reader :location_has, :location_has_no
     attr_reader :full_post_has, :full_post_has_no
     attr_reader :summary_post_has, :summary_post_has_no
     attr_reader :summary_or_full_post_has, :summary_or_full_post_has_no
-    
+
     attr_reader :price_greater_than,:price_less_than
 
     def has_image?; @has_image; end
     def newest_first?; @newest_first; end
     def price_required?; @price_required; end
-      
+
     def starting_at
-      (@starting) ? 
-        Time.parse(@starting) : 
+      (@starting) ?
+        Time.parse(@starting) :
         Time.now.yesterday.beginning_of_day
     end
-    
-    def passes_filter?(post)  
+
+    def passes_filter?(post)
       if post.price.nil?
         return false if price_required?
       else
         return false if @price_greater_than and post.price <= @price_greater_than
         return false if @price_less_than and post.price >= @price_less_than
       end
-      
+
       # Label Filters:
       return false unless matches_all? summary_post_has, post.label
       return false unless doesnt_match_any? summary_post_has_no, post.label
-      
+
       # Location Filters:
       return false unless matches_all? location_has, post.location
       return false unless doesnt_match_any? location_has_no, post.location
-      
+
       # Full post Filters:
       if full_post_has or full_post_has_no or summary_or_full_post_has or summary_or_full_post_has_no
         # We're going to download the page, so let's make sure we didnt hit a "This posting has been flagged for removal"
         return false if post.system_post?
-        
+
         return false unless matches_all? full_post_has, post.contents_as_plain
         return false unless doesnt_match_any? full_post_has_no, post.contents_as_plain
 
@@ -286,19 +287,19 @@ class CraigReportDefinition #:nodoc:
 
       true
     end
-    
+
     private
-    
+
     def matches_all?(conditions, against)
-      against = against.to_a
+      against = against.lines.to_a unless against.nil?
       (conditions.nil? or conditions.all?{|c| against.any?{|a| match_against c, a } }) ? true : false
     end
-    
+
     def doesnt_match_any?(conditions, against)
-      against = against.to_a
+      against = against.lines.to_a unless against.nil?
       (conditions.nil? or conditions.all?{|c| against.any?{|a| !match_against c, a } }) ? true : false
     end
-    
+
     def match_against(condition, against)
       (against.scan( condition.is_re? ? condition.to_re : /#{condition}/i).length > 0) ? true : false
     end
@@ -309,11 +310,11 @@ class TrackedSearch < ActiveRecord::Base #:nodoc:
   has_many :listings, :dependent => :destroy, :class_name => 'TrackedListing'
   validates_uniqueness_of :search_name
   validates_presence_of   :search_name
-  
+
   def self.find_by_name(name)
     self.find :first, :conditions => ['search_name = ?',name]
   end
-  
+
   def find_listing_by_url(url)
     listings.find :first, :conditions => ['url = ?',  url]
   end
@@ -330,7 +331,7 @@ class TrackedListing < ActiveRecord::Base #:nodoc:
   def last_tracked_at
     self.posts.maximum 'created_at'
   end
-  
+
   def delete_posts_older_than(cutoff_date)
     # TODO: can't I use posts.delete 'created_at < ?' and keep it cleaner?
     TrackedPost.delete_all [ 'tracked_listing_id = ? AND created_at < ?', self.id, cutoff_date ]
@@ -342,11 +343,11 @@ class TrackedPost < ActiveRecord::Base #:nodoc:
 
   def self.activate_all!
     TrackedPost.update_all(
-      { :active => true }, 
-      [ 'active = ?', false ] 
+      { :active => true },
+      [ 'active = ?', false ]
     )
   end
-  
+
   def self.destroy_inactive!
     TrackedPost.delete_all [ 'active = ?', false ]
   end
@@ -354,22 +355,23 @@ end
 
 class ReportMailer < ActionMailer::Base #:nodoc:
   def report(to, sender, subject_template, report_tmpl)
-    
-    formatted_subject = Time.now.strftime(subject_template)
-    
-    recipients  to
-    from        sender
-    subject     formatted_subject
 
-    generate_view_parts 'craigslist_report', report_tmpl.merge({:subject =>formatted_subject})
+    formatted_subject = Time.now.strftime(subject_template)
+
+    mail(:to => to, :from => sender, :subject => formatted_subject) do |format|
+      format.text { render "craigslist_report.plain.erb", :locals => {:summaries => report_tmpl[:summaries]}  }
+      format.html { render "craigslist_report.html.erb", :locals => {:summaries => report_tmpl[:summaries]}  }
+    end
   end
 
   def generate_view_parts(view_name, tmpl)
-    part( :content_type => "multipart/alternative" ) do |p|
-      [
-        { :content_type => "text/plain", :body => render_message("#{view_name.to_s}.plain.erb", tmpl) },
-        { :content_type => "text/html",  :body => render_message("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
-      ].each { |parms| p.part parms.merge( { :charset => "UTF-8", :transfer_encoding => "7bit" } ) }
+    mail = Mail.new do
+      part( :content_type => "multipart/alternative" ) do |p|
+        [
+          { :content_type => "text/plain", :body => render("#{view_name.to_s}.plain.erb", tmpl) },
+          { :content_type => "text/html",  :body => render("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
+        ].each { |parms| p.part parms.merge( { :charset => "UTF-8", :transfer_encoding => "7bit" } ) }
+      end
     end
   end
 end
@@ -383,7 +385,7 @@ unless report_definition_file
   puts <<EOD
 Usage:
     #{File.basename($0)} [report_definition_file]
-    
+
 Run 'gem server' and browse the libcraigscrape rdoc for 'bin/craigscrape' for specific usage details.
 EOD
   exit
@@ -408,7 +410,7 @@ ActionMailer::Base.logger = Logger.new STDERR if craig_report.debug_mailer?
 if craig_report.smtp_settings
   ReportMailer.smtp_settings = craig_report.smtp_settings
 else
-  ReportMailer.delivery_method = :sendmail  
+  ReportMailer.delivery_method = :sendmail
 end
 ReportMailer.template_root = File.dirname __FILE__
 
@@ -421,16 +423,16 @@ CraigScrape::Scraper.logger = Logger.new STDERR if craig_report.debug_craigscrap
 
 # Perform migrations if needed?
 ActiveRecord::Schema.define do
-  suppress_messages do 
+  suppress_messages do
     create_table :tracked_searches do |t|
       t.column :search_name,      :string
     end unless table_exists? :tracked_searches
-    
+
     create_table :tracked_listings do |t|
       t.column :url,                :string
       t.column :tracked_search_id,  :integer
-    end unless table_exists? :tracked_listings    
-    
+    end unless table_exists? :tracked_listings
+
     create_table :tracked_posts do |t|
       t.column :url,                :string
       t.column :tracked_listing_id, :integer
@@ -440,7 +442,7 @@ ActiveRecord::Schema.define do
   end
 end
 
-# Remove all posts which are inactive. They would be in there if the prior run was a failure. 
+# Remove all posts which are inactive. They would be in there if the prior run was a failure.
 TrackedPost.destroy_inactive!
 
 # We'll need these outside this next loop:
@@ -450,24 +452,24 @@ newly_tracked_posts = []
 report_summaries = craig_report.searches.collect do |search|
   # Load our tracking info
   search_track = TrackedSearch.find_by_name search.name
-  
+
   # No Tracking found - let's set one up:
   search_track = TrackedSearch.create! :search_name => search.name unless search_track
-  
+
   # This hash tracks what makes it into the report on this search.
   # NOTE that keys are url's b/c sometimes the same posting will end up in multiple listings,
   # And doing this ensures that we don't end-up reporting the same post twice.
   new_summaries = {}
-  
+
   # And now we actually scrape:
   CraigScrape.new(*search.sites).each_listing(*search.listings) do |listing|
-    # Keep in mind that listing.url does change in the while loop. 
+    # Keep in mind that listing.url does change in the while loop.
     # But, this first one is a good base_url that will never change between runs.
 
     tracked_listing = search_track.find_listing_by_url listing.url
     tracked_listing ||= search_track.listings.create! :url => listing.url
-    
-    # Gives us a sane stopping point (hopefully) : 
+
+    # Gives us a sane stopping point (hopefully) :
     last_tracked_at = tracked_listing.last_tracked_at
     last_tracked_at ||= search.starting_at
 
@@ -475,55 +477,55 @@ report_summaries = craig_report.searches.collect do |search|
     already_tracked_urls = tracked_listing.posts.collect{|tp| tp.url}
 
     # We'll use this in the loop to decide what posts to track:
-    newest_post_date = last_tracked_at    
-    
+    newest_post_date = last_tracked_at
+
     # We keep track of post.post_date here, b/c in some circumstances, you can be in the below loop
     # but have no post.post_date since the posting was removed and it parsed to nil
     most_recent_posting_date = Time.now
-    
+
     # OK - Now let's go!
     catch :list_break do
       while listing
         listing.posts.each do |post|
           begin
             most_recent_posting_date = post.post_date if post.post_date
-            
+
             # Are we at a point in the scrape, past which we don't need to proceed?
             throw :list_break if (
               most_recent_posting_date < last_tracked_at or
               already_tracked_urls.include? post.url
             )
-  
+
             # If we want to report this post, add it to the collection:
             new_summaries[post.url] = post if (
-              !new_summaries.has_key? post.url and 
+              !new_summaries.has_key? post.url and
               search.passes_filter? post
             )
           rescue CraigScrape::Scraper::ResourceNotFoundError,CraigScrape::Scraper::MaxRedirectError => e
             # Sometimes we do end up with 404's that will never load, and we dont want to
             # abort a run simply b/c we found some anomaly due to the craigslist index.
-            # being out of date. This ResourceNotFoundError can occur due to 
-            # loading the post url in full, only to see that it was yanked - or craigslist 
+            # being out of date. This ResourceNotFoundError can occur due to
+            # loading the post url in full, only to see that it was yanked - or craigslist
             # is acting funny.
             next
           end
-      
+
           # Now let's see if the url should be kept in our tracking database for the future...
 
           # This post-date sets a limit for the tracked_listing.posts.create below
           newest_post_date = most_recent_posting_date if most_recent_posting_date > newest_post_date
-          
+
           # Now let's add these urls to the database so as to reduce memory overhead.
           # Keep in mind - they're not active until the email goes out.
-          # also - we shouldn't have to worry about putting 'irrelevant' posts in the db, since 
-          # the nbewest are always the first ones parsed:
+          # also - we shouldn't have to worry about putting 'irrelevant' posts in the db, since
+          # the newest are always the first ones parsed:
           tracked_listing.posts.create(
-            :url => post.url, 
-            :created_at => newest_post_date 
+            :url => post.url,
+            :created_at => newest_post_date
           ) unless most_recent_posting_date < newest_post_date
 
         end
-        
+
         listing = listing.next_page
       end
     end
@@ -532,41 +534,34 @@ report_summaries = craig_report.searches.collect do |search|
   
 
   # Let's flatten the unique'd hash into a more useable array:
-  # NOTE: The reason we included a reject is a little complicated, but here's the gist:
-  #  * We try not to load the whole post if we don't have to
-  #  * Its possible that we met all the criterion of the passes_filter? with merely a header, and
-  #    if so we add a url to the summaries stack
-  #  * Unfortunately, when we later load that post in full, we may find that the post was posting_has_expired? 
-  #    or flagged_for_removal?, etc.
-  #  * If this was the case, below we'll end up sorting against nil post_dates. This would fail.
-  #  * So - before we sort, we run a quick reject on nil post_dates 
-  new_summaries = new_summaries.values.reject{|v| v.post_date.nil? }.sort{|a,b| a.post_date <=> b.post_date} # oldest goes to bottom
-  
+  new_summaries = new_summaries.values.sort{|a,b| a.post_date <=> b.post_date} # oldest goes to bottom
+
   # Now Let's manage the tracking database:
-  if new_summaries.length > 0  
+  if new_summaries.length > 0
 
     # We'll use this in the cleanup at the bottom:
     latest_post_date = new_summaries.last.post_date
-    
-    new_summaries.reverse! if search.newest_first?    
+
+    new_summaries.reverse! if search.newest_first?
   end
-  
+
   # We'll want to email these...
-  { 
+  {
     :latest_post_date => latest_post_date,
-    :search_track => search_track, 
-    :postings => new_summaries, 
+    :search_track => search_track,
+    :postings => new_summaries,
     :search => search
   }
 end
 
 # Time to send the email:
-ReportMailer.deliver_report(
-  craig_report.email_to, 
-  craig_report.email_from, 
-  craig_report.report_name, 
-  {:summaries => report_summaries, :definition => craig_report}
-) if report_summaries.length > 0
+ReportMailer.report(
+  craig_report.email_to,
+  craig_report.email_from,
+  craig_report.report_name,
+  {:summaries => report_summaries, :definition => craig_report, @summaries => report_summaries}
+).deliver if report_summaries.length > 0
+
 
 # Commit (make 'active') all newly created tracked post urls:
 TrackedPost.activate_all!

@@ -1,6 +1,6 @@
 CRAIGSLIST REPORTER
 
-<%@summaries.each do |summary| -%>
+<% summaries.each do |summary| -%>
    <%=summary[:search].name %>
    <% summary[:postings].collect do |post| -%>
       <% if summary[:postings].length > 0 %>

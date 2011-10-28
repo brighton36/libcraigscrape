@@ -1,5 +1,5 @@
 <h2><%=h @subject %></h2>
-<%@summaries.each do |summary| %>
+<%summaries.each do |summary| %>
    <h3><%=h summary[:search].name%></h3>
       <% if summary[:postings].length > 0 %>
          <%summary[:postings].each do |post|%>
@@ -9,7 +9,7 @@
    			h(post.label),
    			(post.location) ? '<font size="-1"> (%s)</font>' % h(post.location) : '',
    			(post.has_pic_or_img?) ? ' <span style="color: orange"> img</span>': ''
-         	] -%>
+         	].html_safe -%>
          <% end %>
       <% else %>
          <p><i>No new postings were found, which matched the search criteria.</i></p>
