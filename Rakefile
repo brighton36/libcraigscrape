@@ -1,7 +1,6 @@
 require 'rake'
 require 'rake/clean'
-require 'rake/gempackagetask'
-require 'rake/rdoctask'
+require 'rdoc/task'
 require 'rake/testtask'
 require 'fileutils'
 require 'tempfile'
@@ -37,10 +36,6 @@ SPEC =
     s.files = PKG_FILES
     s.require_paths = ["lib"] 
     s.test_files = FileList['test/test_*.rb']
-    s.add_dependency 'nokogiri',     '>= 1.4.4'
-    s.add_dependency 'htmlentities', '>= 4.0.0'
-    s.add_dependency 'facets',       '>= 2.9.2'
-    s.add_dependency 'activerecord', '>= 2.3.0', '< 3'
   end
 
 desc "Run all the tests"
@@ -58,14 +53,6 @@ Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_files.add RDOC_FILES+Dir.glob('lib/*.rb').sort_by{|a,b| (a == 'lib/libcraigscrape.rb') ? -1 : 0 }
 end
 
-Rake::GemPackageTask.new(SPEC) do |p|
-  p.need_tar = false
-  p.need_tar_gz = false
-  p.need_tar_bz2 = false
-  p.need_zip = false
-  p.gem_spec = SPEC
-end
-
 task "lib" do
   directory "lib"
 end
@@ -79,44 +66,4 @@ task :uninstall => [:clean] do
   sh %{sudo gem uninstall #{NAME}}
 end
 
-require 'roodi'
-require 'roodi_task'
-
-namespace :code_tests do
-  desc "Analyze for code complexity"
-  task :flog do
-    require 'flog'
-
-    flog = Flog.new
-    flog.flog_files ['lib']
-    threshold = 105
-  
-    bad_methods = flog.totals.select do |name, score|
-       score > threshold
-    end
-  
-    bad_methods.sort { |a,b| a[1] <=> b[1] }.each do |name, score|
-      puts "%8.1f: %s" % [score, name]
-    end
-  
-    puts "WARNING : #{bad_methods.size} methods have a flog complexity > #{threshold}" unless bad_methods.empty?
-  end
-  
-  desc "Analyze for code duplication"
-    require 'flay'
-    task :flay do
-    threshold = 25
-    flay = Flay.new({:fuzzy => false, :verbose => false, :mass => threshold})
-    flay.process(*Flay.expand_dirs_to_files(['lib']))
-  
-    flay.report
-  
-    raise "#{flay.masses.size} chunks of code have a duplicate mass > #{threshold}" unless flay.masses.empty?
-  end
-  
-  RoodiTask.new 'roodi', ['lib/*.rb'], 'roodi.yml'
-end
-
-desc "Run all code tests"
-task :code_tests => %w(code_tests:flog code_tests:flay code_tests:roodi)
 

@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# encoding: UTF-8
 
 require 'test/unit'
 require File.dirname(__FILE__)+'/../lib/libcraigscrape'
@@ -45,7 +46,7 @@ EOD
     assert_equal true, one.has_pic_or_img?
     assert_equal '/brw/reb/1128608404.html', one.href
     assert_equal "Losing your house?  You'll need this New Loan Mod Video", one.label
-    assert_equal "real estate - by broker", one.section
+    assert_equal "real estate - by broker", one.section
     assert_equal "W. Woodland", one.location
     assert_equal 4, one.post_date.month
     assert_equal 18, one.post_date.day
@@ -59,7 +60,7 @@ EOD
     assert_equal true, two.has_pic_or_img?
     assert_equal '/mdc/reb/1128609783.html', two.href
     assert_equal "$348000 / 1br - Large 1/1 plus office on 49th Floor. 5-Star NEW Condo. Great Views", two.label
-    assert_equal "real estate - by broker", two.section
+    assert_equal "real estate - by broker", two.section
     assert_equal "Miami", two.location
     assert_equal 1, two.post_date.month
     assert_equal 4, two.post_date.day
@@ -73,7 +74,7 @@ EOD
     assert_equal true, three.has_pic_or_img?
     assert_equal '/mdc/reb/1128520894.html', three.href
     assert_equal "$22,000 HOME -ADULT COMMUNITY BOYNTON BEACH", three.label
-    assert_equal "real estate - by broker", three.section
+    assert_equal "real estate - by broker", three.section
     assert_equal nil, three.location
     assert_equal 12, three.post_date.month
     assert_equal 31, three.post_date.day
@@ -87,7 +88,7 @@ EOD
     assert_equal false, four.has_pic_or_img?
     assert_equal '/mdc/reb/1128474725.html', four.href
     assert_equal "$325000 / 3br - GOOD DEAL GREAT HOUSE AND LOCATION", four.label
-    assert_equal "real estate - by broker", four.section
+    assert_equal "real estate - by broker", four.section
     assert_equal "CORAL GABLES", four.location
     assert_equal 7, four.post_date.month
     assert_equal 22, four.post_date.day
@@ -115,7 +116,7 @@ EOD
     assert_equal true, six.has_pic_or_img?
     assert_equal '/pbc/reb/1128661387.html', six.href
     assert_equal "$2995000 / 5br - Downtown Boca New Home To Be Built", six.label
-    assert_equal "real estate - by broker", six.section
+    assert_equal "real estate - by broker", six.section
     assert_equal "Boca Raton", six.location
     assert_equal nil, six.post_date
     assert_equal 2995000.0, six.price
@@ -153,7 +154,7 @@ EOD
     assert_equal [], posting0.img_types
     
     posting1 = CraigScrape::Posting.new relative_uri_for('post_samples/posting1.html')
-    assert_equal "Residential income property\227Investors this property is for you! This duplex has a 2bedroom/1bath unit on each side. It features updated kitchens and baths (new tubs, toilet, sink, vanities), ceramic tile flooring throughout, separate water and electric meters and on site laundry facilities. It is also closed to the Galleria, beaches and downtown Fort Lauderdale! \r<br>\n\r<br>\nJe parle le Fran\347ais\r<br>\n\r<br>\nThis property is being offered by Blaunch Perrier, Broker Associate, Atlantic Properties International. Blaunch can be reached at 954-593-0077. For additional property information you may also visit www.garylanham.com\r<br>\n\r<br>", posting1.contents
+    assert_equal "Residential income property\u0097Investors this property is for you! This duplex has a 2bedroom/1bath unit on each side. It features updated kitchens and baths (new tubs, toilet, sink, vanities), ceramic tile flooring throughout, separate water and electric meters and on site laundry facilities. It is also closed to the Galleria, beaches and downtown Fort Lauderdale! \r<br>\n\r<br>\nJe parle le Français\r<br>\n\r<br>\nThis property is being offered by Blaunch Perrier, Broker Associate, Atlantic Properties International. Blaunch can be reached at 954-593-0077. For additional property information you may also visit www.garylanham.com\r<br>\n\r<br>", posting1.contents
     assert_equal ["south florida craigslist", "broward county", "real estate - by broker"], posting1.full_section
     assert_equal "$189900 / 4br - Investment Property--Duplex in Fort Lauderdale", posting1.header
     assert_equal "$189900 / 4br - Investment Property--Duplex in Fort Lauderdale", posting1.label
@@ -163,14 +164,14 @@ EOD
     assert_equal "hous-5nzhq-1131242195@craigslist.org", posting1.reply_to 
     assert_equal [0, 33, 13, 20, 4, 2009, 1, 110, true, "EDT"], posting1.post_time.to_a
     assert_equal %w(http://images.craigslist.org/3n83o33l5ZZZZZZZZZ94k913ac1582d4b1fa4.jpg http://images.craigslist.org/3n93p63obZZZZZZZZZ94k19d5e32eb3b610c2.jpg http://images.craigslist.org/3n93m03l6ZZZZZZZZZ94k6e9785e37a1b1f3f.jpg http://images.craigslist.org/3ma3oc3l4ZZZZZZZZZ94kbfecbcd2fb2e19cc.jpg), posting1.pics
-    assert_equal "Residential income property\227Investors this property is for you! This duplex has a 2bedroom/1bath unit on each side. It features updated kitchens and baths (new tubs, toilet, sink, vanities), ceramic tile flooring throughout, separate water and electric meters and on site laundry facilities. It is also closed to the Galleria, beaches and downtown Fort Lauderdale! \r\n\r\nJe parle le Fran\347ais\r\n\r\nThis property is being offered by Blaunch Perrier, Broker Associate, Atlantic Properties International. Blaunch can be reached at 954-593-0077. For additional property information you may also visit www.garylanham.com\r\n\r", posting1.contents_as_plain
+    assert_equal "Residential income property\u0097Investors this property is for you! This duplex has a 2bedroom/1bath unit on each side. It features updated kitchens and baths (new tubs, toilet, sink, vanities), ceramic tile flooring throughout, separate water and electric meters and on site laundry facilities. It is also closed to the Galleria, beaches and downtown Fort Lauderdale! \r\n\r\nJe parle le Français\r\n\r\nThis property is being offered by Blaunch Perrier, Broker Associate, Atlantic Properties International. Blaunch can be reached at 954-593-0077. For additional property information you may also visit www.garylanham.com\r\n\r", posting1.contents_as_plain
     assert_equal 189900.0, posting1.price
     assert_equal [], posting1.images
     assert_equal ["http://images.craigslist.org/3n83o33l5ZZZZZZZZZ94k913ac1582d4b1fa4.jpg", "http://images.craigslist.org/3n93p63obZZZZZZZZZ94k19d5e32eb3b610c2.jpg", "http://images.craigslist.org/3n93m03l6ZZZZZZZZZ94k6e9785e37a1b1f3f.jpg", "http://images.craigslist.org/3ma3oc3l4ZZZZZZZZZ94kbfecbcd2fb2e19cc.jpg"], posting1.pics
     assert_equal [:pic], posting1.img_types
 
     posting2 = CraigScrape::Posting.new relative_uri_for('post_samples/posting2.html')
-    assert_equal 15488, posting2.contents.length # This is easy, and probably fine enough
+    assert_equal 15473, posting2.contents.length # This is easy, and probably fine enough
     assert_equal ["south florida craigslist", "broward county", "cars & trucks - by dealer"], posting2.full_section
     assert_equal "PRESENTING A ELECTRON BLUE METALLIC 2002 CHEVROLET CORVETTE Z06 6 SPEE - $23975 (Fort Lauderdale)", posting2.header
     assert_equal "PRESENTING A ELECTRON BLUE METALLIC 2002 CHEVROLET CORVETTE Z06 6 SPEE - $23975", posting2.label
@@ -204,7 +205,7 @@ EOD
 
     # This one ended up being quite a curveball since the user uploaded HTML was such junk:
     posting4 = CraigScrape::Posting.new relative_uri_for('post_samples/posting4.html')
-    assert_equal 19412, posting4.contents.length
+    assert_equal 19337, posting4.contents.length
     assert_equal ["south florida craigslist", "broward county", "real estate - by broker"], posting4.full_section
     assert_equal "$225000 / 3br - Palm Aire Golf Corner Unit!", posting4.header
     assert_equal "Palm Aire Golf Corner Unit!", posting4.title
@@ -214,7 +215,7 @@ EOD
     assert_equal "hous-sk9f2-1139303170@craigslist.org", posting4.reply_to 
     assert_equal [0, 8, 9, 25, 4, 2009, 6, 115, true, "EDT"], posting4.post_time.to_a
     assert_equal [], posting4.pics
-    assert_equal 6396,posting4.contents_as_plain.length
+    assert_equal 6321,posting4.contents_as_plain.length
     assert_equal 225000.0, posting4.price
     assert_equal ["http://fortlauderdaleareahomesales.com/myfiles/5.jpg", "http://fortlauderdaleareahomesales.com/myfiles/4.jpg", "http://fortlauderdaleareahomesales.com/myfiles/7.jpg", "http://fortlauderdaleareahomesales.com/myfiles/10.jpg", "http://fortlauderdaleareahomesales.com/myfiles/1.jpg", "http://fortlauderdaleareahomesales.com/myfiles/2.jpg", "http://fortlauderdaleareahomesales.com/myfiles/3.jpg", "http://fortlauderdaleareahomesales.com/myfiles/8.jpg", "http://fortlauderdaleareahomesales.com/myfiles/9.jpg", "http://fortlauderdaleareahomesales.com/myfiles/11.jpg", "http://fortlauderdaleareahomesales.com/myfiles/14.jpg", "http://fortlauderdaleareahomesales.com/myfiles/6.jpg"], posting4.images
     assert_equal [:img], posting4.img_types    
@@ -294,8 +295,8 @@ EOD
     assert_equal [:pic], brw_reb_1224008903.img_types
     
     sfbay_art_1223614914 = CraigScrape::Posting.new relative_uri_for('post_samples/sfbay_art_1223614914.html')
-    assert_equal "Bombay Company Beautiful Art Postered Painting \r<br>\n\225\tThe most beautiful piece of art you could have\r<br>\n\225\tMatches with any type of furnishing and decoration\r<br>\n\225\tA must see/Only one year old\r<br>\n\225\tRegular Price @ $1500.00\r<br>\n\225\tSale Price @ $650.00\r<br>", sfbay_art_1223614914.contents
-    assert_equal "Bombay Company Beautiful Art Postered Painting \r\n\225\tThe most beautiful piece of art you could have\r\n\225\tMatches with any type of furnishing and decoration\r\n\225\tA must see/Only one year old\r\n\225\tRegular Price @ $1500.00\r\n\225\tSale Price @ $650.00\r", sfbay_art_1223614914.contents_as_plain
+    assert_equal "Bombay Company Beautiful Art Postered Painting \r<br>\n\u0095\tThe most beautiful piece of art you could have\r<br>\n\u0095\tMatches with any type of furnishing and decoration\r<br>\n\u0095\tA must see/Only one year old\r<br>\n\u0095\tRegular Price @ $1500.00\r<br>\n\u0095\tSale Price @ $650.00\r<br>", sfbay_art_1223614914.contents
+    assert_equal "Bombay Company Beautiful Art Postered Painting \r\n\u0095\tThe most beautiful piece of art you could have\r\n\u0095\tMatches with any type of furnishing and decoration\r\n\u0095\tA must see/Only one year old\r\n\u0095\tRegular Price @ $1500.00\r\n\u0095\tSale Price @ $650.00\r", sfbay_art_1223614914.contents_as_plain
     assert_equal false, sfbay_art_1223614914.deleted_by_author?
     assert_equal false, sfbay_art_1223614914.flagged_for_removal?
     assert_equal ["SF bay area craigslist", "south bay", "art & crafts"], sfbay_art_1223614914.full_section
@@ -375,7 +376,7 @@ EOD
   def test_bug_found090610
     posting_090610 = CraigScrape::Posting.new relative_uri_for('post_samples/posting1938291834-090610.html')
 
-    assert_equal 27629, posting_090610.contents.length 
+    assert_equal 27628, posting_090610.contents.length 
     assert_equal 2326, posting_090610.contents_as_plain.length
     assert_equal false, posting_090610.deleted_by_author?
     assert_equal true, posting_090610.downloaded?

@@ -4,7 +4,6 @@
 #
 require 'rubygems'
 
-gem 'facets'
 gem 'hpricot'
 gem 'htmlentities'
 
@@ -12,7 +11,7 @@ require 'net/http'
 require 'zlib'
 require 'nokogiri'
 require 'htmlentities'
-require 'facets/module/cattr'
+require 'activesupport'
 
 
 # A base class encapsulating the various libcraigscrape objects, and providing most of the

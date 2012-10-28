@@ -1,0 +1,17 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activerecord (2.3.14)
+      activesupport (= 2.3.14)
+    activesupport (2.3.14)
+    htmlentities (4.3.1)
+    nokogiri (1.5.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activerecord (>= 2.3.0, < 3)
+  activesupport (>= 2.3.0, < 3)
+  htmlentities
+  nokogiri (>= 1.4.4)

@@ -476,8 +476,8 @@ class CraigslistGeolistingTest < Test::Unit::TestCase
       %w(
         jacksonville panamacity orlando fortmyers keys tallahassee ocala gainesville tampa 
         pensacola daytona treasure sarasota staugustine spacecoast lakeland newyork
-      ).collect{|p| "#{p}.craigslist.org"},
-      CraigScrape::GeoListings.find_sites( ["us/fl","-us/fl/miami", "+ newyork.craigslist.org"], hier_dir)
+      ).collect{|p| "#{p}.craigslist.org"}.sort,
+      CraigScrape::GeoListings.find_sites( ["us/fl","-us/fl/miami", "+ newyork.craigslist.org"], hier_dir).sort
     )
 
     assert_equal(
@@ -510,10 +510,10 @@ class CraigslistGeolistingTest < Test::Unit::TestCase
       porthuron greensboro orangecounty fargo ogden charlotte allentown joplin chautauqua lakecharles omaha 
       springfieldil roswell montana killeen milwaukee nd williamsport columbia racine southcoast ames huntington 
       cincinnati auburn miami
-      ).collect{|p| "#{p}.craigslist.org"},
+      ).collect{|p| "#{p}.craigslist.org"}.sort,
       CraigScrape::GeoListings.find_sites(
         ["us","- us/fl", "+ us/fl/miami", ' -jacksonville.craigslist.org'], hier_dir
-      )
+      ).sort
     )
     
   end
