@@ -15,12 +15,19 @@ class CraigScrape::Posting < CraigScrape::Scraper
   POST_DATE       = /Date:[^\d]*((?:[\d]{2}|[\d]{4})\-[\d]{1,2}\-[\d]{1,2}[^\d]+[\d]{1,2}\:[\d]{1,2}[ ]*[AP]M[^a-z]+[a-z]+)/i
   LOCATION        = /Location\:[ ]+(.+)/
   HEADER_LOCATION = /^.+[ ]*\-[ ]*[\$]?[\d]+[ ]*\((.+)\)$/
-  POSTING_ID      = /PostingID\:[ ]+([\d]+)/
+  POSTING_ID      = /PostingID\:[ ]*([\d]+)/
   REPLY_TO        = /(.+)/
   PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
+  # NOTE: we implement the (?:) to first check the 'old' style format, and then the 'new style'
+  # (As of 12/03's parse changes)
   USERBODY_PARTS  = /^(.+)\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>(.+)$/m
   HTML_HEADER     = /^(.+)\<div id\=\"userbody\">/m
   IMAGE_SRC       = /\<im[a]?g[e]?[^\>]*src=(?:\'([^\']+)\'|\"([^\"]+)\"|([^ ]+))[^\>]*\>/
+
+  # This is used to determine if there's a parse error
+  REQUIRED_FIELDS = %w(contents posting_id post_time header title full_section)
+
+  XPATH_USERBODY = "//div[@id='userbody']"
 
   # This is really just for testing, in production use, uri.path is a better solution
   attr_reader :href #:nodoc:
@@ -30,14 +37,14 @@ class CraigScrape::Posting < CraigScrape::Scraper
     super(*args)
 
     # Validate that required fields are present, at least - if we've downloaded it from a url
-    parse_error! if ( 
-      args.first.kind_of? String and 
-      !flagged_for_removal? and 
-      !posting_has_expired? and 
-      !deleted_by_author? and [
-        contents,posting_id,post_time,header,title,full_section
-      ].any?{|f| f.nil? or (f.respond_to? :length and f.length == 0)} 
-    )
+    if args.first.kind_of? String and is_active_post?
+      unparsed_fields = REQUIRED_FIELDS.find_all{|f| 
+        val = send(f)
+        val.nil? or (val.respond_to? :length and val.length == 0)
+      } 
+      parse_error! unparsed_fields unless unparsed_fields.empty?
+    end  
+
   end
 
 
@@ -99,10 +106,17 @@ class CraigScrape::Posting < CraigScrape::Scraper
 
   # Integer, Craigslist's unique posting id
   def posting_id
-    unless @posting_id     
-      cursor = Nokogiri::HTML html_footer, nil, HTML_ENCODING if html_footer
-      cursor = cursor.next until cursor.nil? or POSTING_ID.match cursor.to_s
-      @posting_id = $1.to_i if $1
+    if @posting_id 
+
+    elsif USERBODY_PARTS.match html_source
+      # Old style:
+      html_footer = $4
+      cursor = Nokogiri::HTML html_footer, nil, HTML_ENCODING 
+      cursor = cursor.next until cursor.nil? or 
+      @posting_id = $1.to_i if POSTING_ID.match html_footer.to_s
+    else
+      # Post 12/3
+      @posting_id = $1.to_i if POSTING_ID.match html.xpath("//span[@class='postingidtext']").to_s
     end
   
     @posting_id
@@ -202,7 +216,6 @@ class CraigScrape::Posting < CraigScrape::Scraper
     @posting_has_expired
   end
   
-  
   # Reflects only the date portion of the posting. Does not include hours/minutes. This is useful when reflecting the listing scrapes, and can be safely
   # used if you wish conserve bandwidth by not pulling an entire post from a listing scrape.
   def post_date
@@ -290,6 +303,12 @@ class CraigScrape::Posting < CraigScrape::Scraper
     [contents,posting_id,post_time,title].all?{|f| f.nil?}
   end
 
+  # This is mostly used to determine if the post should be checked for
+  # parse errors. Might be useful for someone else though
+  def is_active_post?
+    [flagged_for_removal?, posting_has_expired?, deleted_by_author?].none?
+  end 
+
   private
 
   # I set apart from html to work around the SystemStackError bugs in test_bugs_found061710. Essentially we 
@@ -302,17 +321,26 @@ class CraigScrape::Posting < CraigScrape::Scraper
     @html_head
   end
 
-  # Since we started having so many problems with Hpricot flipping out on whack content bodies, 
-  # I added this to return everything south of the user_body
-  def html_footer     
-    $4 if USERBODY_PARTS.match html_source
-  end
-
   # OK - so the biggest problem parsing the contents of a craigslist post is that users post invalid html all over the place
-  # This bad html trips up hpricot, and I've resorted to splitting the page up using string parsing like so:
+  # This bad html trips up html parsers, and I've resorted to splitting the page up using string parsing like so:
   # We return this as a string, since it makes sense, and since its tough to say how hpricot might mangle this if the html is whack
-  def user_body     
-    $2 if USERBODY_PARTS.match html_source
+  def user_body
+    if USERBODY_PARTS.match html_source
+      # This is the pre-12/3/12 style:
+      $2
+    elsif html.at_xpath(XPATH_USERBODY)
+      # There's a bunch of junk in here that we don't want, so this loop removes
+      # everything after (and including) the last script tag, from the result
+      hit_script_tag = false
+      html.xpath(XPATH_USERBODY).first.children.to_a.reverse.reject{ |p|
+        if hit_script_tag
+          false
+        else
+          hit_script_tag = true if p.name == 'script'
+          true
+        end
+      }.reverse.collect(&:to_s).join
+    end
   end
   
   # Read the notes on user_body. However,  unlike the user_body, the craigslist portion of this div can be relied upon to be valid html. 

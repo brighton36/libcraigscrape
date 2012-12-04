@@ -4,7 +4,6 @@
 #
 require 'rubygems'
 
-gem 'hpricot'
 gem 'htmlentities'
 
 require 'net/http'

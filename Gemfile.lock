@@ -1,17 +1,38 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    actionmailer (2.3.14)
+      actionpack (= 2.3.14)
+    actionpack (2.3.14)
+      activesupport (= 2.3.14)
+      rack (~> 1.1.0)
     activerecord (2.3.14)
       activesupport (= 2.3.14)
     activesupport (2.3.14)
+    diff-lcs (1.1.3)
     htmlentities (4.3.1)
+    kwalify (0.7.2)
     nokogiri (1.5.5)
+    rack (1.1.3)
+    rspec (2.12.0)
+      rspec-core (~> 2.12.0)
+      rspec-expectations (~> 2.12.0)
+      rspec-mocks (~> 2.12.0)
+    rspec-core (2.12.1)
+    rspec-expectations (2.12.0)
+      diff-lcs (~> 1.1.3)
+    rspec-mocks (2.12.0)
+    sqlite3 (1.3.6)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  actionmailer (>= 2.3.0, < 3)
   activerecord (>= 2.3.0, < 3)
   activesupport (>= 2.3.0, < 3)
   htmlentities
+  kwalify
   nokogiri (>= 1.4.4)
+  rspec
+  sqlite3

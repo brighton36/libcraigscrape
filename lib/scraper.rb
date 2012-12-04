@@ -108,7 +108,11 @@ class CraigScrape::Scraper
   end
   
   # Easy way to fail noisily:
-  def parse_error!; raise ParseError, "Error while parsing %s:\n %s" % [self.class.to_s, html]; end
+  def parse_error!(fields = nil)
+    raise ParseError, "Error while parsing %s:\n %s%s" % [
+      self.class.to_s, html, 
+      (fields) ? ("\nRequired fields missing: %s" % fields.join(', ')) : ''] 
+  end
   
   # Returns text with all html entities converted to respective ascii character.
   def he_decode(text); self.class.he_decode text; end

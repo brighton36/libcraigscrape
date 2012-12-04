@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 # encoding: utf-8
 #
 # =craigwatch - A email-based "post monitoring" solution
