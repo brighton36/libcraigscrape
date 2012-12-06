@@ -104,7 +104,7 @@ class CraigScrape::Scraper
   
   # Returns text with all html tags removed.
   def strip_html(str)
-    str.gsub HTML_TAG, "" if str
+    he_decode(str).gsub HTML_TAG, "" if str
   end
   
   # Easy way to fail noisily:
@@ -118,7 +118,12 @@ class CraigScrape::Scraper
   def he_decode(text); self.class.he_decode text; end
 
   # Returns text with all html entities converted to respective ascii character.
-  def self.he_decode(text); HTMLEntities.new.decode text; end
+  # Iconv is used if ruby doesn't support the String.encode method (ruby1.9.3)
+  def self.he_decode(text)
+    HTMLEntities.new.decode( ( String.method_defined?(:encode) ) ? 
+      text.to_s.encode!('UTF-8', 'UTF-8', :invalid => :replace) : 
+      Iconv.new('UTF-8', 'UTF-8//IGNORE').iconv(text.to_s) )
+  end
   
   # Derives a full url, using the current object's url and the provided href
   def url_from_href(href) #:nodoc:
@@ -159,13 +164,14 @@ class CraigScrape::Scraper
       
     begin
       # This handles the redirects for us          
-      resp, data = Net::HTTP.new( uri.host, uri.port).get uri.request_uri
-  
+      resp = Net::HTTP.new( uri.host, uri.port).get uri.request_uri
+
       if resp.response.code == "200"
         # Check for gzip, and decode:
-        data = Zlib::GzipReader.new(StringIO.new(data)).read if resp.response.header['Content-Encoding'] == 'gzip'
-        
-        data
+        ( resp.response.header['Content-Encoding'] == 'gzip' ) ?
+          Zlib::GzipReader.new(StringIO.new(resp.body)).read :
+          resp.body
+
       elsif resp.response['Location']
         redirect_to = resp.response['Location']
         

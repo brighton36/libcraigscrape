@@ -291,17 +291,23 @@ class CraigReportDefinition #:nodoc:
     private
 
     def matches_all?(conditions, against)
-      against = against.lines.to_a unless against.nil?
-      (conditions.nil? or conditions.all?{|c| against.any?{|a| match_against c, a } }) ? true : false
+      (conditions.nil? or conditions.all?{|c| sanitized_against(against).any?{|a| match_against c, a } }) ? true : false
     end
 
     def doesnt_match_any?(conditions, against)
-      against = against.lines.to_a unless against.nil?
-      (conditions.nil? or conditions.all?{|c| against.any?{|a| !match_against c, a } }) ? true : false
+      (conditions.nil? or conditions.all?{|c| sanitized_against(against).any?{|a| !match_against c, a } }) ? true : false
     end
 
     def match_against(condition, against)
-      (against.scan( condition.is_re? ? condition.to_re : /#{condition}/i).length > 0) ? true : false
+      (CraigScrape::Scraper.he_decode(against).scan( condition.is_re? ? condition.to_re : /#{condition}/i).length > 0) ? true : false
+    end
+
+    # This is kind of a hack to deal with ruby 1.9. Really the filtering mechanism 
+    # needs to be factored out and tested....
+    def sanitized_against(against)
+      against = against.lines if against.respond_to? :lines
+      against = against.to_a if against.respond_to? :to_a
+      (against.nil?) ? [] : against
     end
   end
 end

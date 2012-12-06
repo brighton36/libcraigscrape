@@ -27,7 +27,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # This is used to determine if there's a parse error
   REQUIRED_FIELDS = %w(contents posting_id post_time header title full_section)
 
-  XPATH_USERBODY = "//div[@id='userbody']"
+  XPATH_USERBODY = "//*[@id='userbody']"
 
   # This is really just for testing, in production use, uri.path is a better solution
   attr_reader :href #:nodoc:
@@ -74,7 +74,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
     unless @full_section
       @full_section = []
       
-      (html_head/"div[@class='bchead']//a").each do |a|
+      (html_head / "*[@class='bchead']//a").each do |a|
         @full_section << he_decode(a.inner_html) unless a['id'] and a['id'] == 'ef'
       end if html_head
     end
@@ -116,7 +116,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
       @posting_id = $1.to_i if POSTING_ID.match html_footer.to_s
     else
       # Post 12/3
-      @posting_id = $1.to_i if POSTING_ID.match html.xpath("//span[@class='postingidtext']").to_s
+      @posting_id = $1.to_i if POSTING_ID.match html.xpath("//*[@class='postingidtext']").to_s
     end
   
     @posting_id
