@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'spec_helper'
 
 describe CraigScrape::Posting do
@@ -34,5 +35,12 @@ describe CraigScrape::Posting do
 
     its(:title)    {should eq("Premier Bouquet Wrap")}
     its(:contents) {should eq("THESE ARE USED IN FLOWER / CRAFT SHOPS . ALL ARE NEW, BOXED AND AND VERY WELL MADE. I HAVE A CASE OF THESE I WILL SELL FOR ONE PRICE, OR WILL SELL BY THE PIECE. CASE PRICE IS FOR ABOUT 144 PIECES $75.00. <br><br>\nPremier Bouquet Wrap<br><br>\nFlower Bridal  Bouquet Wrap White/Satin <br><br>\nNew White Satin <br><br>\nThe wraps are approximately 6 1/2\" Long <br><br>\nThe bridal bouquet wrap is a creative alternative to tying a ribbon around your flowers. Just slide the wrap around flower stems<br><br>\nThis wrap is perfect for covering/decorating the stems on \"Wedding\", Quinceañera\" or \"Prom\" bouquets. They can also be used with \"Wedding bouquet\" holder handles.  These wraps are made with quality Satin material, easy to install and feels soft and smooth on the Bride's or Bridesmaid's hands.  These wraps put the finishing touches on any Floral Wedding Bouquet.<br><br>\nPLEASE CALL . . .<br><br>\nAJ-518-858-2002<br><br><br>")}
+  end
+  
+  context "posting_mdc_reb_120612.html" do
+    subject{ described_class.new uri_for('posting_mdc_reb_120612.html') }
+    its(:system_post?){ should be_false }
+    its(:title)    {should eq("✱✱✱BEAUTIFUL HOUSE FOR SALE IN FLORIDA KEYS  ") }
+    its(:contents) {should eq("\u0095 $1,149,000.00                  <br>\n\u0095 2000ft²<br>\n\u0095 3-bedroom<br>\n\u0095 3-full bath<br><br>\nJUST REDUCED FOR A QUICK SALE!!!!<br><br>\nThis great Three Story 3-bedroom 3 Full bath home in Islamorada, Florida Keys is the perfect get-away to relax, enjoy the fresh breezes, the sandy beach and watch spectacular sunsets. A spacious master suite bedroom upstairs has a private bath with whirlpool Jacuzzi tub and private patio. Downstairs you have access to full kitchen custom cabinets, granite countertops, stainless steel appliances, open living-dining room, Travertine marble throughout the whole house, two bedrooms and two full baths. Enjoy a concrete dock and davits with boat access to the Gulf and ocean in less than five minutes via the deep-water canal right outside your door. Enjoy access to a private community beach with picnic tables and tiki huts for fun barbecues; jet skiing; boat ramp and recreational boating and water skiing. Don't miss out on these .Located in a quiet neighborhood at Mile Marker 74 in Islamorada, this location is tastefully furnished, has a gourmet kitchen and is ideal for boaters.<br><br>\n(hablamos español)    <br><br>\nCall for appointment 305.467.6348 /  786.484.0917<br>\nMarisol Acosta<br>\nLicensed, Realtor Associate<br>\nAkoya Realty LLC<br>\nwww.akoyarealty.com") }
   end
 end

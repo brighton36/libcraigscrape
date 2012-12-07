@@ -121,7 +121,7 @@ class CraigScrape::Scraper
   # Iconv is used if ruby doesn't support the String.encode method (ruby1.9.3)
   def self.he_decode(text)
     HTMLEntities.new.decode( ( String.method_defined?(:encode) ) ? 
-      text.to_s.encode!('UTF-8', 'UTF-8', :invalid => :replace) : 
+      text.to_s.encode('UTF-8', 'ASCII', :undef => :replace, :invalid => :replace, :replace => "") : 
       Iconv.new('UTF-8', 'UTF-8//IGNORE').iconv(text.to_s) )
   end
   

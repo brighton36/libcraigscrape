@@ -126,7 +126,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   def contents
     unless @contents
       @contents = user_body if html_source
-      @contents = he_decode @contents.strip if @contents
+      @contents = he_decode(@contents).strip if @contents
     end
     
     @contents
