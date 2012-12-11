@@ -28,6 +28,9 @@ class CraigScrape::Posting < CraigScrape::Scraper
   REQUIRED_FIELDS = %w(contents posting_id post_time header title full_section)
 
   XPATH_USERBODY = "//*[@id='userbody']"
+  XPATH_BLURBS = "//ul[@class='blurbs']"
+  XPATH_PICS = "//*[@class='tn']/a/@href"
+  XPATH_REPLY_TO = "//*[@class='dateReplyBar']/small/a"
 
   # This is really just for testing, in production use, uri.path is a better solution
   attr_reader :href #:nodoc:
@@ -85,9 +88,13 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # String, represents the post's reply-to address, if listed
   def reply_to
     unless @reply_to
-      cursor = html_head.at 'hr' if html_head
-      cursor = cursor.next until cursor.nil? or cursor.name == 'a'
-      @reply_to = $1 if cursor and REPLY_TO.match he_decode(cursor.inner_html)
+      if html.at_xpath(XPATH_REPLY_TO)
+        @reply_to = html.at_xpath(XPATH_REPLY_TO).content
+      else
+        cursor = html_head.at 'hr' if html_head
+        cursor = cursor.next until cursor.nil? or cursor.name == 'a'
+        @reply_to = $1 if cursor and REPLY_TO.match he_decode(cursor.inner_html)
+      end
     end
     
     @reply_to
@@ -134,28 +141,36 @@ class CraigScrape::Posting < CraigScrape::Scraper
   
   # String, the location of the item, as best could be parsed
   def location
-    if @location.nil? and craigslist_body and html
-      # Location (when explicitly defined):
-      cursor = craigslist_body.at 'ul' unless @location
-      
-      # Apa section includes other things in the li's (cats/dogs ok fields)
-      cursor.children.each do |li|
-        if LOCATION.match li.inner_html
-          @location = he_decode($1) and break
-          break
-        end
-      end if cursor
+    if @location.nil? and html
+     
+      if html.at_xpath(XPATH_BLURBS)
+        # This is the post-12/3/12 style:
+        @location = $1 if html.xpath(XPATH_BLURBS).first.children.any?{|c| 
+          LOCATION.match c.content}
+      elsif craigslist_body
+        # Location (when explicitly defined):
+        cursor = craigslist_body.at 'ul' unless @location
 
-      # Real estate listings can work a little different for location:
-      unless @location
-        cursor = craigslist_body.at 'small'
-        cursor = cursor.previous until cursor.nil? or cursor.text?
+        # This is the legacy style:
+        # Note: Apa section includes other things in the li's (cats/dogs ok fields)
+        cursor.children.each do |li|
+          if LOCATION.match li.inner_html
+            @location = he_decode($1) and break
+            break
+          end
+        end if cursor
+
+        # Real estate listings can work a little different for location:
+        unless @location
+          cursor = craigslist_body.at 'small'
+          cursor = cursor.previous until cursor.nil? or cursor.text?
+          
+          @location = he_decode(cursor.to_s.strip) if cursor
+        end
         
-        @location = he_decode(cursor.to_s.strip) if cursor
+        # So, *sometimes* the location just ends up being in the header, I don't know why:
+        @location = $1 if @location.nil? and HEADER_LOCATION.match header
       end
-      
-      # So, *sometimes* the location just ends up being in the header, I don't know why:
-      @location = $1 if @location.nil? and HEADER_LOCATION.match header
     end
     
     @location
@@ -178,11 +193,16 @@ class CraigScrape::Posting < CraigScrape::Scraper
     unless @pics
       @pics = []
       
-      if html and craigslist_body
-        # Now let's find the craigslist hosted images:
-        img_table = (craigslist_body / 'table').find{|e| e.name == 'table' and e[:summary] == 'craigslist hosted images'}
-      
-        @pics = (img_table / 'img').collect{|i| i[:src]} if img_table
+      if html 
+        if html.at_xpath(XPATH_PICS)
+          @pics = html.xpath(XPATH_PICS).collect(&:value)
+        elsif craigslist_body
+          # This is the pre-12/3/12 style:
+          # Now let's find the craigslist hosted images:
+          img_table = (craigslist_body / 'table').find{|e| e.name == 'table' and e[:summary] == 'craigslist hosted images'}
+        
+          @pics = (img_table / 'img').collect{|i| i[:src]} if img_table
+        end
       end
     end
     
@@ -242,14 +262,8 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # Array, which image types are listed for the post.
   # This is always able to be pulled from the listing post-summary, and should never cause an additional page load
   def img_types
-    unless @img_types
-      @img_types = []
-      
-      @img_types << :img if images.length > 0
-      @img_types << :pic if pics.length > 0
-    end
-    
-    @img_types
+    @img_types || [ (images.length > 0) ? :img : nil, 
+      (pics.length > 0) ? :pic : nil ].compact
   end
   
   # Retrieves the most-relevant craigslist 'section' of the post. This is *generally* the same as full_section.last. However, 
@@ -331,12 +345,19 @@ class CraigScrape::Posting < CraigScrape::Scraper
     elsif html.at_xpath(XPATH_USERBODY)
       # There's a bunch of junk in here that we don't want, so this loop removes
       # everything after (and including) the last script tag, from the result
-      hit_script_tag = false
-      html.xpath(XPATH_USERBODY).first.children.to_a.reverse.reject{ |p|
-        if hit_script_tag
+      user_body = html.xpath(XPATH_USERBODY)
+      hit_delimeter = false
+      # Since some posts don't actually have the script tag:
+      delimeter = user_body.at_xpath('script') ? :script : :comment
+      user_body.first.children.to_a.reverse.reject{ |p|
+        # TODO: Clean this block up a bit
+        if hit_delimeter
           false
         else
-          hit_script_tag = true if p.name == 'script'
+          hit_delimeter = true if (
+            (delimeter == :script and p.name == 'script') or 
+            # TODO: Not quite there yet:
+            (delimeter == :comment and p.is_a? Nokogiri::XML::Comment ) )
           true
         end
       }.reverse.collect(&:to_s).join

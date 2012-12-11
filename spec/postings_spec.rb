@@ -14,12 +14,81 @@ describe CraigScrape::Posting do
     its(:system_post?){ should be_true }
   end
 
+  context "posting_sya_121012.html" do
+    # This example was picked since it has pics
+    subject{ described_class.new uri_for('posting_sya_121012.html') }
+
+    its(:full_section) {should eq(["south florida craigslist", "miami / dade", "for sale / wanted", "computers - by dealer"])}
+    its(:header)       {should eq("Sony Vaio - $480 (orlando,florida)")}
+    its(:label)        {should eq("Sony Vaio - $480")}
+    its(:title)        {should eq("Sony Vaio")}
+    its(:location)     {should eq('orlando,florida')}
+    its(:posting_id)   {should eq(3469913065)}
+    its(:reply_to)     {should eq('9cxgv-3469913065@sale.craigslist.org')}
+    its(:post_time)    {should eq(Time.parse('2012-12-10 20:51:00 -0500'))}
+    its(:price)        {should eq(480)}
+    its(:images)       {should eq([])}
+    its(:pics) do
+      pics_list = ['3Eb3Fc3M25Ne5Ed5J6cca593d0c806b3614c1',
+        '3K73L43J45G25H55J1cca2d0db7d75fe11448', '3E53Gc3F85I95K25M1ccaf6c5790cbd541b57',
+        '3G83Kc3F15L45E75J9cca7e4e7fbdfe981fd9', '3Kc3ma3N65Le5Kf5U3ccae67bd8aa8129140c'
+      ].collect{|src| ['http://images.craigslist.org/', src, '.jpg'].join }
+      should eq( pics_list )
+    end
+    its(:img_types)    {should eq([:pic])}
+    its(:contents_as_plain) {should eq("Sony Vaio for sale! Its in great condition but I no longer hard need for it. No low ball offers!!")}
+    its(:contents) {should eq("<br>Sony Vaio for sale! Its in great condition but I no longer hard need for it. No low ball offers!!<br><br><br><br>")}
+  end
+
+  context "posting_sya_121012-2.html" do
+    # This example was picked since it has images and no text
+    subject{ described_class.new uri_for('posting_sya_121012-2.html') }
+
+    its(:full_section) {should eq(["south florida craigslist", "broward county", "for sale / wanted", "computers - by dealer"])}
+    #its(:header)       {should eq("Sony Vaio - $480 (orlando,florida)")}
+    #its(:label)        {should eq("Sony Vaio - $480")}
+    #its(:title)        {should eq("Sony Vaio")}
+    #its(:location)     {should eq('orlando,florida')}
+    #its(:posting_id)   {should eq(3469913065)}
+    #its(:reply_to)     {should eq('9cxgv-3469913065@sale.craigslist.org')}
+    #its(:post_time)    {should eq(Time.parse('2012-12-10 20:51:00 -0500'))}
+    #its(:price)        {should eq(480)}
+    #its(:images)       {should eq([])}
+    #its(:pics) do
+      #pics_list = ['3Eb3Fc3M25Ne5Ed5J6cca593d0c806b3614c1',
+        #'3K73L43J45G25H55J1cca2d0db7d75fe11448', '3E53Gc3F85I95K25M1ccaf6c5790cbd541b57',
+        #'3G83Kc3F15L45E75J9cca7e4e7fbdfe981fd9', '3Kc3ma3N65Le5Kf5U3ccae67bd8aa8129140c'
+      #].collect{|src| ['http://images.craigslist.org/', src, '.jpg'].join }
+      #should eq( pics_list )
+    #end
+    #its(:img_types)    {should eq([:pic])}
+    #its(:contents_as_plain) {should eq("Sony Vaio for sale! Its in great condition but I no longer hard need for it. No low ball offers!!")}
+    its(:contents) {should eq('<a href=\"http://s1157.photobucket.com/albums/p590/emy123000/?action=view&current=T2eC16NE9s2fp7dBQuCykypg60_12.jpg\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i1157.photobucket.com/albums/p590/emy123000/T2eC16NE9s2fp7dBQuCykypg60_12.jpg\" border=\"0\" alt=\"Photobucket\"></a><br><a href=\"http://s1157.photobucket.com/albums/p590/emy123000/?action=view&current=KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg\" border=\"0\" alt=\"Photobucket\"></a><a href=\"http://s1157.photobucket.com/albums/p590/emy123000/?action=view&current=KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg\" border=\"0\" alt=\"Photobucket\"></a><a href=\"http://s1157.photobucket.com/albums/p590/emy123000/?action=view&current=ScreenShot2012-06-25at60811AM.png\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i1157.photobucket.com/albums/p590/emy123000/ScreenShot2012-06-25at60811AM.png\" border=\"0\" alt=\"Photobucket\"></a><a href=\"http://s1157.photobucket.com/albums/p590/emy123000/?action=view&current=KGrHqZowFCp4FZqoWBQvsVUbFdw60_12.jpg\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZowFCp4FZqoWBQvsVUbFdw60_12.jpg\" border=\"0\" alt=\"Photobucket\"></a>\n\t\n\t')}
+  end
+
   context "posting_mdc_cto_ftl_112612.html" do
     subject{ described_class.new uri_for('posting_mdc_cto_ftl_112612.html') }
 
     its(:title)    {should eq("1999 Mustang GT w/ '08 3 Valve Engine Swap")}
     its(:contents) {should eq("I am selling my 1999 Mustang GT with a 2008 GT 3 Valve engine swap. The car is a 5 speed with 3.73 rear gears. It has a Diablo Sport chip with 2 tunes. The rear tires have plentyt of tread and are Michelin Pilot sports ($700 less than a year ago). The rims are staggered and are less than a year old. The car has a 2003 Mustang Cobra hood. It also has a 2003 Cobra front bumper. The paint on the car is less than a year old. The bad: The car will need 2 front tires soon. They are currently Nitto 555's. The A/C Compressor will need changing soon as it is making a little noise. It works but I dont use it just in case. The drivers side seat needs to be re-upholstered also. Minor problems considering the work that went into this car. The instrument cluster is from a Mach 1 and shows 120,000 miles, but the engine has around 70,000 miles. <br><br>\nA lot of time and money was spent on this car to do the swap right. It is my daily driver and has never given me a single problem. It's always had Mobil 1 Synthetic oil and it's plenty fast and a lot of fun to drive. If you are looking for something unique and you are a Mustang fan, you might want to consider this car.<br><br>\nThe seats are from a newer model Mustang GT. The car runs really good, and turns heads everywhere it goes, especially when I pop the hood and those in the know see the engine that doesnt belong there.  : )<br><br>\nI am will consider all offers so please don't be shy, the worse that I can do is say no. I am interested in some specific cars as well that I willl consider on trade. BMW 530 or 540, Infinity G35, Lexus IS 300 or GS300 or 400. I respond better to texts or emails. Call with any quesrtions. 305-310-5993 or email me at Torresa76@aol.com<br><br>\nThanks for looking.  : )")}
     its(:contents_as_plain) {should eq("I am selling my 1999 Mustang GT with a 2008 GT 3 Valve engine swap. The car is a 5 speed with 3.73 rear gears. It has a Diablo Sport chip with 2 tunes. The rear tires have plentyt of tread and are Michelin Pilot sports ($700 less than a year ago). The rims are staggered and are less than a year old. The car has a 2003 Mustang Cobra hood. It also has a 2003 Cobra front bumper. The paint on the car is less than a year old. The bad: The car will need 2 front tires soon. They are currently Nitto 555's. The A/C Compressor will need changing soon as it is making a little noise. It works but I dont use it just in case. The drivers side seat needs to be re-upholstered also. Minor problems considering the work that went into this car. The instrument cluster is from a Mach 1 and shows 120,000 miles, but the engine has around 70,000 miles. \nA lot of time and money was spent on this car to do the swap right. It is my daily driver and has never given me a single problem. It's always had Mobil 1 Synthetic oil and it's plenty fast and a lot of fun to drive. If you are looking for something unique and you are a Mustang fan, you might want to consider this car.\nThe seats are from a newer model Mustang GT. The car runs really good, and turns heads everywhere it goes, especially when I pop the hood and those in the know see the engine that doesnt belong there.  : )\nI am will consider all offers so please don't be shy, the worse that I can do is say no. I am interested in some specific cars as well that I willl consider on trade. BMW 530 or 540, Infinity G35, Lexus IS 300 or GS300 or 400. I respond better to texts or emails. Call with any quesrtions. 305-310-5993 or email me at Torresa76@aol.com\nThanks for looking.  : )")}
+    its(:full_section) {should eq(["south florida craigslist", "miami / dade", "for sale / wanted", "cars & trucks - by owner"])}
+    its(:header)       {should eq("1999 Mustang GT w/ '08 3 Valve Engine Swap - $8500 (Homestead)")}
+    its(:label)        {should eq("1999 Mustang GT w/ '08 3 Valve Engine Swap - $8500")}
+    its(:location)     {should eq('Homestead')}
+    its(:posting_id)   {should eq(3437079882)}
+    its(:reply_to)     {should eq(nil)}
+    its(:post_time)    {should eq(Time.parse('2012-11-26 21:34:00 -0500'))}
+    its(:price)        {should eq(8500)}
+    its(:images)       {should eq([])}
+    its(:pics) do
+      pics_list = ['3M53of3H65N15E15M2cbqdd2e7af939c215a3',
+        '3G13F23Hd5I15Nb5T1cbqfb3e2605ddf31b8b', '3n13F23N25Lf5Y65Facbq05143722c4801267',
+        '3Ee3Ne3H85N85K15Hecbq79f17c0a2e03136e', '3me3pb3Nb5Le5Hd5Mdcbqe446ce3ce2ef1f80'
+      ].collect{|src| ['http://images.craigslist.org/', src, '.jpg'].join }
+      should eq( pics_list )
+    end
+    its(:img_types)    {should eq([:pic])}
   end
 
   context "posting_daytona_art_120512.html" do

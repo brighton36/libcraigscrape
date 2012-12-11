@@ -1,4 +1,7 @@
-
+* Do the TODO in the posting to get the newest test passing
+* Fix the craigwatch paths bug
+* Get the image parsing working
+* Get all the fields added to the spec for the other posts in there we haven't finished
 ------------------------------------------
 Possible features?:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')

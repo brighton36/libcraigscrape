@@ -23,6 +23,10 @@
 #
 # <b>sleep_between_404_retries</b> - The amount of seconds to sleep, between successive attempts in the case of a Resource Not Found error. Defaults to 3.
 #
+
+# This enables us to work like ruby 1.8 did when working with crazy string encodings
+$KCODE = "UTF-8"
+
 class CraigScrape::Scraper
   cattr_accessor :logger
   cattr_accessor :sleep_between_fetch_retries
@@ -120,9 +124,10 @@ class CraigScrape::Scraper
   # Returns text with all html entities converted to respective ascii character.
   # Iconv is used if ruby doesn't support the String.encode method (ruby1.9.3)
   def self.he_decode(text)
-    HTMLEntities.new.decode( ( String.method_defined?(:encode) ) ? 
-      text.to_s.encode('UTF-8', 'ASCII', :undef => :replace, :invalid => :replace, :replace => "") : 
-      Iconv.new('UTF-8', 'UTF-8//IGNORE').iconv(text.to_s) )
+    HTMLEntities.new.decode( text) 
+    #( String.method_defined?(:encode) ) ? 
+      #text.to_s.encode('UTF-8', 'ASCII', :undef => :replace, :invalid => :replace, :replace => "") : 
+      #Iconv.new('UTF-8', 'UTF-8//IGNORE').iconv(text.to_s) )
   end
   
   # Derives a full url, using the current object's url and the provided href

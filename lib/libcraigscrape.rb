@@ -10,8 +10,8 @@ require 'net/http'
 require 'zlib'
 require 'nokogiri'
 require 'htmlentities'
-require 'activesupport'
-
+require 'active_support/core_ext/class/attribute_accessors'
+require 'time'
 
 # A base class encapsulating the various libcraigscrape objects, and providing most of the
 # craigslist interaction methods. Currently, we're supporting the old Class methods

@@ -360,24 +360,14 @@ class TrackedPost < ActiveRecord::Base #:nodoc:
 end
 
 class ReportMailer < ActionMailer::Base #:nodoc:
+  default :template_path => File.dirname(__FILE__)
+
   def report(to, sender, subject_template, report_tmpl)
-
-    formatted_subject = Time.now.strftime(subject_template)
-
-    mail(:to => to, :from => sender, :subject => formatted_subject) do |format|
-      format.text { render "craigslist_report.plain.erb", :locals => {:summaries => report_tmpl[:summaries]}  }
-      format.html { render "craigslist_report.html.erb", :locals => {:summaries => report_tmpl[:summaries]}  }
-    end
-  end
-
-  def generate_view_parts(view_name, tmpl)
-    mail = Mail.new do
-      part( :content_type => "multipart/alternative" ) do |p|
-        [
-          { :content_type => "text/plain", :body => render("#{view_name.to_s}.plain.erb", tmpl) },
-          { :content_type => "text/html",  :body => render("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
-        ].each { |parms| p.part parms.merge( { :charset => "UTF-8", :transfer_encoding => "7bit" } ) }
-      end
+    subject = Time.now.strftime subject_template
+    @summaries = report_tmpl[:summaries]
+    mail :to => to, :subject => subject, :from => sender do |format|
+      format.text
+      format.html
     end
   end
 end
@@ -414,11 +404,11 @@ end and exit if parser.errors.length > 0
 # Initialize Action Mailer:
 ActionMailer::Base.logger = Logger.new STDERR if craig_report.debug_mailer?
 if craig_report.smtp_settings
-  ReportMailer.smtp_settings = craig_report.smtp_settings
+  ActionMailer::Base.smtp_settings = craig_report.smtp_settings
+  ActionMailer::Base.delivery_method = :smtp
 else
-  ReportMailer.delivery_method = :sendmail
+  ActionMailer::Base.delivery_method = :sendmail
 end
-ReportMailer.template_root = File.dirname __FILE__
 
 # Initialize the database:
 ActiveRecord::Base.logger = Logger.new STDERR if craig_report.debug_database?
@@ -565,7 +555,7 @@ ReportMailer.report(
   craig_report.email_to,
   craig_report.email_from,
   craig_report.report_name,
-  {:summaries => report_summaries, :definition => craig_report, @summaries => report_summaries}
+  {:summaries => report_summaries, :definition => craig_report}
 ).deliver if report_summaries.length > 0
 
 
