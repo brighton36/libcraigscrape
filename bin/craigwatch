@@ -360,15 +360,12 @@ class TrackedPost < ActiveRecord::Base #:nodoc:
 end
 
 class ReportMailer < ActionMailer::Base #:nodoc:
-  default :template_path => File.dirname(__FILE__)
+  # default :template_path => File.dirname(__FILE__)
 
   def report(to, sender, subject_template, report_tmpl)
     subject = Time.now.strftime subject_template
     @summaries = report_tmpl[:summaries]
-    mail :to => to, :subject => subject, :from => sender do |format|
-      format.text
-      format.html
-    end
+    mail :to => to, :subject => subject, :from => sender
   end
 end
 
@@ -402,6 +399,7 @@ parser.errors.each do |e|
 end and exit if parser.errors.length > 0
 
 # Initialize Action Mailer:
+ActionMailer::Base.prepend_view_path(File.dirname(__FILE__))
 ActionMailer::Base.logger = Logger.new STDERR if craig_report.debug_mailer?
 if craig_report.smtp_settings
   ActionMailer::Base.smtp_settings = craig_report.smtp_settings

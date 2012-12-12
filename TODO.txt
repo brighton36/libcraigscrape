@@ -1,13 +1,9 @@
-* Do the TODO in the posting to get the newest test passing
-* Fix the craigwatch paths bug
-* Get the image parsing working
-* Get all the fields added to the spec for the other posts in there we haven't finished
+* The date filters aren't working right
+* Address that system_post spec
 ------------------------------------------
 Possible features?:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
  * FEATURE: Support for post submissions?
- * FEATURE: Add the craigwatch_debug feature - and monitor it... (There's a TODO in there...)
-	* Shows the current progress...? (pages fetched, objects in caches..) 
  * FEATURE: Get the YAML template features working in the chris_report.yml
  	* should be pretty easy - I think we just add to the schema
  	* Might have to do this yourself with a search_templates section and an search ':include' thing

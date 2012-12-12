@@ -350,14 +350,12 @@ class CraigScrape::Posting < CraigScrape::Scraper
       # Since some posts don't actually have the script tag:
       delimeter = user_body.at_xpath('script') ? :script : :comment
       user_body.first.children.to_a.reverse.reject{ |p|
-        # TODO: Clean this block up a bit
         if hit_delimeter
           false
+        elsif ( (delimeter == :script and p.name == 'script') or 
+          (delimeter == :comment and p.comment? and p.content.strip == "START CLTAGS") )
+          hit_delimeter = true 
         else
-          hit_delimeter = true if (
-            (delimeter == :script and p.name == 'script') or 
-            # TODO: Not quite there yet:
-            (delimeter == :comment and p.is_a? Nokogiri::XML::Comment ) )
           true
         end
       }.reverse.collect(&:to_s).join
