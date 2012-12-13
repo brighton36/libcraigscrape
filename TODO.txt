@@ -1,4 +1,5 @@
 * The date filters aren't working right
+* Stop using the let syntax perhaps? I think that made the specs slow
 * Address that system_post spec
 ------------------------------------------
 Possible features?:
