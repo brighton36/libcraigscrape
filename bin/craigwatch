@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
+# encoding: UTF-8
 #
 # =craigwatch - A email-based "post monitoring" solution
 #
@@ -253,7 +253,7 @@ class CraigReportDefinition #:nodoc:
 
     def starting_at
       (@starting) ?
-        Time.parse(@starting) :
+        Time.strptime(@starting, "%m/%d/%Y") :
         Time.now.yesterday.beginning_of_day
     end
 

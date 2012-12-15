@@ -13,7 +13,10 @@ class CraigScrape::Listings < CraigScrape::Scraper
   IMG_TYPE       = /^[ ]*(.+)[ ]*$/
   HEADER_DATE    = /^[ ]*(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Nov|Dec)[ ]+([0-9]{1,2})[ ]*$/i
   SUMMARY_DATE   = /^[ ]([^ ]+)[ ]+([^ ]+)[ ]*[\-][ ]*$/
-  NEXT_PAGE_LINK = /^[ ]*next [\d]+ postings[ ]*$/
+  NEXT_PAGE_LINK = /^[ ]*(?:next [\d]+ postings|Next \>\>)[ ]*$/
+
+  XPATH_POST_DATE = "*[@class='itemdate']"
+  XPATH_PAGENAV_LINKS = "//*[@class='ban']//a"
 
   # Array, PostSummary objects found in the listing
   def posts
@@ -65,29 +68,37 @@ class CraigScrape::Listings < CraigScrape::Scraper
   # String, URL Path href-fragment of the next page link
   def next_page_href
     unless @next_page_href
-      cursor = html.at 'p:last-of-type'
-      
-      cursor = cursor.at 'a' if cursor
-      
-      # Category Listings have their 'next 100 postings' link at the end of the doc in a p tag 
-      next_link = cursor if cursor and NEXT_PAGE_LINK.match cursor.inner_html
+     
+      if html.at_xpath(XPATH_PAGENAV_LINKS)
+        # Post 12/3
+        next_link = html.xpath(XPATH_PAGENAV_LINKS).find{|link| NEXT_PAGE_LINK.match link.content}
+        @next_page_href = next_link[:href]
+      else 
+        # Old style
+        cursor = html.at 'p:last-of-type'
+        
+        cursor = cursor.at 'a' if cursor
+        
+        # Category Listings have their 'next 100 postings' link at the end of the doc in a p tag 
+        next_link = cursor if cursor and NEXT_PAGE_LINK.match cursor.inner_html
 
-      # Search listings put their next page in a link towards the top
-      next_link = (html / 'a').find{ |a| he_decode(a.inner_html) == '<b>Next>></b>' } unless next_link
-              
-      # Some search pages have a bug, whereby a 'next page' link isn't displayed,
-      # even though we can see that theres another page listed in the page-number links block at the top
-      # and bottom of the listing page
-      unless next_link
-        cursor = html % 'div.sh:first-of-type > b:last-of-type'
+        # Search listings put their next page in a link towards the top
+        next_link = (html / 'a').find{ |a| he_decode(a.inner_html) == '<b>Next>></b>' } unless next_link
+                
+        # Some search pages have a bug, whereby a 'next page' link isn't displayed,
+        # even though we can see that theres another page listed in the page-number links block at the top
+        # and bottom of the listing page
+        unless next_link
+          cursor = html % 'div.sh:first-of-type > b:last-of-type'
 
-        # If there's no 'a' in the next sibling, we'll have just performed a nil assignment, otherwise
-        # We're looking good.
-        next_link = cursor.next_element if cursor and /^[\d]+$/.match cursor.inner_html
+          # If there's no 'a' in the next sibling, we'll have just performed a nil assignment, otherwise
+          # We're looking good.
+          next_link = cursor.next_element if cursor and /^[\d]+$/.match cursor.inner_html
+        end
+        
+        # We have an anchor tag - so - let's assign the href:
+        @next_page_href = next_link[:href] if next_link
       end
-      
-      # We have an anchor tag - so - let's assign the href:
-      @next_page_href = next_link[:href] if next_link
     end
     
     @next_page_href
@@ -142,9 +153,15 @@ class CraigScrape::Listings < CraigScrape::Scraper
     end
 
     ret[:section] = he_decode(section_anchor.inner_html) if section_anchor
-    
+   
     ret[:post_date] = date
-    if SUMMARY_DATE.match he_decode(p_element.children[0])
+    if p_element.at_xpath(XPATH_POST_DATE)
+      # Post 12/3
+      if /\A([^ ]+) ([\d]+)\Z/.match p_element.at_xpath(XPATH_POST_DATE).content.strip
+        ret[:post_date] = CraigScrape.most_recently_expired_time $1, $2.to_i
+      end
+    elsif SUMMARY_DATE.match he_decode(p_element.children[0])
+      # Old style
       ret[:post_date] = CraigScrape.most_recently_expired_time $1, $2.to_i
     end
 
