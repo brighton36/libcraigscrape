@@ -3,15 +3,12 @@
 # All of libcraigscrape's objects and methods are loaded when you use <tt>require 'libcraigscrape'</tt> in your code.
 #
 require 'rubygems'
-
-gem 'htmlentities'
-
-require 'net/http'
-require 'zlib'
-require 'nokogiri'
+require 'time'
 require 'htmlentities'
 require 'active_support/core_ext/class/attribute_accessors'
-require 'time'
+require 'htmlentities'
+require 'nokogiri'
+require 'typhoeus'
 
 # A base class encapsulating the various libcraigscrape objects, and providing most of the
 # craigslist interaction methods. Currently, we're supporting the old Class methods

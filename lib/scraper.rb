@@ -24,9 +24,6 @@
 # <b>sleep_between_404_retries</b> - The amount of seconds to sleep, between successive attempts in the case of a Resource Not Found error. Defaults to 3.
 #
 
-# This enables us to work like ruby 1.8 did when working with crazy string encodings
-$KCODE = "UTF-8"
-
 class CraigScrape::Scraper
   cattr_accessor :logger
   cattr_accessor :sleep_between_fetch_retries
@@ -39,6 +36,10 @@ class CraigScrape::Scraper
   HTML_TAG  = /<\/?[^>]*>/
   # We have to specify this to nokogiri. Sometimes it tries to figure out encoding on its own, and craigslist users post crazy bytes sometimes  
   HTML_ENCODING = "UTF-8"
+
+  HTTP_HEADERS = { "Cache-Control" => "no-cache", "Pragma" => "no-cache", 
+    "Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", 
+    "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19"}
   
   # Returns the full url that corresponds to this resource
   attr_reader :url
@@ -122,12 +123,8 @@ class CraigScrape::Scraper
   def he_decode(text); self.class.he_decode text; end
 
   # Returns text with all html entities converted to respective ascii character.
-  # Iconv is used if ruby doesn't support the String.encode method (ruby1.9.3)
   def self.he_decode(text)
-    HTMLEntities.new.decode( text) 
-    #( String.method_defined?(:encode) ) ? 
-      #text.to_s.encode('UTF-8', 'ASCII', :undef => :replace, :invalid => :replace, :replace => "") : 
-      #Iconv.new('UTF-8', 'UTF-8//IGNORE').iconv(text.to_s) )
+    HTMLEntities.new.decode text
   end
   
   # Derives a full url, using the current object's url and the provided href
@@ -147,70 +144,23 @@ class CraigScrape::Scraper
     '%s://%s%s' % [scheme, host, path]
   end
   
-  def fetch_uri(uri, redirect_count = 0)
+  def fetch_uri(uri)
     logger.info "Requesting (%d): %s" % [redirect_count, @url.inspect] if logger
 
     raise MaxRedirectError, "Max redirects (#{redirect_count}) reached for URL: #{@url}" if redirect_count > self.maximum_redirects_per_request-1 
 
-    case uri.scheme
+    (case uri.scheme
       when 'file'
         # If this is a directory, we'll try to approximate http a bit by loading a '/index.html'
-        File.read( File.directory?(uri.path) ? "#{uri.path}/index.html" : uri.path , :encoding => 'BINARY' ).force_encoding("ISO-8859-1").encode("UTF-8")
+        File.read( File.directory?(uri.path) ? 
+          "#{uri.path}/index.html" : uri.path , :encoding => 'BINARY')
       when /^http[s]?/
-        fetch_http uri, redirect_count
+        resp = Typhoeus.get uri.to_s, :followlocation =>  true, 
+          :headers => HTTP_HEADERS
+        resp.response_body
       else
         raise BadUrlError, "Unknown URI scheme for the url: #{@url}"
-    end
-  end
-  
-  def fetch_http(uri, redirect_count = 0)
-    fetch_attempts = 0
-    resource_not_found_attempts = 0
-      
-    begin
-      # This handles the redirects for us          
-      resp = Net::HTTP.new( uri.host, uri.port).get uri.request_uri
-
-      if resp.response.code == "200"
-        # Check for gzip, and decode:
-        ( resp.response.header['Content-Encoding'] == 'gzip' ) ?
-          Zlib::GzipReader.new(StringIO.new(resp.body)).read :
-          resp.body
-
-      elsif resp.response['Location']
-        redirect_to = resp.response['Location']
-        
-        fetch_uri URI.parse(url_from_href(redirect_to)), redirect_count+1
-      else
-        # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
-        raise ResourceNotFoundError, 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
-      end
-    rescue ResourceNotFoundError => err
-      logger.info err.message if logger
-      
-      resource_not_found_attempts += 1
-      
-      if resource_not_found_attempts <= self.retries_on_404_fail
-        sleep self.sleep_between_404_retries if self.sleep_between_404_retries
-        logger.info 'Retrying ....' if logger
-        retry
-      else
-        raise err
-      end      
-    rescue FetchError,Timeout::Error,Errno::ECONNRESET,EOFError => err
-      logger.info 'Timeout error while requesting "%s"' % @url if logger and err.class == Timeout::Error
-      logger.info 'Connection reset while requesting "%s"' % @url if logger and err.class == Errno::ECONNRESET
-      
-      fetch_attempts += 1
-      
-      if fetch_attempts <= self.retries_on_fetch_fail
-        sleep self.sleep_between_fetch_retries if self.sleep_between_fetch_retries
-        logger.info 'Retrying fetch ....' if logger
-        retry
-      else
-        raise err
-      end
-    end
+    end).force_encoding("ISO-8859-1").encode("UTF-8")
   end
   
   # Returns a string, of the current URI's source code

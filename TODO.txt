@@ -1,5 +1,3 @@
-* The date filters aren't working right
-* Stop using the let syntax perhaps? I think that made the specs slow
 * Address that system_post spec
 ------------------------------------------
 Possible features?:
@@ -13,9 +11,7 @@ Possible features?:
 	 	* to be referenced in separate reports for 'art in florida', 'art in nyc', 'art everywhere esle' ..
 	 	* The other  thing I'd like to do though is have "New art watch/Classic Artwatch" type reports that look
 	 	* separate - but that dont cause the crawl to happen twice. Just once with two reports per crawl..
- * FEATURE: Page-caching? Maybe? Any interest? might be nice for geocaching...
  * FEATURE: Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
- 
  * FEATURE: We might want to parse the sub-locations in the geo-location code... (so for miami: brw/mia/wpb)
 
 ------------------------------------------
