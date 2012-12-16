@@ -4,6 +4,7 @@
 #
 require 'rubygems'
 require 'time'
+require 'uri'
 require 'htmlentities'
 require 'active_support/core_ext/class/attribute_accessors'
 require 'htmlentities'

@@ -26,11 +26,6 @@
 
 class CraigScrape::Scraper
   cattr_accessor :logger
-  cattr_accessor :sleep_between_fetch_retries
-  cattr_accessor :retries_on_fetch_fail
-  cattr_accessor :retries_on_404_fail
-  cattr_accessor :sleep_between_404_retries
-  cattr_accessor :maximum_redirects_per_request
 
   URL_PARTS = /^(?:([^\:]+)\:\/\/([^\/]*))?(.*)$/
   HTML_TAG  = /<\/?[^>]*>/
@@ -44,15 +39,6 @@ class CraigScrape::Scraper
   # Returns the full url that corresponds to this resource
   attr_reader :url
 
-  # Set some defaults:
-  self.retries_on_fetch_fail = 8
-  self.sleep_between_fetch_retries = 30
-  
-  self.retries_on_404_fail = 3
-  self.sleep_between_404_retries = 3
-  
-  self.maximum_redirects_per_request = 20
-
   class BadConstructionError < StandardError #:nodoc:
   end
 
@@ -62,13 +48,7 @@ class CraigScrape::Scraper
   class BadUrlError < StandardError #:nodoc:
   end
 
-  class MaxRedirectError < StandardError #:nodoc:
-  end
-
   class FetchError < StandardError #:nodoc:
-  end
-
-  class ResourceNotFoundError < StandardError #:nodoc:
   end
   
   # Scraper Objects can be created from either a full URL (string), or a Hash.
@@ -145,9 +125,7 @@ class CraigScrape::Scraper
   end
   
   def fetch_uri(uri)
-    logger.info "Requesting (%d): %s" % [redirect_count, @url.inspect] if logger
-
-    raise MaxRedirectError, "Max redirects (#{redirect_count}) reached for URL: #{@url}" if redirect_count > self.maximum_redirects_per_request-1 
+    logger.info "Requesting: %s" % [@url.inspect] if logger
 
     (case uri.scheme
       when 'file'

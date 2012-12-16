@@ -1,5 +1,11 @@
 == Change Log
 
+=== Release 1.1
+- ruby 1.9.3 support
+- migrated from rails 2 gems to rails 3
+- fixed some new parsing bugs introduced by craigslist template changes
+- Replaced Net:Http with typhoeus
+
 === Release 1.0
 - Replaced hpricot dependency with Nokogiri. Nokogiri should be faster and more reliable. Whoo-hoo!
 

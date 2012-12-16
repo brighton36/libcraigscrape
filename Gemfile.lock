@@ -77,12 +77,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actionmailer (= 3.2.9)
-  activerecord (= 3.2.9)
-  activesupport (= 3.2.9)
-  htmlentities
-  kwalify
+  actionmailer (~> 3.2.9)
+  activerecord (~> 3.2.9)
+  activesupport (~> 3.2.9)
+  htmlentities (~> 4.3)
+  kwalify (~> 0.7)
   nokogiri (>= 1.4.4)
   rspec
-  sqlite3
-  typhoeus
+  sqlite3 (~> 1.3)
+  typhoeus (~> 0.5)
