@@ -72,7 +72,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
       if html.at_xpath(XPATH_PAGENAV_LINKS)
         # Post 12/3
         next_link = html.xpath(XPATH_PAGENAV_LINKS).find{|link| NEXT_PAGE_LINK.match link.content}
-        @next_page_href = next_link[:href]
+        @next_page_href = next_link[:href] if next_link
       else 
         # Old style
         cursor = html.at 'p:last-of-type'
@@ -111,7 +111,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
   
   # Returns a Listings object of the next_page_url on the current listings object
   def next_page
-    CraigScrape::Listings.new next_page_url if next_page_url
+    CraigScrape::Listings.new URI.encode(next_page_url) if next_page_url
   end
   
   # Takes a paragraph element and returns a mostly-parsed Posting
