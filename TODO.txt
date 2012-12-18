@@ -1,4 +1,9 @@
-* Address that system_post spec
+* Do we want to better parse zones by having a geography singleton, with a default_zone method?
+  * Yea - we should...
+  * Write some specs that test for this, fix them, and then adjust the old test code failures to reflect the new functionality
+    (Just to be clear, the test_posting is currently *wrong*)
+* Clean up the filters code a bit and get them testing
+* And maybe we can use the typhoeus lib a bit more to better speed up the runs
 ------------------------------------------
 Possible features?:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')

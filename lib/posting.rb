@@ -105,7 +105,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
     unless @post_time
       cursor = html_head.at 'hr' if html_head
       cursor = cursor.next until cursor.nil? or POST_DATE.match cursor.to_s
-      @post_time = Time.parse $1 if $1
+      @post_time = Time.zone.parse $1 if $1
     end
     
     @post_time
@@ -239,7 +239,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # Reflects only the date portion of the posting. Does not include hours/minutes. This is useful when reflecting the listing scrapes, and can be safely
   # used if you wish conserve bandwidth by not pulling an entire post from a listing scrape.
   def post_date
-    @post_date = Time.local(*[0]*3+post_time.to_a[3...10]) unless @post_date or post_time.nil?
+    @post_date = post_time.to_date unless @post_date or post_time.nil?
     
     @post_date
   end

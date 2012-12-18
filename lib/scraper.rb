@@ -15,14 +15,6 @@
 # 
 # <b>logger</b> - a Logger object to debug http notices too. Defaults to nil
 #
-# <b>retries_on_fetch_fail</b> - The number of times to retry a failed uri download. Defaults to 8
-#
-# <b>sleep_between_fetch_retries</b> - The amount of seconds to sleep, between successive attempts in the case of a failed download. Defaults to 30.
-#
-# <b>retries_on_404_fail</b> - The number of times to retry a Resource Not Found error (http Response code 404). Defaults to 3.
-#
-# <b>sleep_between_404_retries</b> - The amount of seconds to sleep, between successive attempts in the case of a Resource Not Found error. Defaults to 3.
-#
 
 class CraigScrape::Scraper
   cattr_accessor :logger

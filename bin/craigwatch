@@ -253,8 +253,8 @@ class CraigReportDefinition #:nodoc:
 
     def starting_at
       (@starting) ?
-        Time.strptime(@starting, "%m/%d/%Y") :
-        Time.now.yesterday.beginning_of_day
+        Time.zone.strptime(@starting, "%m/%d/%Y") :
+        Time.zone.now.yesterday.beginning_of_day
     end
 
     def passes_filter?(post)
@@ -363,7 +363,7 @@ class ReportMailer < ActionMailer::Base #:nodoc:
   # default :template_path => File.dirname(__FILE__)
 
   def report(to, sender, subject_template, report_tmpl)
-    subject = Time.now.strftime subject_template
+    subject = Time.zone.now.strftime subject_template
     @summaries = report_tmpl[:summaries]
     mail :to => to, :subject => subject, :from => sender
   end
@@ -475,7 +475,7 @@ report_summaries = craig_report.searches.collect do |search|
 
     # We keep track of post.post_date here, b/c in some circumstances, you can be in the below loop
     # but have no post.post_date since the posting was removed and it parsed to nil
-    most_recent_posting_date = Time.now
+    most_recent_posting_date = Time.zone.now
 
     # OK - Now let's go!
     catch :list_break do

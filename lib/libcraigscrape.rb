@@ -7,9 +7,12 @@ require 'time'
 require 'uri'
 require 'htmlentities'
 require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext/time/calculations'
 require 'htmlentities'
 require 'nokogiri'
 require 'typhoeus'
+
+Time.zone = 'UTC'
 
 # A base class encapsulating the various libcraigscrape objects, and providing most of the
 # craigslist interaction methods. Currently, we're supporting the old Class methods
@@ -196,11 +199,11 @@ class CraigScrape
 
   # Returns the most recentlt expired  time for the provided month and day
   def self.most_recently_expired_time(month, day)  #:nodoc:
-    now = (time_now) ? time_now : Time.now
+    now = (time_now) ? time_now : Time.zone.now
 
     # This ensures we always generate a time in the past, by guessing the year and subtracting one if we guessed wrong
-    ret = Time.local now.year, month, day
-    ret = Time.local now.year-1, month, day if ret > now
+    ret = Time.zone.local now.year, month, day
+    ret = Time.zone.local now.year-1, month, day if ret > now
 
     ret
   end

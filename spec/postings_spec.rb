@@ -8,12 +8,6 @@ describe CraigScrape::Posting do
     its(:posting_has_expired?){ should be_true }
   end
 
-  context "posting_page_not_found_120512.html" do
-    subject{ described_class.new uri_for('posting_page_not_found_120512.html') }
-
-    its(:system_post?){ should be_true }
-  end
-
   context "posting_sya_121012.html" do
     # This example was picked since it has pics
     subject{ described_class.new uri_for('posting_sya_121012.html') }
