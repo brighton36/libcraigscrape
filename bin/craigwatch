@@ -307,7 +307,7 @@ class CraigReportDefinition #:nodoc:
     def sanitized_against(against)
       against = against.lines if against.respond_to? :lines
       against = against.to_a if against.respond_to? :to_a
-      (against.nil?) ? [] : against
+      (against.nil?) ? [] : against.compact
     end
   end
 end
