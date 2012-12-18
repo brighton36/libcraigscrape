@@ -18,6 +18,8 @@ mapping:
          "domain":         { type: str, required: no }
          "password":       { type: str, required: no }
          "authentication": { type: str, required: no }
+         "enable_starttls_auto": { type: bool, required: no }
+         "tls":            { type: bool, required: no }
    "tracking_database":
       type: map
       mapping:
