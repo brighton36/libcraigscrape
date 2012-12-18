@@ -42,6 +42,9 @@ class CraigScrape::Scraper
 
   class FetchError < StandardError #:nodoc:
   end
+
+  class ResourceNotFoundError < StandardError #:nodoc:
+  end
   
   # Scraper Objects can be created from either a full URL (string), or a Hash.
   # Currently, this initializer isn't intended to be called from libcraigslist API users, though

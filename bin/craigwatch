@@ -171,6 +171,7 @@ require 'action_mailer'
 require 'kwalify/util/hashlike'
 require 'libcraigscrape'
 require "socket"
+require 'active_support/all'
 
 class String #:nodoc:
   RE = /^\/(.*)\/([ixm]*)$/
@@ -253,7 +254,7 @@ class CraigReportDefinition #:nodoc:
 
     def starting_at
       (@starting) ?
-        Time.zone.strptime(@starting, "%m/%d/%Y") :
+        Time.strptime([@starting, 'UTC'].join(' '), "%m/%d/%Y %Z") :
         Time.zone.now.yesterday.beginning_of_day
     end
 
@@ -475,7 +476,7 @@ report_summaries = craig_report.searches.collect do |search|
 
     # We keep track of post.post_date here, b/c in some circumstances, you can be in the below loop
     # but have no post.post_date since the posting was removed and it parsed to nil
-    most_recent_posting_date = Time.zone.now
+    most_recent_posting_date = Time.zone.now.to_date
 
     # OK - Now let's go!
     catch :list_break do
@@ -486,7 +487,7 @@ report_summaries = craig_report.searches.collect do |search|
 
             # Are we at a point in the scrape, past which we don't need to proceed?
             throw :list_break if (
-              most_recent_posting_date < last_tracked_at or
+              most_recent_posting_date.to_time < last_tracked_at or
               already_tracked_urls.include? post.url
             )
 
@@ -495,7 +496,7 @@ report_summaries = craig_report.searches.collect do |search|
               !new_summaries.has_key? post.url and
               search.passes_filter? post
             )
-          rescue CraigScrape::Scraper::ResourceNotFoundError,CraigScrape::Scraper::MaxRedirectError => e
+          rescue CraigScrape::Scraper::ResourceNotFoundError => e
             # Sometimes we do end up with 404's that will never load, and we dont want to
             # abort a run simply b/c we found some anomaly due to the craigslist index.
             # being out of date. This ResourceNotFoundError can occur due to
