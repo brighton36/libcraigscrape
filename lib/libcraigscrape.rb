@@ -104,7 +104,7 @@ class CraigScrape
     ret = []
     fragments.each do |frag|
       each_post(frag) do |p|
-        break if p.post_date <= newer_then
+        break if p.post_time <= newer_then
         ret << p
       end
     end
