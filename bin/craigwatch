@@ -308,7 +308,7 @@ class CraigReportDefinition #:nodoc:
     def sanitized_against(against)
       against = against.lines if against.respond_to? :lines
       against = against.to_a if against.respond_to? :to_a
-      (against.nil?) ? [] : against
+      (against.nil?) ? [] : against.compact
     end
   end
 end
@@ -393,7 +393,8 @@ parser = Kwalify::Yaml::Parser.new(
   :data_binding => true
 )
 
-craig_report = parser.parse_file report_definition_file
+report_definition_file_content = ERB.new(File.read(report_definition_file)).result
+craig_report = parser.parse(report_definition_file_content, filename: report_definition_file)
 
 parser.errors.each do |e|
   puts "Definition Validation Error (line #{e.linenum}, char #{e.column}): #{e.message}"
@@ -403,7 +404,7 @@ end and exit if parser.errors.length > 0
 ActionMailer::Base.prepend_view_path(File.dirname(__FILE__))
 ActionMailer::Base.logger = Logger.new STDERR if craig_report.debug_mailer?
 if craig_report.smtp_settings
-  ActionMailer::Base.smtp_settings = craig_report.smtp_settings
+  ActionMailer::Base.smtp_settings = craig_report.smtp_settings.symbolize_keys
   ActionMailer::Base.delivery_method = :smtp
 else
   ActionMailer::Base.delivery_method = :sendmail
@@ -549,14 +550,15 @@ report_summaries = craig_report.searches.collect do |search|
   }
 end
 
-# Time to send the email:
-ReportMailer.report(
-  craig_report.email_to,
-  craig_report.email_from,
-  craig_report.report_name,
-  {:summaries => report_summaries, :definition => craig_report}
-).deliver if report_summaries.length > 0
-
+# Time to send the email (maybe):
+unless report_summaries.select { |s| !s[:postings].empty? }.empty?
+  ReportMailer.report(
+    craig_report.email_to,
+    craig_report.email_from,
+    craig_report.report_name,
+    {:summaries => report_summaries, :definition => craig_report}
+  ).deliver
+end
 
 # Commit (make 'active') all newly created tracked post urls:
 TrackedPost.activate_all!
