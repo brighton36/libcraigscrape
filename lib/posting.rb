@@ -17,7 +17,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   HEADER_LOCATION = /^.+[ ]*\-[ ]*[\$]?[\d]+[ ]*\((.+)\)$/
   POSTING_ID      = /PostingID\:[ ]*([\d]+)/
   REPLY_TO        = /(.+)/
-  PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
+  PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?))/
   # NOTE: we implement the (?:) to first check the 'old' style format, and then the 'new style'
   # (As of 12/03's parse changes)
   USERBODY_PARTS  = /^(.+)\<div id\=\"userbody\">(.+)\<br[ ]*[\/]?\>\<br[ ]*[\/]?\>(.+)\<\/div\>(.+)$/m
@@ -297,7 +297,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # Returns the best-guess of a price, judging by the label's contents. Price is available when pulled from the listing summary
   # and can be safely used if you wish conserve bandwidth by not pulling an entire post from a listing scrape.
   def price
-    $1.tr('$','').to_f if label and PRICE.match label
+    $1.tr('$','').to_f if header and PRICE.match header
   end
   
   # Returns the post contents with all html tags removed
