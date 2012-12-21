@@ -1,21 +1,17 @@
+* document the craigwatch features for :
+  * erb yaml processing and 
+  * Tls/smtp
 * Do we want to better parse zones by having a geography singleton, with a default_zone method?
   * Yea - we should...
   * Write some specs that test for this, fix them, and then adjust the old test code failures to reflect the new functionality
     (Just to be clear, the test_posting is currently *wrong*)
 * Clean up the filters code a bit and get them testing
 * And maybe we can use the typhoeus lib a bit more to better speed up the runs
+  * And we might need to add that retry-404's thing again
 ------------------------------------------
 Possible features?:
  * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
  * FEATURE: Support for post submissions?
- * FEATURE: Get the YAML template features working in the chris_report.yml
- 	* should be pretty easy - I think we just add to the schema
- 	* Might have to do this yourself with a search_templates section and an search ':include' thing
-   * Should we have 'defined searches' in the yaml and then apply these defitions to a report? 
- 		* It would be nice to have one search definition for 'art I want' and then allow these
-	 	* to be referenced in separate reports for 'art in florida', 'art in nyc', 'art everywhere esle' ..
-	 	* The other  thing I'd like to do though is have "New art watch/Classic Artwatch" type reports that look
-	 	* separate - but that dont cause the crawl to happen twice. Just once with two reports per crawl..
  * FEATURE: Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped
  * FEATURE: We might want to parse the sub-locations in the geo-location code... (so for miami: brw/mia/wpb)
 

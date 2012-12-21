@@ -253,9 +253,9 @@ class CraigReportDefinition #:nodoc:
     def price_required?; @price_required; end
 
     def starting_at
-      (@starting) ?
+      ((@starting) ?
         Time.strptime([@starting, 'UTC'].join(' '), "%m/%d/%Y %Z") :
-        Time.zone.now.yesterday.beginning_of_day
+        Time.zone.now.yesterday).to_date
     end
 
     def passes_filter?(post)
@@ -340,7 +340,6 @@ class TrackedListing < ActiveRecord::Base #:nodoc:
   end
 
   def delete_posts_older_than(cutoff_date)
-    # TODO: can't I use posts.delete 'created_at < ?' and keep it cleaner?
     TrackedPost.delete_all [ 'tracked_listing_id = ? AND created_at < ?', self.id, cutoff_date ]
   end
 end
@@ -361,12 +360,10 @@ class TrackedPost < ActiveRecord::Base #:nodoc:
 end
 
 class ReportMailer < ActionMailer::Base #:nodoc:
-  # default :template_path => File.dirname(__FILE__)
-
   def report(to, sender, subject_template, report_tmpl)
-    subject = Time.zone.now.strftime subject_template
     @summaries = report_tmpl[:summaries]
-    mail :to => to, :subject => subject, :from => sender
+
+    mail :to => to, :subject => Time.zone.now.strftime(subject_template), :from => sender
   end
 end
 
@@ -473,7 +470,7 @@ report_summaries = craig_report.searches.collect do |search|
     already_tracked_urls = tracked_listing.posts.collect{|tp| tp.url}
 
     # We'll use this in the loop to decide what posts to track:
-    newest_post_date = last_tracked_at
+    newest_post_date = last_tracked_at.to_date
 
     # We keep track of post.post_date here, b/c in some circumstances, you can be in the below loop
     # but have no post.post_date since the posting was removed and it parsed to nil
