@@ -38,7 +38,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
       post_tags.each do |el|
         case el.name
           when 'p'
-           post_summary = self.class.parse_summary el, current_date
+           post_summary = parse_summary el, current_date
 
            # Validate that required fields are present:
            parse_error! unless [post_summary[:label],post_summary[:href]].all?{|f| f and f.length > 0}
@@ -50,7 +50,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
           # Let's make sense of the h4 tag, and then read all the p tags below it
           if HEADER_DATE.match he_decode(el.inner_html)
             # Generally, the H4 tags contain valid dates. When they do - this is easy:
-            current_date = CraigScrape.most_recently_expired_time $1, $2
+            current_date = Date.parse [$1, $2].join('/')
           elsif html.at('h4:last-of-type') == el
             # There's a specific bug in craigslist, where these nonsense h4's just appear without anything relevant inside them.
             # They're safe to ignore if they're not the last h4 on the page. I fthey're the last h4 on the page, 
@@ -113,10 +113,12 @@ class CraigScrape::Listings < CraigScrape::Scraper
   def next_page
     CraigScrape::Listings.new URI.encode(next_page_url) if next_page_url
   end
-  
+ 
+  private
+
   # Takes a paragraph element and returns a mostly-parsed Posting
   # We separate this from the rest of the parsing both for readability and ease of testing
-  def self.parse_summary(p_element, date = nil)  #:nodoc:
+  def parse_summary(p_element, date = nil)  #:nodoc:
     ret = {}
 
     title_anchor   = nil
@@ -158,11 +160,11 @@ class CraigScrape::Listings < CraigScrape::Scraper
     if p_element.at_xpath(XPATH_POST_DATE)
       # Post 12/3
       if /\A([^ ]+) ([\d]+)\Z/.match p_element.at_xpath(XPATH_POST_DATE).content.strip
-        ret[:post_date] = CraigScrape.most_recently_expired_time($1, $2.to_i).to_date
+        ret[:post_date] = Date.parse [$1, $2].join('/')
       end
     elsif SUMMARY_DATE.match he_decode(p_element.children[0])
       # Old style
-      ret[:post_date] = CraigScrape.most_recently_expired_time($1, $2.to_i).to_date
+        ret[:post_date] = Date.parse [$1, $2].join('/')
     end
 
     if title_anchor
@@ -174,4 +176,5 @@ class CraigScrape::Listings < CraigScrape::Scraper
     
     ret
   end
+
 end

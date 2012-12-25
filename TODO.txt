@@ -1,9 +1,5 @@
-* All our report outputs have -'s now. Maybe those shouldn't be part of the title
-* Do we want to better parse zones by having a geography singleton, with a default_zone method?
-  * Remove the Time.zone = 'UTC' and see that the tests still pass (in the libcraigscrape). I think they should
-  * Yea - we should...
-  * Write some specs that test for this, fix them, and then adjust the old test code failures to reflect the new functionality
-    (Just to be clear, the test_posting is currently *wrong*)
+* I think it's just the most_recently_expired time that needs to move into the listing, and stop using the Time.zone
+  * Did our post times reflect the change correctly? Test a west coast parse
 ------------------------------------------
 Possible features?:
   * Clean up the filters code a bit and get them testing

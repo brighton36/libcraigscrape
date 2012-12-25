@@ -13,8 +13,6 @@ require 'nokogiri'
 require 'typhoeus'
 require 'money'
 
-Time.zone = 'UTC'
-
 # A base class encapsulating the various libcraigscrape objects, and providing most of the
 # craigslist interaction methods. Currently, we're supporting the old Class methods
 # in a legacy-compatibility mode, but these methods are marked for deprecation. Instead,
@@ -22,7 +20,6 @@ Time.zone = 'UTC'
 # See the README for easy to follow examples.
 
 class CraigScrape
-  cattr_accessor :time_now
   cattr_accessor :site_to_url_prefix
 
   #--
@@ -196,17 +193,6 @@ class CraigScrape
       lf += '/' unless lf.index '?'
       sites.collect { |site| '%s%s/%s' % [site_to_url_prefix,site,lf] }
     }.flatten
-  end
-
-  # Returns the most recentlt expired  time for the provided month and day
-  def self.most_recently_expired_time(month, day)  #:nodoc:
-    now = (time_now) ? time_now : Time.zone.now
-
-    # This ensures we always generate a time in the past, by guessing the year and subtracting one if we guessed wrong
-    ret = Time.zone.local now.year, month, day
-    ret = Time.zone.local now.year-1, month, day if ret > now
-
-    ret
   end
 
 end

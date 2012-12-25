@@ -106,7 +106,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
     unless @post_time
       cursor = html_head.at 'hr' if html_head
       cursor = cursor.next until cursor.nil? or POST_DATE.match cursor.to_s
-      @post_time = Time.zone.parse $1 if $1
+      @post_time = Time.parse $1 if $1
     end
     
     @post_time
