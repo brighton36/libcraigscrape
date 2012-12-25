@@ -158,11 +158,11 @@ class CraigScrape::Listings < CraigScrape::Scraper
     if p_element.at_xpath(XPATH_POST_DATE)
       # Post 12/3
       if /\A([^ ]+) ([\d]+)\Z/.match p_element.at_xpath(XPATH_POST_DATE).content.strip
-        ret[:post_date] = CraigScrape.most_recently_expired_time $1, $2.to_i
+        ret[:post_date] = CraigScrape.most_recently_expired_time($1, $2.to_i).to_date
       end
     elsif SUMMARY_DATE.match he_decode(p_element.children[0])
       # Old style
-      ret[:post_date] = CraigScrape.most_recently_expired_time $1, $2.to_i
+      ret[:post_date] = CraigScrape.most_recently_expired_time($1, $2.to_i).to_date
     end
 
     if title_anchor

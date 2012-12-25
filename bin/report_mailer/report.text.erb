@@ -4,11 +4,12 @@ CRAIGSLIST REPORTER
    <%=summary[:search].name %>
    <% summary[:postings].collect do |post| -%>
       <% if summary[:postings].length > 0 %>
-      <%='%s : %s %s %s %s' % [
+      <%='%s : %s %s %s %s %s' % [
 			post.post_date.strftime('%b %d'),
-			post.label,
-			(post.location) ? " (#{post.location})" : '',
-			(post.has_pic_or_img?) ? ' [img]': '',
+			post.title,
+      post.price.try(:format),
+			(post.location) ? " (#{post.location})" : nil,
+			(post.has_pic_or_img?) ? ' [img]': nil,
 			post.url
       ] -%>
       <% else %>

@@ -7,8 +7,6 @@ describe CraigScrape::Listings do
     specify{ subject.posts.should have(100).items }
     specify{ subject.posts.collect(&:post_date).uniq.should eq([Time.zone.parse('2012-11-26 00:00:00')]) }
     specify{ subject.next_page_href.should eq('index100.html') }
-
-
   end
 
   context 'listing_search_ppa_nyc_121212.html' do

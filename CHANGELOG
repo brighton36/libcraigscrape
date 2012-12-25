@@ -3,8 +3,13 @@
 === Release 1.1
 - ruby 1.9.3 support
 - migrated from rails 2 gems to rails 3
-- fixed some new parsing bugs introduced by craigslist template changes
 - Replaced Net:Http with typhoeus
+- Switched to the money gem for price storage
+- fixed some new parsing bugs introduced by craigslist template changes
+- added a tz parameter in the craigwatch report definition for overiding the
+default timezone in your reports. 
+- added support for enable_starttls_auto and tls in craigwatch (Thanks olek!)
+- added erb evaluation support to the craigwatch definition file (Thanks olek!)
 
 === Release 1.0
 - Replaced hpricot dependency with Nokogiri. Nokogiri should be faster and more reliable. Whoo-hoo!

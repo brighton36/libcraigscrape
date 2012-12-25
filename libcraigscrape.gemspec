@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.add_dependency( 'activerecord', ['~>3.2.9'] )
   s.add_dependency( 'activesupport', ['~>3.2.9'] )
   s.add_dependency( 'rspec' )
+  s.add_dependency( 'money', ['~>5.0.0'] )
   s.add_dependency( 'kwalify', ['~>0.7'] )
   s.add_dependency( 'actionmailer', ['~>3.2.9'] )
   s.add_dependency( 'sqlite3', ['~>1.3'] )

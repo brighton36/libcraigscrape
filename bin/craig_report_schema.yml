@@ -4,6 +4,7 @@ mapping:
    "debug_database":    { type: bool, required: no }
    "debug_mailer":      { type: bool, required: no }
    "debug_craigscrape": { type: bool, required: no }
+   "tz": { type: str, required: no }
 
    "report_name":   { type: str, required: no  }
    "email_to":      { type: str, required: yes }

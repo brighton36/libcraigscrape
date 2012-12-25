@@ -298,7 +298,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # Returns the best-guess of a price, judging by the label's contents. Price is available when pulled from the listing summary
   # and can be safely used if you wish conserve bandwidth by not pulling an entire post from a listing scrape.
   def price
-    $1.tr('$','').to_f if header and PRICE.match label
+    Money.new($1.tr('$','').to_i*100, 'USD') if header and PRICE.match label
   end
   
   # Returns the post contents with all html tags removed

@@ -11,6 +11,7 @@ require 'active_support/core_ext/time/calculations'
 require 'htmlentities'
 require 'nokogiri'
 require 'typhoeus'
+require 'money'
 
 Time.zone = 'UTC'
 
