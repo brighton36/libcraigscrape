@@ -80,6 +80,16 @@ class CraigScrape::Scraper
     @uri
   end
 
+  # This method is mostly useful for our specs, but it's included in case anyone
+  # else wants it. It returns all currently-defined instance variables, and is 
+  # mostly useful for the specs. Probably this doesn't do what you think, and
+  # should only be used to determine what's been parsed by the object thus-far.
+  # (And does not include parseable attributes which have yet to be determined
+  def attributes
+    Hash[self.instance_variables.collect{|i| 
+      [i.to_s.tr('@','').to_sym, instance_variable_get(i) ] }]
+  end
+
   private
   
   # Returns text with all html tags removed.

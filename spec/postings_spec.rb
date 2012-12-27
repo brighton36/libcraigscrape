@@ -19,7 +19,7 @@ describe CraigScrape::Posting do
     its(:location)     {should eq('orlando,florida')}
     its(:posting_id)   {should eq(3469913065)}
     its(:reply_to)     {should eq('9cxgv-3469913065@sale.craigslist.org')}
-    its(:post_time)    {should eq(Time.parse('2012-12-10 20:51:00 -0500'))}
+    its(:post_time)    {should eq(DateTime.parse('2012-12-10 20:51:00 -0500'))}
     its(:price)        {should eq(480)}
     its(:images)       {should eq([])}
     its(:pics) do
@@ -45,7 +45,7 @@ describe CraigScrape::Posting do
     its(:location)     {should eq('BROWARD')}
     its(:posting_id)   {should eq(3469905497)}
     its(:reply_to)     {should eq('z7jmh-3469905497@sale.craigslist.org')}
-    its(:post_time)    {should eq(Time.parse('2012-12-10 20:47:00 -0500'))}
+    its(:post_time)    {should eq(DateTime.parse('2012-12-10 20:47:00 -0500'))}
     its(:price)        {should eq(80)}
     its(:images) do 
       images_list = ["http://i1157.photobucket.com/albums/p590/emy123000/T2eC16NE9s2fp7dBQuCykypg60_12.jpg", "http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg", "http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg", "http://i1157.photobucket.com/albums/p590/emy123000/ScreenShot2012-06-25at60811AM.png", "http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZowFCp4FZqoWBQvsVUbFdw60_12.jpg"]
@@ -70,7 +70,7 @@ describe CraigScrape::Posting do
     its(:location)     {should eq('Homestead')}
     its(:posting_id)   {should eq(3437079882)}
     its(:reply_to)     {should eq(nil)}
-    its(:post_time)    {should eq(Time.parse('2012-11-26 21:34:00 -0500'))}
+    its(:post_time)    {should eq(DateTime.parse('2012-11-26 21:34:00 -0500'))}
     its(:price)        {should eq(8500)}
     its(:images)       {should eq([])}
     its(:pics) do
@@ -93,7 +93,7 @@ describe CraigScrape::Posting do
     its(:location)     {should eq('ormond')}
     its(:posting_id)   {should eq(3431080802)}
     its(:reply_to)     {should eq('rbwts-3431080802@sale.craigslist.org')}
-    its(:post_time)    {should eq(Time.parse('2012-12-05 21:25:00 -0500'))}
+    its(:post_time)    {should eq(DateTime.parse('2012-12-05 21:25:00 -0500'))}
     its(:price)        {should eq(nil)}
     its(:images)       {should eq([])}
     its(:pics)         {should eq(["http://images.craigslist.org/3Kb3M83I85Gc5Ea5H2cbo8eb0fb5e4af71968.jpg", "http://images.craigslist.org/3Lb3M33l35E85F35P0cbod80bd9115e311350.jpg", "http://images.craigslist.org/3Ef3Ib3H55L35K55J6cbof57b4d73878111d0.jpg"])}
@@ -112,7 +112,7 @@ describe CraigScrape::Posting do
     its(:location)     {should eq('PALM COAST')}
     its(:posting_id)   {should eq(3448282416)}
     its(:reply_to)     {should eq('nqmhm-3448282416@sale.craigslist.org')}
-    its(:post_time)    {should eq(Time.parse('2012-12-01 15:02:00 -0500'))}
+    its(:post_time)    {should eq(DateTime.parse('2012-12-01 15:02:00 -0500'))}
     its(:price)        {should eq(2)}
     its(:images)       {should eq([])}
     its(:pics)         {should eq(["http://images.craigslist.org/3I93pe3Hf5G75J55M2cc13e19b59314771029.jpg"])}
@@ -132,12 +132,26 @@ describe CraigScrape::Posting do
     its(:location)     {should eq('Florida Key Islamorada')}
     its(:posting_id)   {should eq(3438004368)}
     its(:reply_to)     {should eq('p7h8m-3438004368@hous.craigslist.org')}
-    its(:post_time)    {should eq(Time.parse('2012-12-05 12:46:00 -0500'))}
+    its(:post_time)    {should eq(DateTime.parse('2012-12-05 12:46:00 -0500'))}
     its(:price)        {should eq(1149000)}
     its(:images)       {should eq([])}
     its(:pics)         {should eq(["http://images.craigslist.org/3M43Jb3ld5L55Z35M5cbr12a6ec99f72d18e2.jpg", "http://images.craigslist.org/3L73H63l45I55L35G4cbr8902484988f3112f.jpg", "http://images.craigslist.org/3Le3Ic3Hf5I75La5M1cbrdd1617f48d4c1f02.jpg"])}
     its(:img_types)    {should eq([:pic])}
     its(:contents_as_plain)    {should eq("\u0095 $1,149,000.00                  \n\u0095 2000ft²\n\u0095 3-bedroom\n\u0095 3-full bath\nJUST REDUCED FOR A QUICK SALE!!!!\nThis great Three Story 3-bedroom 3 Full bath home in Islamorada, Florida Keys is the perfect get-away to relax, enjoy the fresh breezes, the sandy beach and watch spectacular sunsets. A spacious master suite bedroom upstairs has a private bath with whirlpool Jacuzzi tub and private patio. Downstairs you have access to full kitchen custom cabinets, granite countertops, stainless steel appliances, open living-dining room, Travertine marble throughout the whole house, two bedrooms and two full baths. Enjoy a concrete dock and davits with boat access to the Gulf and ocean in less than five minutes via the deep-water canal right outside your door. Enjoy access to a private community beach with picnic tables and tiki huts for fun barbecues; jet skiing; boat ramp and recreational boating and water skiing. Don't miss out on these .Located in a quiet neighborhood at Mile Marker 74 in Islamorada, this location is tastefully furnished, has a gourmet kitchen and is ideal for boaters.\n(hablamos español)    \nCall for appointment 305.467.6348 /  786.484.0917\nMarisol Acosta\nLicensed, Realtor Associate\nAkoya Realty LLC\nwww.akoyarealty.com") }
     its(:contents) {should eq("\u0095 $1,149,000.00                  <br>\n\u0095 2000ft²<br>\n\u0095 3-bedroom<br>\n\u0095 3-full bath<br><br>\nJUST REDUCED FOR A QUICK SALE!!!!<br><br>\nThis great Three Story 3-bedroom 3 Full bath home in Islamorada, Florida Keys is the perfect get-away to relax, enjoy the fresh breezes, the sandy beach and watch spectacular sunsets. A spacious master suite bedroom upstairs has a private bath with whirlpool Jacuzzi tub and private patio. Downstairs you have access to full kitchen custom cabinets, granite countertops, stainless steel appliances, open living-dining room, Travertine marble throughout the whole house, two bedrooms and two full baths. Enjoy a concrete dock and davits with boat access to the Gulf and ocean in less than five minutes via the deep-water canal right outside your door. Enjoy access to a private community beach with picnic tables and tiki huts for fun barbecues; jet skiing; boat ramp and recreational boating and water skiing. Don't miss out on these .Located in a quiet neighborhood at Mile Marker 74 in Islamorada, this location is tastefully furnished, has a gourmet kitchen and is ideal for boaters.<br><br>\n(hablamos español)    <br><br>\nCall for appointment 305.467.6348 /  786.484.0917<br>\nMarisol Acosta<br>\nLicensed, Realtor Associate<br>\nAkoya Realty LLC<br>\nwww.akoyarealty.com") }
+  end
+
+  context "posting_sfbay_1226.html" do
+    # This example was picked since it has pics
+    subject{ described_class.new uri_for('posting_sfbay_1226.html') }
+
+    its(:full_section) {should eq(["SF bay area craigslist", "east bay", "community", "lost & found"])}
+    its(:header)       {should eq("LOST CAT - black SH neutered M - STAR (lafayette / orinda / moraga)")}
+    its(:label)        {should eq("LOST CAT - black SH neutered M - STAR")}
+    its(:title)        {should eq("LOST CAT - black SH neutered M - STAR")}
+    its(:location)     {should eq('lafayette / orinda / moraga')}
+    its(:posting_id)   {should eq(3456070558)}
+    its(:reply_to)     {should eq('qnggz-3456070558@comm.craigslist.org')}
+    its(:post_time)    {should eq(DateTime.parse('2012-12-26 17:41:00 PST'))}
   end
 end

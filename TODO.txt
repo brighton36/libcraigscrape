@@ -1,5 +1,6 @@
-* I think it's just the most_recently_expired time that needs to move into the listing, and stop using the Time.zone
-  * Did our post times reflect the change correctly? Test a west coast parse
+* Found that price bug that olek was talking about
+* I think we need to put our 404 logic back in here. Let's see what happens after some runs....
+* Maybe we should fix up the classic tests as well, and test the parse summaries a bit better in the specs?
 ------------------------------------------
 Possible features?:
   * Clean up the filters code a bit and get them testing

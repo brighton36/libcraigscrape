@@ -96,13 +96,21 @@ class CraigScrape
   # Determines all listings which can be construed by combining the sites specified in the object
   # constructor with the provided url-path fragments.
   #
-  # Returns all posts from each of these urls, which are newer than the provider 'newer_then' date.
+  # Returns all posts from each of these urls, which are newer than (or equal to) the provider 'newer_then' date.
   # (Returns 'newest' posts first).
+  #
+  # NOTE: New to version 1.1, if newer_then is a date, we compare to the post_date
+  # if newer_then is a Time, we compare to post_time. Be aware that post_time 
+  # requires the entire post be loaded, and not just the summary - which will
+  # take longer to download.
   def posts_since(newer_then, *fragments)
+    accessor =  (newer_then.kind_of? Date) ? :post_date : :post_time
     ret = []
     fragments.each do |frag|
       each_post(frag) do |p|
-        break if p.post_time <= newer_then
+        # We have to try the comparison, since post_time could conceivably be nil 
+        # for the case of a system_post?
+        break if p.send(accessor).try(:<=, newer_then)
         ret << p
       end
     end

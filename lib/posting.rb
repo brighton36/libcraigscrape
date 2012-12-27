@@ -14,7 +14,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   
   POST_DATE       = /Date:[^\d]*((?:[\d]{2}|[\d]{4})\-[\d]{1,2}\-[\d]{1,2}[^\d]+[\d]{1,2}\:[\d]{1,2}[ ]*[AP]M[^a-z]+[a-z]+)/i
   LOCATION        = /Location\:[ ]+(.+)/
-  HEADER_LOCATION = /^.+[ ]*\-[ ]*[\$]?[\d]+[ ]*\((.+)\)$/
+  HEADER_LOCATION = /\((.+)\)$/
   POSTING_ID      = /PostingID\:[ ]*([\d]+)/
   REPLY_TO        = /(.+)/
   PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
@@ -106,7 +106,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
     unless @post_time
       cursor = html_head.at 'hr' if html_head
       cursor = cursor.next until cursor.nil? or POST_DATE.match cursor.to_s
-      @post_time = Time.parse $1 if $1
+      @post_time = DateTime.parse($1) if $1
     end
     
     @post_time
@@ -146,8 +146,11 @@ class CraigScrape::Posting < CraigScrape::Scraper
      
       if html.at_xpath(XPATH_BLURBS)
         # This is the post-12/3/12 style:
+
+        # Sometimes the Location is in the body :
         @location = $1 if html.xpath(XPATH_BLURBS).first.children.any?{|c| 
           LOCATION.match c.content}
+
       elsif craigslist_body
         # Location (when explicitly defined):
         cursor = craigslist_body.at 'ul' unless @location
@@ -169,9 +172,11 @@ class CraigScrape::Posting < CraigScrape::Scraper
           @location = he_decode(cursor.to_s.strip) if cursor
         end
         
-        # So, *sometimes* the location just ends up being in the header, I don't know why:
-        @location = $1 if @location.nil? and HEADER_LOCATION.match header
       end
+      
+      # So, *sometimes* the location just ends up being in the header, I don't know why.
+      # This happens on old-style and new-style posts:
+      @location = $1 if @location.nil? and HEADER_LOCATION.match header
     end
     
     @location
