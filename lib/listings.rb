@@ -16,6 +16,8 @@ class CraigScrape::Listings < CraigScrape::Scraper
   NEXT_PAGE_LINK = /^[ ]*(?:next [\d]+ postings|Next \>\>)[ ]*$/
 
   XPATH_POST_DATE = "*[@class='itemdate']"
+  XPATH_POST_IMGPIC = "*[@class='itempx']/*[@class='p']"
+  XPATH_POST_PRICE = "*[@class='itempp']"
   XPATH_PAGENAV_LINKS = "//*[@class='ban']//a"
 
   # Array, PostSummary objects found in the listing
@@ -139,19 +141,30 @@ class CraigScrape::Listings < CraigScrape::Scraper
     end
     
     location_tag = p_element.at 'font'
-    has_pic_tag = p_element.at 'span'
     
     href = nil
     
     location = he_decode p_element.at('font').inner_html if location_tag
     ret[:location] = $1 if location and LOCATION.match location
 
-    ret[:img_types] = []
-    if has_pic_tag
-      img_type = he_decode has_pic_tag.inner_html
-      img_type = $1.tr('^a-zA-Z0-9',' ') if IMG_TYPE.match img_type
+    if p_element.at_xpath XPATH_POST_PRICE
+      price = p_element.at_xpath(XPATH_POST_PRICE).content.tr('^0-9', '')
+      ret[:price] = Money.new price.to_i*100, 'USD' unless price.empty?
+    end
 
-      ret[:img_types] = img_type.split(' ').collect{|t| t.to_sym}
+    ret[:img_types] = []
+    if p_element.at_xpath XPATH_POST_IMGPIC
+      # Post 12/3
+      ret[:img_types] = p_element.at_xpath(XPATH_POST_IMGPIC).content.scan(/\w+/).collect(&:to_sym)
+    else
+      # Old style:
+      has_pic_tag = p_element.at 'span'
+      if has_pic_tag
+        img_type = he_decode has_pic_tag.inner_html
+        img_type = $1.tr('^a-zA-Z0-9',' ') if IMG_TYPE.match img_type
+
+        ret[:img_types] = img_type.split(' ').collect{|t| t.to_sym}
+      end
     end
 
     ret[:section] = he_decode(section_anchor.inner_html) if section_anchor

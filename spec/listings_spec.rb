@@ -19,7 +19,7 @@ describe CraigScrape::Listings do
         :label     => 'we buy junk-bus-truck- car for cash!!$500-$5000-5612062848',
         :price     => 5000,
         :href      => 'http://miami.craigslist.org/brw/ctd/3437083983.html',
-        :url       => 'http://miami.craigslist.org/pbc/ctd/3437083983.html',
+        :url       => 'http://miami.craigslist.org/brw/ctd/3437083983.html',
         :location  => 'all over',
         :section   => 'dealer',
         :img_types => [],
