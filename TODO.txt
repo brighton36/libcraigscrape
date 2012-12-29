@@ -1,6 +1,4 @@
-* Found that price bug that olek was talking about
 * I think we need to put our 404 logic back in here. Let's see what happens after some runs....
-* Maybe we should fix up the classic tests as well, and test the parse summaries a bit better in the specs?
 ------------------------------------------
 Possible features?:
   * Clean up the filters code a bit and get them testing

@@ -249,11 +249,17 @@ class CraigReportDefinition #:nodoc:
     attr_reader :summary_post_has, :summary_post_has_no
     attr_reader :summary_or_full_post_has, :summary_or_full_post_has_no
 
-    attr_reader :price_greater_than,:price_less_than
-
     def has_image?; @has_image; end
     def newest_first?; @newest_first; end
     def price_required?; @price_required; end
+
+    def price_greater_than
+      Money.new(@price_greater_than*100, 'USD') if @price_greater_than
+    end
+
+    def price_less_than
+      Money.new(@price_less_than*100, 'USD') if @price_less_than
+    end
 
     def starting_at
       (@starting) ?
@@ -266,8 +272,8 @@ class CraigReportDefinition #:nodoc:
       if post.price.nil?
         return false if price_required?
       else
-        return false if @price_greater_than and post.price <= @price_greater_than
-        return false if @price_less_than and post.price >= @price_less_than
+        return false if price_greater_than and post.price <= price_greater_than
+        return false if price_less_than and post.price >= price_less_than
       end
 
       # Label Filters:
