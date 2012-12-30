@@ -8,7 +8,7 @@
    			h(post.post_date.strftime('%b %d')), post.url, h(post.title)
       ]).html_safe %>
       <%=([
-        (post.price) ? h(post.price.try(:format)) : nil,
+        (post.price) ? h(post.price.try(:format, :no_cents => true)) : nil,
    			(post.location) ? '<font size="-1"> (%s)</font>' % h(post.location) : nil,
    			(post.has_pic_or_img?) ? ' <span style="color: orange"> img</span>': nil
       ].compact.join(' ')).html_safe -%>

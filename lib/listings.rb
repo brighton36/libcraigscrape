@@ -17,8 +17,9 @@ class CraigScrape::Listings < CraigScrape::Scraper
 
   XPATH_POST_DATE = "*[@class='itemdate']"
   XPATH_POST_IMGPIC = "*[@class='itempx']/*[@class='p']"
-  XPATH_POST_PRICE = "*[@class='itempp']"
   XPATH_PAGENAV_LINKS = "//*[@class='ban']//a"
+  # There's a couple places that the price hangs out. We search in this order
+  XPATHS_POST_PRICE = ["*[@class='itempp']", "*[@class='itemph']"]
 
   # Array, PostSummary objects found in the listing
   def posts
@@ -147,10 +148,12 @@ class CraigScrape::Listings < CraigScrape::Scraper
     location = he_decode p_element.at('font').inner_html if location_tag
     ret[:location] = $1 if location and LOCATION.match location
 
-    if p_element.at_xpath XPATH_POST_PRICE
-      price = p_element.at_xpath(XPATH_POST_PRICE).content.tr('^0-9', '')
-      ret[:price] = Money.new price.to_i*100, 'USD' unless price.empty?
-    end
+    price_path = XPATHS_POST_PRICE.find{|path| 
+      content = p_element.at_xpath(path).try(:content)
+      (!content.nil? and !content.empty?)
+    }
+    ret[:price] = Money.new($1.to_i * 100, 'USD') if price_path and 
+      /\$([\d]+)/.match(p_element.at_xpath(price_path).content) 
 
     ret[:img_types] = []
     if p_element.at_xpath XPATH_POST_IMGPIC

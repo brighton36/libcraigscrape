@@ -51,4 +51,27 @@ describe CraigScrape::Listings do
         :price     =>  Money.new(3000, 'USD'),
         :post_date => Date.parse('2012/12/12') }) }
   end
+  
+  context "listing_rea_miami_123012.html" do
+    subject { described_class.new( uri_for('listing_rea_miami_123012.html') ) }
+    specify{ subject.posts.should have(100).items }
+    specify{ subject.posts[0].attributes.should eq({
+        :label     => '3bd 2ba Home for Sale in Miami - Reduced',
+        :href      => 'http://miami.craigslist.org/mdc/reb/3478403162.html',
+        :url       => 'http://miami.craigslist.org/mdc/reb/3478403162.html',
+        :location  => 'Miami',
+        :section   => 'broker',
+        :img_types => [:img],
+        :price     =>  Money.new(24900000, 'USD'),
+        :post_date => Date.parse('2012/12/30') }) }
+    specify{ subject.posts[12].attributes.should eq({
+        :label     => 'Miami, FL Home for Sale - 4bd 3ba/1hba',
+        :href      => 'http://miami.craigslist.org/mdc/reb/3478359527.html',
+        :url       => 'http://miami.craigslist.org/mdc/reb/3478359527.html',
+        :location  => 'Other',
+        :section   => 'broker',
+        :img_types => [:img],
+        :price     =>  Money.new(45800000, 'USD'),
+        :post_date => Date.parse('2012/12/30') }) }
+  end
 end

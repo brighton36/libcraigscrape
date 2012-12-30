@@ -7,7 +7,7 @@ CRAIGSLIST REPORTER
       <%='%s : %s %s %s %s %s' % [
 			post.post_date.strftime('%b %d'),
 			post.title,
-      post.price.try(:format),
+      post.price.try(:format, :no_cents => true),
 			(post.location) ? " (#{post.location})" : nil,
 			(post.has_pic_or_img?) ? ' [img]': nil,
 			post.url
