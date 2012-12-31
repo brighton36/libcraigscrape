@@ -18,6 +18,11 @@
 
 class CraigScrape::Scraper
   cattr_accessor :logger
+  cattr_accessor :retries_on_404_fail
+  cattr_accessor :sleep_between_404_retries
+
+  self.retries_on_404_fail = 3
+  self.sleep_between_404_retries = 3
 
   URL_PARTS = /^(?:([^\:]+)\:\/\/([^\/]*))?(.*)$/
   HTML_TAG  = /<\/?[^>]*>/
@@ -138,12 +143,39 @@ class CraigScrape::Scraper
         File.read( File.directory?(uri.path) ? 
           "#{uri.path}/index.html" : uri.path , :encoding => 'BINARY')
       when /^http[s]?/
-        resp = Typhoeus.get uri.to_s, :followlocation =>  true, 
-          :headers => HTTP_HEADERS
-        resp.response_body
+        fetch_http uri
       else
         raise BadUrlError, "Unknown URI scheme for the url: #{@url}"
     end).force_encoding("ISO-8859-1").encode("UTF-8")
+  end
+
+  def fetch_http(uri)
+    fetch_attempts = 0
+    resource_not_found_attempts = 0
+      
+    begin
+      resp = Typhoeus.get uri.to_s, :followlocation =>  true, 
+        :headers => HTTP_HEADERS
+
+      if resp.response_code == 200
+        resp.response_body
+      else
+        # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
+        raise ResourceNotFoundError, 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
+      end
+    rescue ResourceNotFoundError => err
+      logger.info err.message if logger
+      
+      resource_not_found_attempts += 1
+      
+      if resource_not_found_attempts <= self.retries_on_404_fail
+        sleep self.sleep_between_404_retries if self.sleep_between_404_retries
+        logger.info 'Retrying ....' if logger
+        retry
+      else
+        raise err
+      end      
+    end
   end
   
   # Returns a string, of the current URI's source code
