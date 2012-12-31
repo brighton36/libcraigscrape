@@ -161,7 +161,7 @@ class CraigScrape::Scraper
         resp.response_body
       else
         # Sometimes Craigslist seems to return 404's for no good reason, and a subsequent fetch will give you what you want
-        raise ResourceNotFoundError, 'Unable to fetch "%s" (%s)' % [ @url, resp.response.code ]
+        raise ResourceNotFoundError, 'Unable to fetch "%s" (%s)' % [ @url, resp.response_code ]
       end
     rescue ResourceNotFoundError => err
       logger.info err.message if logger
