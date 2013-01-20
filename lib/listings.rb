@@ -53,7 +53,7 @@ class CraigScrape::Listings < CraigScrape::Scraper
           # Let's make sense of the h4 tag, and then read all the p tags below it
           if HEADER_DATE.match he_decode(el.inner_html)
             # Generally, the H4 tags contain valid dates. When they do - this is easy:
-            current_date = Date.parse [$1, $2].join('/')
+            current_date = most_recent_date $1, $2
           elsif html.at('h4:last-of-type') == el
             # There's a specific bug in craigslist, where these nonsense h4's just appear without anything relevant inside them.
             # They're safe to ignore if they're not the last h4 on the page. I fthey're the last h4 on the page, 
@@ -176,11 +176,11 @@ class CraigScrape::Listings < CraigScrape::Scraper
     if p_element.at_xpath(XPATH_POST_DATE)
       # Post 12/3
       if /\A([^ ]+) ([\d]+)\Z/.match p_element.at_xpath(XPATH_POST_DATE).content.strip
-        ret[:post_date] = Date.parse [$1, $2].join('/')
+        ret[:post_date] = most_recent_date $1, $2
       end
     elsif SUMMARY_DATE.match he_decode(p_element.children[0])
       # Old style
-        ret[:post_date] = Date.parse [$1, $2].join('/')
+        ret[:post_date] = most_recent_date $1, $2
     end
 
     if title_anchor
@@ -193,4 +193,18 @@ class CraigScrape::Listings < CraigScrape::Scraper
     ret
   end
 
+  private
+
+  # This method takes a month & day, and returns the most recent Date in the 
+  # past for this date.
+  def most_recent_date(month, day)
+    now = Time.now.utc
+
+    # This ensures we always generate a time in the past, by guessing the year 
+    # and subtracting one if we guessed wrong
+    ret = Date.parse [month, day, now.year].join('/')
+    ret = Date.parse [month, day, now.year-1].join('/') if ret > now.to_date
+
+    ret
+  end
 end

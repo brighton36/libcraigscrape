@@ -2,8 +2,11 @@
 require 'spec_helper'
 
 describe CraigScrape::Listings do
+  let(:end_of_2012) { Time.local(2012,12,31) }
+  let(:start_of_2013) { Time.local(2013,1,20) }
+
   context "listing_cta_ftl_112612.html" do
-    before{ Timecop.freeze(Time.local(2012,12,31)) }
+    before{ Timecop.freeze(start_of_2013) }
     after{ Timecop.return }
     
     subject { described_class.new( uri_for('listing_cta_ftl_112612.html') ) }
@@ -30,6 +33,9 @@ describe CraigScrape::Listings do
   end
 
   context 'listing_search_ppa_nyc_121212.html' do
+    before{ Timecop.freeze(end_of_2012) }
+    after{ Timecop.return }
+
     subject {  described_class.new( uri_for('listing_search_ppa_nyc_121212.html') ) }
 
     specify{ subject.posts.should have(100).items }
@@ -56,6 +62,9 @@ describe CraigScrape::Listings do
   end
   
   context "listing_rea_miami_123012.html" do
+    before{ Timecop.freeze(end_of_2012) }
+    after{ Timecop.return }
+
     subject { described_class.new( uri_for('listing_rea_miami_123012.html') ) }
     specify{ subject.posts.should have(100).items }
     specify{ subject.posts[0].attributes.should eq({

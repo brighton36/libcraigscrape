@@ -15,7 +15,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
   POST_DATE       = /Date:[^\d]*((?:[\d]{2}|[\d]{4})\-[\d]{1,2}\-[\d]{1,2}[^\d]+[\d]{1,2}\:[\d]{1,2}[ ]*[AP]M[^a-z]+[a-z]+)/i
   LOCATION        = /Location\:[ ]+(.+)/
   HEADER_LOCATION = /\((.+)\)$/
-  POSTING_ID      = /PostingID\:[ ]*([\d]+)/
+  POSTING_ID      = /Posting[ ]?ID\:[ ]*([\d]+)/
   REPLY_TO        = /(.+)/
   PRICE           = /((?:^\$[\d]+(?:\.[\d]{2})?)|(?:\$[\d]+(?:\.[\d]{2})?$))/
    
@@ -29,9 +29,19 @@ class CraigScrape::Posting < CraigScrape::Scraper
   REQUIRED_FIELDS = %w(contents posting_id post_time header title full_section)
 
   XPATH_USERBODY = "//*[@id='userbody']"
+  XPATH_POSTINGBODY = "//*[@id='postingbody']"
+  
   XPATH_BLURBS = "//ul[@class='blurbs']"
-  XPATH_PICS = "//*[@class='tn']/a/@href"
-  XPATH_REPLY_TO = "//*[@class='dateReplyBar']/small/a"
+  XPATH_PICS = ["//*[@class='tn']/a/@href",
+    # For some posts (the newest ones on 01/20/12) we find the images:
+    "//*[@id='thumbs']/a/@href"
+    ].join('|')
+  XPATH_REPLY_TO = ["//*[@class='dateReplyBar']/small/a",
+    # For some posts (the newest ones on 01/20/12) we find the reply to this way:
+    "//*[@class='dateReplyBar']/*[@id='replytext']/following-sibling::a" 
+    ].join('|')
+  XPATH_POSTINGBLOCK = "//*[@class='postingidtext' or @class='postinginfos']"
+  XPATH_POSTED_DATE = "//*[@class='postinginfos']/*[@class='postinginfo']/date"
 
   # This is really just for testing, in production use, uri.path is a better solution
   attr_reader :href #:nodoc:
@@ -81,6 +91,10 @@ class CraigScrape::Posting < CraigScrape::Scraper
       (html_head / "*[@class='bchead']//a").each do |a|
         @full_section << he_decode(a.inner_html) unless a['id'] and a['id'] == 'ef'
       end if html_head
+      
+      # For some posts (the newest ones on 01/20/12) craigslist is pre-pending
+      # a silly "CL" to the section. Let's strip that:
+      @full_section.delete_at(0) if @full_section[0] == 'CL'
     end
 
     @full_section
@@ -104,9 +118,16 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # Time, reflects the full timestamp of the posting 
   def post_time
     unless @post_time
-      cursor = html_head.at 'hr' if html_head
-      cursor = cursor.next until cursor.nil? or POST_DATE.match cursor.to_s
-      @post_time = DateTime.parse($1) if $1
+      if html.at_xpath(XPATH_POSTED_DATE)
+        # For some posts (the newest ones on 01/20/12) craigslist made this really 
+        # easy for us. 
+        @post_time = DateTime.parse(html.at_xpath(XPATH_POSTED_DATE))
+      else
+        # The bulk of the post time/dates are parsed via a simple regex:
+        cursor = html_head.at 'hr' if html_head
+        cursor = cursor.next until cursor.nil? or POST_DATE.match cursor.to_s
+        @post_time = DateTime.parse($1) if $1
+      end
     end
     
     @post_time
@@ -124,7 +145,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
       @posting_id = $1.to_i if POSTING_ID.match html_footer.to_s
     else
       # Post 12/3
-      @posting_id = $1.to_i if POSTING_ID.match html.xpath("//*[@class='postingidtext']").to_s
+      @posting_id = $1.to_i if POSTING_ID.match html.xpath(XPATH_POSTINGBLOCK).to_s
     end
   
     @posting_id
@@ -133,7 +154,17 @@ class CraigScrape::Posting < CraigScrape::Scraper
   # String, The full-html contents of the post
   def contents
     unless @contents
-      @contents = user_body if html_source
+      @contents = if html.at_xpath(XPATH_POSTINGBODY)
+        # For some posts (the newest ones on 01/20/12) craigslist made this really 
+        # easy for us. 
+        html.at_xpath(XPATH_POSTINGBODY).children.to_s
+      elsif html_source
+        # Otherwise we have to parse this in a convoluted way from the userbody
+        # section:
+        user_body
+      end
+      
+      # This helps clean up the whitespace around the sides, in case we got any: 
       @contents = he_decode(@contents).strip if @contents
     end
     

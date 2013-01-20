@@ -1,10 +1,11 @@
 == Change Log
 
-=== Release 1.1.1
+=== Release 1.1.1 (January 20, 2013)
+- A new posting format showed up(posting_hil_cto_011913.html), added to specs and wrote handling code
 - Fixed a bug affecting the parsing of dates on some postings
-- Listing specs were failing due to the year change, added a timecop dependency to resolve
+- Listing specs were failing due to the year change, resolved, and added a timecop dependency to development
 
-=== Release 1.1
+=== Release 1.1 (December 25, 2012)
 - ruby 1.9.3 support
 - migrated from rails 2 gems to rails 3
 - Replaced Net:Http with typhoeus
@@ -15,10 +16,10 @@ default timezone in your reports.
 - added support for enable_starttls_auto and tls in craigwatch (Thanks olek!)
 - added erb evaluation support to the craigwatch definition file (Thanks olek!)
 
-=== Release 1.0
+=== Release 1.0 (February 13, 2011)
 - Replaced hpricot dependency with Nokogiri. Nokogiri should be faster and more reliable. Whoo-hoo!
 
-=== Release 0.9.1
+=== Release 0.9.1 (January 5, 2011)
 - Added support for posting_has_expired? and expired post recognition
 - Fixed a weird bug in craigwatch that would cause a scrape to abort if a flagged_for_removal? was encountered when using certain (minimal) filtering 
 

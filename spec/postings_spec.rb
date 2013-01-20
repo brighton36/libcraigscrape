@@ -20,6 +20,7 @@ describe CraigScrape::Posting do
     its(:posting_id)   {should eq(3469913065)}
     its(:reply_to)     {should eq('9cxgv-3469913065@sale.craigslist.org')}
     its(:post_time)    {should eq(DateTime.parse('2012-12-10 20:51:00 -0500'))}
+    its(:post_date)    {should eq(Date.parse('2012-12-10'))}
     its(:price)        {should eq(480)}
     its(:images)       {should eq([])}
     its(:pics) do
@@ -46,6 +47,7 @@ describe CraigScrape::Posting do
     its(:posting_id)   {should eq(3469905497)}
     its(:reply_to)     {should eq('z7jmh-3469905497@sale.craigslist.org')}
     its(:post_time)    {should eq(DateTime.parse('2012-12-10 20:47:00 -0500'))}
+    its(:post_date)    {should eq(Date.parse('2012-12-10'))}
     its(:price)        {should eq(80)}
     its(:images) do 
       images_list = ["http://i1157.photobucket.com/albums/p590/emy123000/T2eC16NE9s2fp7dBQuCykypg60_12.jpg", "http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg", "http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZqwFCS4TIRoZBQKvdVJIQ60_57.jpg", "http://i1157.photobucket.com/albums/p590/emy123000/ScreenShot2012-06-25at60811AM.png", "http://i1157.photobucket.com/albums/p590/emy123000/KGrHqZowFCp4FZqoWBQvsVUbFdw60_12.jpg"]
@@ -71,6 +73,7 @@ describe CraigScrape::Posting do
     its(:posting_id)   {should eq(3437079882)}
     its(:reply_to)     {should eq(nil)}
     its(:post_time)    {should eq(DateTime.parse('2012-11-26 21:34:00 -0500'))}
+    its(:post_date)    {should eq(Date.parse('2012-11-26'))}
     its(:price)        {should eq(8500)}
     its(:images)       {should eq([])}
     its(:pics) do
@@ -94,6 +97,7 @@ describe CraigScrape::Posting do
     its(:posting_id)   {should eq(3431080802)}
     its(:reply_to)     {should eq('rbwts-3431080802@sale.craigslist.org')}
     its(:post_time)    {should eq(DateTime.parse('2012-12-05 21:25:00 -0500'))}
+    its(:post_date)    {should eq(Date.parse('2012-12-05'))}
     its(:price)        {should eq(nil)}
     its(:images)       {should eq([])}
     its(:pics)         {should eq(["http://images.craigslist.org/3Kb3M83I85Gc5Ea5H2cbo8eb0fb5e4af71968.jpg", "http://images.craigslist.org/3Lb3M33l35E85F35P0cbod80bd9115e311350.jpg", "http://images.craigslist.org/3Ef3Ib3H55L35K55J6cbof57b4d73878111d0.jpg"])}
@@ -113,6 +117,7 @@ describe CraigScrape::Posting do
     its(:posting_id)   {should eq(3448282416)}
     its(:reply_to)     {should eq('nqmhm-3448282416@sale.craigslist.org')}
     its(:post_time)    {should eq(DateTime.parse('2012-12-01 15:02:00 -0500'))}
+    its(:post_date)    {should eq(Date.parse('2012-12-01'))}
     its(:price)        {should eq(2)}
     its(:images)       {should eq([])}
     its(:pics)         {should eq(["http://images.craigslist.org/3I93pe3Hf5G75J55M2cc13e19b59314771029.jpg"])}
@@ -133,6 +138,7 @@ describe CraigScrape::Posting do
     its(:posting_id)   {should eq(3438004368)}
     its(:reply_to)     {should eq('p7h8m-3438004368@hous.craigslist.org')}
     its(:post_time)    {should eq(DateTime.parse('2012-12-05 12:46:00 -0500'))}
+    its(:post_date)    {should eq(Date.parse('2012-12-05'))}
     its(:price)        {should eq(1149000)}
     its(:images)       {should eq([])}
     its(:pics)         {should eq(["http://images.craigslist.org/3M43Jb3ld5L55Z35M5cbr12a6ec99f72d18e2.jpg", "http://images.craigslist.org/3L73H63l45I55L35G4cbr8902484988f3112f.jpg", "http://images.craigslist.org/3Le3Ic3Hf5I75La5M1cbrdd1617f48d4c1f02.jpg"])}
@@ -153,12 +159,62 @@ describe CraigScrape::Posting do
     its(:posting_id)   {should eq(3456070558)}
     its(:reply_to)     {should eq('qnggz-3456070558@comm.craigslist.org')}
     its(:post_time)    {should eq(DateTime.parse('2012-12-26 17:41:00 PST'))}
+    its(:post_date)    {should eq(Date.parse('2012-12-26'))}
   end
 
   context "posting_hil_cto_011913.html" do
     # This example was picked since we were failing to parse the post_date:
-    subject{ described_class.new uri_for('posting_sfbay_1226.html') }
+    subject{ described_class.new uri_for('posting_hil_cto_011913.html') }
 
     its(:post_date)    {should eq(Date.parse('2013-01-08'))}
+    its(:full_section) {should eq([ 'tampa bay', 'hillsborough co', 
+      'all for sale / wanted', 'cars & trucks - by owner' ])}
+
+    its(:header)       {should eq("2 dr Chevy on 30s fs/trade donk - $20 (Any)")}
+    its(:label)        {should eq("2 dr Chevy on 30s fs/trade donk - $20")}
+    its(:title)        {should eq("2 dr Chevy on 30s fs/trade donk - $20 (Any)")}
+
+    its(:location)     {should eq('Any')}
+    its(:posting_id)   {should eq(3516252529)}
+    its(:reply_to)     {should eq('t5kjj-3516252529@sale.craigslist.org')}
+    its(:post_time)    {should eq(DateTime.parse('2013-01-08, 2:09PM EST'))}
+    its(:post_date)    {should eq(Date.parse('2013-01-08'))}
+
+    its(:price)        {should eq(20)}
+    its(:images)       {should eq([])}
+    its(:pics)         {should eq(["http://images.craigslist.org/3G53I93Hc5L85Kf5H7d120fddd0157c831762.jpg", 'http://images.craigslist.org/3F83J73Hb5L75Gb5J2d12f3a7aa165da01cad.jpg', 'http://images.craigslist.org/3I43m13N85K25Fd5Hed120641f1962feb153b.jpg', 'http://images.craigslist.org/3Ld3J53H35Gb5Ff5Jfd12984fcb8d2d721dd9.jpg'])}
+    its(:img_types)    {should eq([:pic])}
+
+    its(:contents) {should eq("One of the baddest 2 door chevys u will ever see on the road way way to much to list car is in Paint shop now getting painted house of color real candy red all the way through the car everything on car is brand new from the motor (no other one like it) and to the lift (done by underground rim king) fiberglass digital dash this is a one of a kind only car I have ever seen with a see through hood on it car has everything I want 20,000 cash or close to it but.... I will trade for either one of the following: a  tahoe, or pick up,hummer h2,silver ado, Sierra,Dually, range rover,porsche suv,avalanche,magnum,charger,cls 500,745,range rover,infinity of any kind im open just send me a text or email either one is good or a vert!!! I will drive to u or meet u half way o yea and the rims are 30's floaters (786)257-7215 Cj text me<br><br><br><br><br>\nDonk,floaters,trade,Chevy,lift,lifted,22,24,26,28,30,32,vert,candy,pearl,ect:") }
+    its(:contents_as_plain) {should eq("One of the baddest 2 door chevys u will ever see on the road way way to much to list car is in Paint shop now getting painted house of color real candy red all the way through the car everything on car is brand new from the motor (no other one like it) and to the lift (done by underground rim king) fiberglass digital dash this is a one of a kind only car I have ever seen with a see through hood on it car has everything I want 20,000 cash or close to it but.... I will trade for either one of the following: a  tahoe, or pick up,hummer h2,silver ado, Sierra,Dually, range rover,porsche suv,avalanche,magnum,charger,cls 500,745,range rover,infinity of any kind im open just send me a text or email either one is good or a vert!!! I will drive to u or meet u half way o yea and the rims are 30's floaters (786)257-7215 Cj text me\nDonk,floaters,trade,Chevy,lift,lifted,22,24,26,28,30,32,vert,candy,pearl,ect:") }
+
+  end
+
+  context "posting_hil_cto_012012.html" do
+    # This example was picked since we were failing to parse the post_date:
+    subject{ described_class.new uri_for('posting_hil_cto_012012.html') }
+
+    its(:post_date)    {should eq(Date.parse('2013-01-20'))}
+    its(:full_section) {should eq([ 'tampa bay', 'hillsborough co', 
+      'all for sale / wanted', 'cars & trucks - by owner' ])}
+
+    its(:header)       {should eq("2002 Jaguar X-Type 90,000 miles - $4900 (Tampa/Brandon)")}
+    its(:label)        {should eq("2002 Jaguar X-Type 90,000 miles - $4900")}
+    its(:title)        {should eq("2002 Jaguar X-Type 90,000 miles - $4900 (Tampa/Brandon)")}
+
+    its(:location)     {should eq('Tampa/Brandon')}
+    its(:posting_id)   {should eq(3559534414)}
+    its(:reply_to)     {should eq('xxnxb-3559534414@sale.craigslist.org')}
+    its(:post_time)    {should eq(DateTime.parse('2013-01-20, 4:24PM EST'))}
+    its(:post_date)    {should eq(Date.parse('2013-01-20'))}
+
+    its(:price)        {should eq(4900)}
+    its(:images)       {should eq(["http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00390_zpsc95bcf98.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00392_zps1b90d33c.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00395_zps0047f176.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00398-1_zps4b01580d.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00401-1_zps69e67678.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00404_zps1dfd3717.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00406_zps370a3ffa.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00411_zps8584b52e.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00412_zpsbf6b145b.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00415_zps0341d9d2.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00421_zpsa71182c6.jpg", "http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00417_zpsf5f23e08.jpg"])}
+    its(:pics)         {should eq([])}
+    its(:img_types)    {should eq([:img])}
+
+    its(:contents) {should eq("2002 Jaguar X-Type, automatick, 90,000 miles, cold ac, grey with black leather, power windows, power seats, power mirrors, power door locks with keyless entry, power sunroof, wood trim and more, looks and runs great. Call 727-439-3027<br><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00390_zpsc95bcf98.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00390_zpsc95bcf98.jpg\" border=\"0\" alt=\" photo DSC00390_zpsc95bcf98.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00392_zps1b90d33c.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00392_zps1b90d33c.jpg\" border=\"0\" alt=\" photo DSC00392_zps1b90d33c.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00395_zps0047f176.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00395_zps0047f176.jpg\" border=\"0\" alt=\" photo DSC00395_zps0047f176.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00398-1_zps4b01580d.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00398-1_zps4b01580d.jpg\" border=\"0\" alt=\" photo DSC00398-1_zps4b01580d.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00401-1_zps69e67678.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00401-1_zps69e67678.jpg\" border=\"0\" alt=\" photo DSC00401-1_zps69e67678.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00404_zps1dfd3717.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00404_zps1dfd3717.jpg\" border=\"0\" alt=\" photo DSC00404_zps1dfd3717.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00406_zps370a3ffa.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00406_zps370a3ffa.jpg\" border=\"0\" alt=\" photo DSC00406_zps370a3ffa.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00411_zps8584b52e.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00411_zps8584b52e.jpg\" border=\"0\" alt=\" photo DSC00411_zps8584b52e.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00412_zpsbf6b145b.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00412_zpsbf6b145b.jpg\" border=\"0\" alt=\" photo DSC00412_zpsbf6b145b.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00415_zps0341d9d2.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00415_zps0341d9d2.jpg\" border=\"0\" alt=\" photo DSC00415_zps0341d9d2.jpg\"></a><br><a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00421_zpsa71182c6.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00421_zpsa71182c6.jpg\" border=\"0\" alt=\" photo DSC00421_zpsa71182c6.jpg\"></a>\n<a href=\"http://s730.beta.photobucket.com/user/brianvangelov/media/DSC00417_zpsf5f23e08.jpg.html\" target=\"_blank\" rel=\"nofollow\"><img src=\"http://i730.photobucket.com/albums/ww303/brianvangelov/DSC00417_zpsf5f23e08.jpg\" border=\"0\" alt=\" photo DSC00417_zpsf5f23e08.jpg\"></a>") }
+    its(:contents_as_plain) {should eq("2002 Jaguar X-Type, automatick, 90,000 miles, cold ac, grey with black leather, power windows, power seats, power mirrors, power door locks with keyless entry, power sunroof, wood trim and more, looks and runs great. Call 727-439-3027\n") }
+
   end
 end

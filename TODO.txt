@@ -1,6 +1,3 @@
-* Get that damn time cop working
-  * I think there might be a bug in the way we're calculating the most recent date, because really, these tests shouldn't 
-    be defaulting to 2013, they should be defaulting to the most recent expire date...
 ------------------------------------------
 Possible features?:
   * Clean up the filters code a bit and get them testing
