@@ -3,6 +3,9 @@ require 'spec_helper'
 
 describe CraigScrape::Listings do
   context "listing_cta_ftl_112612.html" do
+    before{ Timecop.freeze(Time.local(2012,12,31)) }
+    after{ Timecop.return }
+    
     subject { described_class.new( uri_for('listing_cta_ftl_112612.html') ) }
     specify{ subject.posts.should have(100).items }
     specify{ subject.posts.collect(&:post_date).uniq.should eq([Date.strptime('11/26/2012', '%m/%d/%Y')]) }

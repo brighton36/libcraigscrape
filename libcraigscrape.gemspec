@@ -14,12 +14,11 @@ Gem::Specification.new do |s|
   s.add_dependency( 'nokogiri',     ['>= 1.4.4'] )
   s.add_dependency( 'activerecord', ['~>3.2.9'] )
   s.add_dependency( 'activesupport', ['~>3.2.9'] )
-  s.add_dependency( 'rspec' )
   s.add_dependency( 'money', ['~>5.0.0'] )
   s.add_dependency( 'kwalify', ['~>0.7'] )
   s.add_dependency( 'actionmailer', ['~>3.2.9'] )
   s.add_dependency( 'sqlite3', ['~>1.3'] )
   s.add_dependency( 'typhoeus', ['~>0.5'] )
-  s.add_dependency('rake')
   s.add_development_dependency('rspec', [">= 2.12.0"])
+  s.add_development_dependency('timecop', [">= 0.5.9"])
 end

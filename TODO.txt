@@ -1,9 +1,10 @@
-* I think we need to put our 404 logic back in here. Let's see what happens after some runs....
+* Get that damn time cop working
+  * I think there might be a bug in the way we're calculating the most recent date, because really, these tests shouldn't 
+    be defaulting to 2013, they should be defaulting to the most recent expire date...
 ------------------------------------------
 Possible features?:
   * Clean up the filters code a bit and get them testing
   * And maybe we can use the typhoeus lib a bit more to better speed up the runs
-    * And we might need to add that retry-404's thing again
   * FEATURE: Rather then 'search/sss?query=artist+needed', maybe use CraigScrape::search_for('artist needed')
   * FEATURE: Support for post submissions?
   * FEATURE: Stats in the email: bytes transferred, generation time, urls scrapped, posts scrapped

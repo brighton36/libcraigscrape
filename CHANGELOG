@@ -1,5 +1,9 @@
 == Change Log
 
+=== Release 1.1.1
+- Fixed a bug affecting the parsing of dates on some postings
+- Listing specs were failing due to the year change, added a timecop dependency to resolve
+
 === Release 1.1
 - ruby 1.9.3 support
 - migrated from rails 2 gems to rails 3

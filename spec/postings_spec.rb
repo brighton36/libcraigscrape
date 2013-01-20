@@ -154,4 +154,11 @@ describe CraigScrape::Posting do
     its(:reply_to)     {should eq('qnggz-3456070558@comm.craigslist.org')}
     its(:post_time)    {should eq(DateTime.parse('2012-12-26 17:41:00 PST'))}
   end
+
+  context "posting_hil_cto_011913.html" do
+    # This example was picked since we were failing to parse the post_date:
+    subject{ described_class.new uri_for('posting_sfbay_1226.html') }
+
+    its(:post_date)    {should eq(Date.parse('2013-01-08'))}
+  end
 end
