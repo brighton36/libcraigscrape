@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
   s.add_dependency( 'typhoeus', ['~>0.5'] )
   s.add_development_dependency('rspec', [">= 2.12.0"])
   s.add_development_dependency('timecop', [">= 0.5.9"])
+  s.add_development_dependency('vcr', [">= 2.4.0"])
 end
