@@ -38,7 +38,7 @@ class CraigScrape::Posting < CraigScrape::Scraper
     ].join('|')
   XPATH_REPLY_TO = ["//*[@class='dateReplyBar']/small/a",
     # For some posts (the newest ones on 01/20/12) we find the reply to this way:
-    "//*[@class='dateReplyBar']/*[@id='replytext']/following-sibling::a" 
+    "//*[@class='dateReplyBar']/*[@class='replytext']/following-sibling::a"
     ].join('|')
   XPATH_POSTINGBLOCK = "//*[@class='postingidtext' or @class='postinginfos']"
   XPATH_POSTED_DATE = "//*[@class='postinginfos']/*[@class='postinginfo']/date"
